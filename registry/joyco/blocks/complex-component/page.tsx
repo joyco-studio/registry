@@ -1,13 +1,13 @@
-import { cache } from "react"
-import { PokemonCard } from "@/registry/new-york/blocks/complex-component/components/pokemon-card"
-import { getPokemonList } from "@/registry/new-york/blocks/complex-component/lib/pokemon"
-const getCachedPokemonList = cache(getPokemonList)
+import { cache } from 'react';
+import { PokemonCard } from '@/registry/joyco/blocks/complex-component/components/pokemon-card';
+import { getPokemonList } from '@/registry/joyco/blocks/complex-component/lib/pokemon';
+const getCachedPokemonList = cache(getPokemonList);
 
 export default async function Page() {
-  const pokemons = await getCachedPokemonList({ limit: 12 })
+  const pokemons = await getCachedPokemonList({ limit: 12 });
 
   if (!pokemons) {
-    return null
+    return null;
   }
 
   return (
@@ -18,5 +18,5 @@ export default async function Page() {
         ))}
       </div>
     </div>
-  )
+  );
 }
