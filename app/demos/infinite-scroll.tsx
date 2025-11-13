@@ -1,8 +1,8 @@
 'use client';
-import { getPokemonList } from '@/registry/joyco/blocks/complex-component/lib/pokemon';
+
 import { InfiniteScroll, useInfiniteScrollState } from '@/registry/joyco/blocks/infinite-scroll/infinite-scroll';
 import { LoadPageFn } from '@/registry/joyco/blocks/infinite-scroll/use-infinite-scroll';
-import { useEffect, useState } from 'react';
+import { useRef } from 'react';
 
 type Pokemon = {
   id: number;
@@ -11,22 +11,23 @@ type Pokemon = {
 };
 
 const loadPage: LoadPageFn<Pokemon> = async ({ offset, limit, page }) => {
-  const response = await getPokemonList({ limit, offset, page: page ?? 1 });
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}&page=${page}`);
+  const data = await response.json();
   return {
-    items: (response?.results.map((result) => ({ id: result.id, name: result.name, url: result.url })) ??
-      []) as Pokemon[],
-    totalCount: response?.results?.length ?? 0,
+    items: (data.results.map((result: { id: number; name: string; url: string }) => ({
+      id: result.id,
+      name: result.name,
+      url: result.url,
+    })) ?? []) as Pokemon[],
+    totalCount: data.count ?? 0,
   };
 };
 
-const InfiniteScrollDemoContent = () => {
+const InfiniteScrollDemoContent = ({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) => {
   const { visibleItems } = useInfiniteScrollState<Pokemon>();
   return (
-    <InfiniteScroll.Root
-      className="max-h-96 overflow-y-auto w-full rounded-2xl border border-border p-4"
-      id="scroll-container"
-    >
-      <InfiniteScroll.Viewport>
+    <InfiniteScroll.Root className="max-h-96 overflow-y-auto w-full rounded-2xl border border-border p-4">
+      <InfiniteScroll.Viewport ref={ref}>
         {visibleItems.map((item) => (
           <InfiniteScroll.Item key={item.id} index={item.id}>
             <div>{item.name}</div>
@@ -41,25 +42,10 @@ const InfiniteScrollDemoContent = () => {
 };
 
 const InfiniteScrollDemo = () => {
-  const [scrollContainerRef, setScrollContainerRef] = useState<HTMLDivElement | null>(null);
-  useEffect(() => {
-    setScrollContainerRef(document.getElementById('scroll-container') as HTMLDivElement);
-  }, []);
-
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   return (
-    <InfiniteScroll.Provider
-      loadPage={loadPage}
-      autoAdvance
-      bias={10}
-      initialPage={1}
-      pageSize={10}
-      observerOptions={{
-        root: scrollContainerRef,
-        rootMargin: '0px 0px 100px 0px',
-        threshold: 0.1,
-      }}
-    >
-      <InfiniteScrollDemoContent />
+    <InfiniteScroll.Provider loadPage={loadPage} autoAdvance bias={10} initialPage={1} pageSize={10}>
+      <InfiniteScrollDemoContent ref={scrollContainerRef} />
     </InfiniteScroll.Provider>
   );
 };
