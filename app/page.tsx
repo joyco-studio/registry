@@ -6,14 +6,25 @@ import * as React from 'react';
 
 const ITEMS = Array.from({ length: 100 }, (_, index) => index);
 const loadPage: LoadPageFn<number> = async ({ offset, limit }) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return { items: ITEMS.slice(offset, offset + limit), totalCount: ITEMS.length + 100 };
 };
 
 export default function Home() {
+  const initialItems = React.useMemo(() => ITEMS.slice(0, 10), []);
+
   return (
     <div className="max-w-3xl mx-auto flex flex-col min-h-svh px-4 py-8 gap-8">
       <h1>Joyco Registry</h1>
-      <InfiniteScroll.Provider debug loadPage={loadPage} autoAdvance bias={10} initialPage={1} pageSize={10}>
+      <InfiniteScroll.Provider
+        debug
+        loadPage={loadPage}
+        autoAdvance
+        initialPage={1}
+        pageSize={10}
+        initialFetched={10}
+        initialItems={initialItems}
+      >
         <InfiniteScrollDemo />
       </InfiniteScroll.Provider>
     </div>
