@@ -21,3 +21,4 @@ This is a template for creating a custom registry using Next.js.
 ## Documentation
 
 Visit the [shadcn documentation](https://ui.shadcn.com/docs/registry) to view the full documentation.
+# shadcn-registry
