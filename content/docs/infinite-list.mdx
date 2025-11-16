@@ -1,11 +1,66 @@
 ---
 title: Infinite List
-description: A list that loads more items when the user scrolls to the bottom.
+description: A simplified infinite scroll component that manages pagination and child masking with virtual list behavior.
 ---
 
+import { PokemonInfiniteList } from '@/components/pokemon-infinite-demo/pokemon-infinite-list';
+
+## Demo
+
+<PokemonInfiniteList />
 
 ## Installation
 
 ```bash
 npx shadcn@latest add @joyco/infinite-list
 ```
+
+## API Reference
+
+### useInfiniteList Hook
+
+#### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `pageSize` | `number` | - | Number of items per page |
+| `initialItems` | `any[]` | - | Optional. Initial items array (used to calculate bias) |
+| `initialPage` | `number` | `1` | Starting page number |
+
+#### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `requestedPage` | `number` | Current page number |
+| `displayLimit` | `number` | Calculated as `requestedPage * pageSize` |
+| `pageSize` | `number` | Items per page |
+| `bias` | `number` | Calculated as `Math.max(0, initialItems.length - pageSize)` |
+| `nextPage` | `() => void` | Function to increment the page |
+| `reset` | `() => void` | Function to reset to initial page |
+| `List` | `Component` | Component that masks children to displayLimit |
+
+#### Usage Example
+
+```tsx
+const { List, nextPage, displayLimit } = useInfiniteList({
+  pageSize: 20,
+  initialItems: data,
+});
+
+return (
+  <List>
+    {items.map(item => <Item key={item.id} {...item} />)}
+  </List>
+);
+```
+
+## How it Works
+
+The component implements a virtual list pattern where you load more items than you display:
+
+1. **Initial Load**: Fetch `pageSize + bias` items (e.g., 20 + 20 = 40 items)
+2. **Display**: Show only `pageSize` items (e.g., 20 items)
+3. **Next Page**: When user clicks "Load More", show next 20 items instantly (already loaded)
+4. **Background Fetch**: Simultaneously fetch the next batch in the background
+
+**Bias Warning**: The hook will warn if `bias !== pageSize` to prevent items from appearing to append unexpectedly when the next page loads.

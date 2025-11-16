@@ -45,7 +45,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     }: React.ComponentProps<typeof TabsContent>) => (
       <TabsContent
         className={cn(
-          "relative [&_h3.font-heading]:text-base [&_h3.font-heading]:font-medium *:[figure]:first:mt-0 [&>.steps]:mt-6",
+          "relative [&_h3.font-heading]:text-base [&_h3.font-heading]:font-medium *:[figure]:first:mt-0",
           className
         )}
         {...props}
@@ -99,7 +99,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   
       // Default codeblock.
       return (
-        <code className={cn("rounded-lg bg-fd-card py-3.5 border border-fd-border", className)} {...props} />
+        <code className={cn("rounded-lg bg-fd-card p-3.5 border border-fd-border", className)} {...props} />
       )
     },
     ...components,
