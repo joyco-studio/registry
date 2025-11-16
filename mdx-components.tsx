@@ -10,7 +10,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     CodeTabs: CodeTabs,
     pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
-      return <pre className={cn("relative w-full bg-fd-card rounded-lg border border-fd-border", className)} {...props} />
+      return <pre className={cn("relative w-full", className)} {...props} />
     },
     Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => {
       return <Tabs className={cn("relative w-full", className)} {...props} />
@@ -99,7 +99,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   
       // Default codeblock.
       return (
-        <code {...props} />
+        <code className={cn("rounded-lg bg-fd-card py-3.5 border border-fd-border", className)} {...props} />
       )
     },
     ...components,

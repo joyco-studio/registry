@@ -54,7 +54,7 @@ export function CodeBlockCommand({
   }, [packageManager, tabs])
 
   return (
-    <div className="overflow-x-auto">
+    <div className="not-prose overflow-x-auto bg-fd-card rounded-lg border border-fd-border">
       <Tabs
         value={packageManager}
         className="gap-0"
@@ -72,7 +72,7 @@ export function CodeBlockCommand({
                 <TabsTrigger
                   key={key}
                   value={key}
-                  className="data-[state=active]:bg-accent data-[state=active]:border-input h-7 border border-transparent pt-0.5 data-[state=active]:shadow-none"
+                  className="data-[state=active]:bg-fd-accent data-[state=active]:border-fd-border h-7 border border-transparent pt-0.5 data-[state=active]:shadow-none"
                 >
                   {key}
                 </TabsTrigger>
@@ -84,9 +84,9 @@ export function CodeBlockCommand({
           {Object.entries(tabs).map(([key, value]) => {
             return (
               <TabsContent key={key} value={key} className="mt-0 px-4 py-3.5">
-                <pre className="not-prose">
+                <pre>
                   <code
-                    className="relative font-mono text-sm leading-none"
+                    className="relative font-mono text-sm leading-none text-green-300"
                     data-language="bash"
                   >
                     {value}
