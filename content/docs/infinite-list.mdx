@@ -19,17 +19,13 @@ npx shadcn@latest add @joyco/infinite-list
 
 ### useInfiniteList Hook
 
-#### Options
-
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `pageSize` | `number` | - | Number of items per page |
 | `initialItems` | `any[]` | - | Optional. Initial items array (used to calculate bias) |
 | `initialPage` | `number` | `1` | Starting page number |
 
-#### Returns
-
-| Property | Type | Description |
+| Returns | Type | Description |
 |----------|------|-------------|
 | `offset` | `number` | Total items to fetch (includes bias for prefetching) |
 | `displayLimit` | `number` | Number of items to display |
@@ -37,7 +33,7 @@ npx shadcn@latest add @joyco/infinite-list
 | `bias` | `number` | Calculated as `Math.max(0, initialItems.length - pageSize)` |
 | `nextPage` | `() => void` | Function to increment the page |
 
-### MaskedList Component
+### MaskedList
 
 The `MaskedList` component masks children to the `displayLimit`.
 
