@@ -3,9 +3,101 @@ title: Marquee
 description: The all in one marquee component.
 ---
 
+import { MarqueeDemo } from '@/components/marquee-demo/marquee-demo';
+
+## Demo
+
+<MarqueeDemo />
 
 ## Installation
 
 ```bash
 npx shadcn@latest add @joyco/marquee
 ```
+
+## API Reference
+
+### Marquee Component
+
+The `Marquee` component provides a smooth, performant scrolling animation using the Web Animations API.
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `speed` | `number` | - | Base speed of the marquee animation |
+| `speedFactor` | `number` | - | Multiplier for the base speed |
+| `direction` | `1 \| -1` | - | Direction of movement (1 for right-to-left, -1 for left-to-right) |
+| `play` | `boolean` | `true` | Controls whether the marquee is playing or paused |
+| `rootClassName` | `string` | - | Class name for the root container |
+| `marqueeClassName` | `string` | - | Class name for the marquee element |
+| `children` | `ReactNode` | - | The content to be scrolled |
+
+#### Basic Usage
+
+```tsx
+import { Marquee } from '@joyco/marquee';
+
+function App() {
+  return (
+    <Marquee speed={100} speedFactor={1} direction={1} play={true}>
+      <div>Your content here</div>
+    </Marquee>
+  );
+}
+```
+
+### useMarquee Hook
+
+For more control, you can use the `useMarquee` hook. This is particularly useful when you need to:
+
+- Share the same marquee instance configuration across multiple elements
+- Have more granular control over the marquee instance
+
+#### Returns
+
+The `useMarquee` hook returns a tuple containing:
+
+- `rootRef`: A ref to attach to your container element
+- `marquee`: A marquee instance with the following methods:
+  - `play()`: Start the marquee animation
+  - `pause()`: Pause the marquee animation
+  - `setSpeed(speed: number)`: Update the base speed
+  - `setSpeedFactor(factor: number)`: Update the speed multiplier
+  - `setDirection(direction: 1 | -1)`: Change the scroll direction
+  - `destroy()`: Clean up the marquee (automatically called on unmount)
+
+#### Usage Example
+
+```tsx
+import { useMarquee, Marquee } from '@joyco/marquee';
+
+function ScrollBasedMarquee() {
+  const [ref, marquee] = useMarquee({ 
+    speed: 100, 
+    speedFactor: 1, 
+    direction: 1 
+  });
+
+  return (
+    <Marquee instance={[ref, marquee]}>
+      <div>Your content here</div>
+    </Marquee>
+  );
+}
+```
+
+## Notes
+
+- The marquee component only supports a single child element. Wrap multiple elements in a container if needed.
+- The marquee automatically handles cleanup on unmount.
+- You are responsible for making the marquee cover the full width of its render area. This library **DOES NOT** auto-fill that space.
+- The component provides built-in styles for proper overflow handling and content positioning.
+
+## Why Marquee?
+
+JOYCO Marquee leverages the Web Animations API (WAAPI) to create smooth, performant animations:
+
+- **Precise Control**: Programmatic control over animation playback, allowing dynamic speed adjustment and direction changes
+- **Performance**: Smooth performance off the main thread using the browser's native animation engine
+- **Runtime Flexibility**: Modify animation parameters (speed, direction) on the fly

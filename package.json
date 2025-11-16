@@ -11,6 +11,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@joycostudio/marquee": "^0.0.12",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",

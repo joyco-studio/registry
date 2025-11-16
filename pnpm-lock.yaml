@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@joycostudio/marquee':
+        specifier: ^0.0.12
+        version: 0.0.12(react@19.2.0)
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.5)(react@19.2.0)
@@ -534,6 +537,11 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@joycostudio/marquee@0.0.12':
+    resolution: {integrity: sha512-zBZIlXr4lkwYIUvvvrSViVk/4ztmGr0XU7s4aJp8BZSEAiGdkOGScY3zqnvbCTEsLIwBzRWm8tOTwEPES0oRMQ==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -3594,6 +3602,10 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.5':
     optional: true
+
+  '@joycostudio/marquee@0.0.12(react@19.2.0)':
+    dependencies:
+      react: 19.2.0
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
