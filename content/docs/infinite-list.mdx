@@ -17,7 +17,7 @@ npx shadcn@latest add @joyco/infinite-list
 
 ## API Reference
 
-### useInfiniteList Hook
+### useInfiniteList
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -30,7 +30,6 @@ npx shadcn@latest add @joyco/infinite-list
 | `offset` | `number` | Total items to fetch (includes bias for prefetching) |
 | `displayLimit` | `number` | Number of items to display |
 | `pageSize` | `number` | Items per page |
-| `bias` | `number` | Calculated as `Math.max(0, initialItems.length - pageSize)` |
 | `nextPage` | `() => void` | Function to increment the page |
 
 ### MaskedList
@@ -39,8 +38,10 @@ The `MaskedList` component masks children to the `displayLimit`.
 
 #### Props
 
-Accepts all properties from `useInfiniteList` return value plus:
-- `children`: React nodes to be masked
+| Prop | Type | Description |
+|------|------|-------------|
+| `displayLimit` | `number` | Number of items to display (from useInfiniteList) |
+| `children` | `ReactNode` | React nodes to be masked |
 
 #### Usage Example
 

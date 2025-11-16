@@ -38,7 +38,6 @@ export function useInfiniteList({
     offset: requestedPage * pageSize + bias,
     displayLimit,
     pageSize,
-    bias,
     nextPage
   };
 }
