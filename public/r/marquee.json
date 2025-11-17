@@ -9,8 +9,8 @@
   ],
   "files": [
     {
-      "path": "registry/joyco/blocks/marquee/marquee.tsx",
-      "content": "'use client';\n\nimport { Marquee as MarqueeComponent, useMarquee as useMarqueeHook } from '@joycostudio/marquee/react';\n\nexport const useMarquee = useMarqueeHook;\n\nexport function Marquee({ children, ...props }: React.ComponentProps<typeof MarqueeComponent>) {\n  return (\n    <MarqueeComponent {...props}>\n      {children}\n    </MarqueeComponent>\n  );\n}\n",
+      "path": "registry/joyco/blocks/marquee.tsx",
+      "content": "'use client';\n\nimport { Marquee as MarqueeComponent, useMarquee as useMarqueeHook } from '@joycostudio/marquee/react';\n\nexport const useMarquee = useMarqueeHook;\n\nexport function Marquee({ children, ...props }: React.ComponentProps<typeof MarqueeComponent>) {\n  return (\n    <MarqueeComponent {...props}>\n       <div className=\"flex items-center gap-8 px-4\">\n        {children}\n       </div>\n    </MarqueeComponent>\n  );\n}\n",
       "type": "registry:component"
     }
   ]
