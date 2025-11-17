@@ -10,7 +10,7 @@
       "description": "A bias-based infinite scroll wrapper and hook.",
       "files": [
         {
-          "path": "registry/joyco/blocks/infinite-list/infinite-list.tsx",
+          "path": "registry/joyco/blocks/infinite-list.tsx",
           "type": "registry:component"
         }
       ]
@@ -22,7 +22,7 @@
       "description": "The all in one marquee component with smooth Web Animations API.",
       "files": [
         {
-          "path": "registry/joyco/blocks/marquee/marquee.tsx",
+          "path": "registry/joyco/blocks/marquee.tsx",
           "type": "registry:component"
         }
       ],

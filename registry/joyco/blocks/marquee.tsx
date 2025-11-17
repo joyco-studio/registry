@@ -7,7 +7,9 @@ export const useMarquee = useMarqueeHook;
 export function Marquee({ children, ...props }: React.ComponentProps<typeof MarqueeComponent>) {
   return (
     <MarqueeComponent {...props}>
-      {children}
+       <div className="flex items-center gap-8 px-4">
+        {children}
+       </div>
     </MarqueeComponent>
   );
 }

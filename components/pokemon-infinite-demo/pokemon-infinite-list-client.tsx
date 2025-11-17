@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { MaskedList, useInfiniteList } from '@/registry/joyco/blocks/infinite-list/infinite-list';
+import { MaskedList, useInfiniteList } from '@/registry/joyco/blocks/infinite-list';
 import { Button } from '@/components/ui/button';
 import { fetchPokemon, Pokemon } from './api';
 import { Card, CardContent } from '../ui/card';
