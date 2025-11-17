@@ -1,12 +1,12 @@
 'use client';
 
-import { Marquee as MarqueeComponent, ReactMarqueeConfigProps, useMarquee as useMarqueeHook } from '@joycostudio/marquee/react';
+import { Marquee as MarqueeComponent, useMarquee as useMarqueeHook } from '@joycostudio/marquee/react';
 
 export const useMarquee = useMarqueeHook;
 
-export function Marquee({ children, speed = 100, direction = 1, ...props }: ReactMarqueeConfigProps) {
+export function Marquee({ children, ...props }: React.ComponentProps<typeof MarqueeComponent>) {
   return (
-    <MarqueeComponent speed={speed} direction={direction} {...props}>
+    <MarqueeComponent {...props}>
       {children}
     </MarqueeComponent>
   );
