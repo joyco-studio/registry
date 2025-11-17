@@ -8,7 +8,7 @@ export function useInfiniteList({
   initialPage = 1,
 }: {
   pageSize: number;
-  initialItems?: any[];
+  initialItems?: unknown[];
   initialPage?: number;
 }) {
   const [requestedPage, setRequestedPage] = useState(initialPage);
