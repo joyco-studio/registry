@@ -46,7 +46,7 @@ export function MarqueeDemo() {
       </Card>
 
       <div className="border-t-0 bg-fd-card border border-fd-border rounded-b-lg overflow-hidden">
-        <div className="flex">
+        <div className="grid grid-cols-2 sm:grid-cols-4">
           <ControlButton onClick={() => setPlay(!play)} className={cn(!play && "bg-fd-accent/80 dark:bg-fd-accent/50")}>
             {play ? (
               <>
@@ -63,7 +63,7 @@ export function MarqueeDemo() {
 
           <ControlButton
             onClick={() => setDirection(1)}
-            className={cn(direction === 1 && "bg-fd-accent/80 dark:bg-fd-accent/50")}
+            className={cn(direction === 1 && "bg-fd-accent/80 dark:bg-fd-accent/50", "max-sm:row-[2]")}
             disabled={direction === 1}
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
@@ -72,14 +72,14 @@ export function MarqueeDemo() {
 
           <ControlButton
             onClick={() => setDirection(-1)}
-            className={cn(direction === -1 && "bg-fd-accent/80 dark:bg-fd-accent/50")}
+            className={cn(direction === -1 && "bg-fd-accent/80 dark:bg-fd-accent/50", "max-sm:row-[2]")}
             disabled={direction === -1}
           >
             Right
             <ArrowRight className="w-4 h-4 mr-1" />
           </ControlButton>
 
-          <div className="flex-1">
+          <div>
             <SliderPrimitive.Root
               className={cn(
                 "relative flex w-full h-full touch-none select-none items-center"
