@@ -182,7 +182,7 @@ export function MarqueeDemo() {
 
   return (
     <div className="not-prose">
-      <Card className="overflow-hidden rounded-b-none">
+      <Card className="overflow-hidden rounded-b-none bg-fd-card">
         <div className="py-6">
           <Marquee
             speed={100}
