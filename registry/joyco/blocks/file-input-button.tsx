@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { useCallback, useId, useMemo } from "react"
 
 interface FileInputProps {
-  onUpload: (file: File) => Promise<any> | void
+  onUpload: (file: File) => Promise<unknown> | void
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>
 }
 
