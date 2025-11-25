@@ -1,1 +1,1 @@
-export { DemoPage as default } from "@/components/mobile-menu-demo"
+export { DemoPage as default } from "@/components/demo/mobile-menu-demo"
