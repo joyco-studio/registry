@@ -5,13 +5,13 @@ import * as Dialog from "@radix-ui/react-dialog"
 import { cn } from "@/lib/utils"
 import { Slot } from "@radix-ui/react-slot"
 
-const MobileMenu = ({ children, ...props }: React.ComponentProps<typeof Dialog.Root>) => (
+const Root = ({ children, ...props }: React.ComponentProps<typeof Dialog.Root>) => (
   <Dialog.Root modal={false} {...props}>
     {children}
   </Dialog.Root>
 )
 
-const MobileMenuTrigger = React.forwardRef<
+const Trigger = React.forwardRef<
   React.ComponentRef<typeof Dialog.Trigger>,
   React.ComponentPropsWithoutRef<typeof Dialog.Trigger>
 >(({ className, children, ...props }, ref) => (
@@ -26,9 +26,9 @@ const MobileMenuTrigger = React.forwardRef<
     {children}
   </Dialog.Trigger>
 ))
-MobileMenuTrigger.displayName = "MobileMenuTrigger"
+Trigger.displayName = "Trigger"
 
-const MobileMenuClose = React.forwardRef<
+const Close = React.forwardRef<
   React.ComponentRef<typeof Dialog.Close>,
   React.ComponentPropsWithoutRef<typeof Dialog.Close>
 >(({ className, children, ...props }, ref) => (
@@ -43,9 +43,9 @@ const MobileMenuClose = React.forwardRef<
     {children}
   </Dialog.Close>
 ))
-MobileMenuClose.displayName = "MobileMenuClose"
+Close.displayName = "Close"
 
-const MobileMenuContent = React.forwardRef<
+const Content = React.forwardRef<
   React.ComponentRef<typeof Dialog.Content>,
   React.ComponentPropsWithoutRef<typeof Dialog.Content>
 >(({ className, children, ...props }, ref) => (
@@ -61,9 +61,9 @@ const MobileMenuContent = React.forwardRef<
     {children}
   </Dialog.Content>
 ))
-MobileMenuContent.displayName = "MobileMenuContent"
+Content.displayName = "Content"
 
-const MobileMenuNav = React.forwardRef<
+const Navigation = React.forwardRef<
   HTMLElement,
   React.HTMLAttributes<HTMLElement>
 >(({ className, ...props }, ref) => (
@@ -73,9 +73,9 @@ const MobileMenuNav = React.forwardRef<
     {...props}
   />
 ))
-MobileMenuNav.displayName = "MobileMenuNav"
+Navigation.displayName = "Navigation"
 
-const MobileMenuLink = React.forwardRef<
+const Item = React.forwardRef<
   HTMLAnchorElement,
   React.AnchorHTMLAttributes<HTMLAnchorElement> & { asChild?: boolean }
 >(({ className, asChild, ...props }, ref) => {
@@ -94,9 +94,9 @@ const MobileMenuLink = React.forwardRef<
     </Dialog.Close>
   )
 })
-MobileMenuLink.displayName = "MobileMenuLink"
+Item.displayName = "Item"
 
-const MobileMenuFooter = React.forwardRef<
+const Footer = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -109,15 +109,15 @@ const MobileMenuFooter = React.forwardRef<
     {...props}
   />
 ))
-MobileMenuFooter.displayName = "MobileMenuFooter"
+Footer.displayName = "Footer"
 
 export {
-  MobileMenu,
-  MobileMenuTrigger,
-  MobileMenuContent,
-  MobileMenuClose,
-  MobileMenuNav,
-  MobileMenuLink,
-  MobileMenuFooter,
+  Root,
+  Trigger,
+  Content,
+  Close,
+  Navigation,
+  Item,
+  Footer,
 }
 

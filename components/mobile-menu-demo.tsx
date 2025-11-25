@@ -5,15 +5,7 @@ import { ResizableIframe } from "@/components/resizable-iframe"
 
 import { useEffect } from "react"
 import { Menu, X, Home, User, Settings, Mail } from "lucide-react"
-import {
-  MobileMenu,
-  MobileMenuTrigger,
-  MobileMenuContent,
-  MobileMenuClose,
-  MobileMenuNav,
-  MobileMenuLink,
-  MobileMenuFooter,
-} from "@/registry/joyco/blocks/mobile-menu"
+import * as MobileMenu from "@/registry/joyco/blocks/mobile-menu"
 
 export function DemoPage() {
   return (
@@ -38,32 +30,32 @@ export function DemoPage() {
           </a>
         </nav>
 
-        <MobileMenu>
-          <MobileMenuTrigger>
+        <MobileMenu.Root>
+          <MobileMenu.Trigger>
             <Menu className="h-6 w-6 group-data-[state=open]/menu-trigger:hidden" />
             <X className="h-6 w-6 group-data-[state=closed]/menu-trigger:hidden" />
-          </MobileMenuTrigger>
+          </MobileMenu.Trigger>
 
-          <MobileMenuContent>
-            <MobileMenuNav>
-              <MobileMenuLink href="#">
+          <MobileMenu.Content>
+            <MobileMenu.Navigation>
+              <MobileMenu.Item href="#">
                 Home
-              </MobileMenuLink>
-              <MobileMenuLink href="#">
+              </MobileMenu.Item>
+              <MobileMenu.Item href="#">
                 Profile
-              </MobileMenuLink>
-              <MobileMenuLink href="#">
+              </MobileMenu.Item>
+              <MobileMenu.Item href="#">
                 Settings
-              </MobileMenuLink>
-              <MobileMenuLink href="#">
+              </MobileMenu.Item>
+              <MobileMenu.Item href="#">
                 Contact
-              </MobileMenuLink>
-            </MobileMenuNav>
-            <MobileMenuFooter>
+              </MobileMenu.Item>
+            </MobileMenu.Navigation>
+            <MobileMenu.Footer>
               <p className="text-sm text-muted-foreground">© 2025 Defenitely Not Joyco Inc.</p>
-            </MobileMenuFooter>
-          </MobileMenuContent>
-        </MobileMenu>
+            </MobileMenu.Footer>
+          </MobileMenu.Content>
+        </MobileMenu.Root>
       </header>
     </div>
   )
