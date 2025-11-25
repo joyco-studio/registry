@@ -20,7 +20,7 @@ export function DemoPage() {
     <div className="min-h-screen bg-background w-full text-foreground font-sans">
       {/* Header */}
       <header className="flex items-center justify-between px-6 h-heading-height border-b border-border sticky top-0 bg-background z-40">
-        <div className="font-bold text-xl tracking-tight z-10 relative">Acme Inc</div>
+        <div className="font-bold text-xl tracking-tight z-10 relative">NOT JOYCO</div>
 
         {/* Desktop nav - visible on md+ */}
         <nav className="hidden md:flex items-center gap-8">
@@ -60,7 +60,7 @@ export function DemoPage() {
               </MobileMenuLink>
             </MobileMenuNav>
             <MobileMenuFooter>
-              <p className="text-sm text-muted-foreground">© 2025 Your Company</p>
+              <p className="text-sm text-muted-foreground">© 2025 Defenitely Not Joyco Inc.</p>
             </MobileMenuFooter>
           </MobileMenuContent>
         </MobileMenu>
