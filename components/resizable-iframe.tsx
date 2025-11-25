@@ -177,8 +177,8 @@ export function ResizableIframe({
             onTouchStart={handleTouchStart}
             className={cn(
               "absolute top-0 right-0 w-5 h-full cursor-ew-resize flex items-center justify-center",
-              "bg-neutral-800/80 hover:bg-neutral-700 transition-colors border-l border-neutral-700",
-              isDragging && "bg-neutral-600"
+              "bg-border hover:bg-border/80 transition-colors border-l border-border",
+              isDragging && "bg-border"
             )}
           >
             <GripVertical className="w-3.5 h-3.5 text-neutral-400" />

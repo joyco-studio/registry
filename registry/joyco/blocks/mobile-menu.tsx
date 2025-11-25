@@ -5,7 +5,11 @@ import * as Dialog from "@radix-ui/react-dialog"
 import { cn } from "@/lib/utils"
 import { Slot } from "@radix-ui/react-slot"
 
-const MobileMenu = Dialog.Root
+const MobileMenu = ({ children, ...props }: React.ComponentProps<typeof Dialog.Root>) => (
+  <Dialog.Root modal={false} {...props}>
+    {children}
+  </Dialog.Root>
+)
 
 const MobileMenuTrigger = React.forwardRef<
   React.ComponentRef<typeof Dialog.Trigger>,
@@ -14,7 +18,7 @@ const MobileMenuTrigger = React.forwardRef<
   <Dialog.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center gap-2 rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      "inline-flex group/menu-trigger items-center z-10 justify-center gap-2 rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       className
     )}
     {...props}
@@ -48,7 +52,7 @@ const MobileMenuContent = React.forwardRef<
   <Dialog.Content
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-background flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
+      "fixed inset-0 pt-heading-height bg-background flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
       className
     )}
     {...props}
@@ -64,7 +68,7 @@ const MobileMenuNav = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <nav
     ref={ref}
-    className={cn("flex flex-1 flex-col gap-1 px-6 py-6 overflow-y-auto", className)}
+    className={cn("flex flex-1 flex-col gap-1 p-6 overflow-y-auto", className)}
     {...props}
   />
 ))
@@ -81,7 +85,7 @@ const MobileMenuLink = React.forwardRef<
       <Comp
         ref={ref}
         className={cn(
-          "group flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium text-white/80 transition-all hover:bg-white/5 hover:text-white hover:pl-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+          "group flex items-center gap-3 rounded-lg py-3 text-lg text-foreground",
           className
         )}
         {...props}
@@ -98,7 +102,7 @@ const MobileMenuFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "mt-auto px-6 py-6 border-t border-white/10",
+      "mt-auto p-6",
       className
     )}
     {...props}

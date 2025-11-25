@@ -12,60 +12,58 @@ import {
   MobileMenuClose,
   MobileMenuNav,
   MobileMenuLink,
+  MobileMenuFooter,
 } from "@/registry/joyco/blocks/mobile-menu"
 
 export function DemoPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] w-full text-white font-sans">
+    <div className="min-h-screen bg-background w-full text-foreground font-sans">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-[#0a0a0a] z-40">
-        <div className="font-bold text-xl tracking-tight">Acme Inc</div>
+      <header className="flex items-center justify-between px-6 h-heading-height border-b border-border sticky top-0 bg-background z-40">
+        <div className="font-bold text-xl tracking-tight z-10 relative">Acme Inc</div>
 
         {/* Desktop nav - visible on md+ */}
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <a href="#" className="text-sm font-medium text-foreground">
             Home
           </a>
-          <a href="#" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <a href="#" className="text-sm font-medium text-foreground">
             About
           </a>
-          <a href="#" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <a href="#" className="text-sm font-medium text-foreground">
             Services
           </a>
-          <a href="#" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
+          <a href="#" className="text-sm font-medium text-foreground">
             Contact
           </a>
         </nav>
 
-        {/* Mobile menu - visible on < md */}
-        <div className="md:hidden">
-          <MobileMenu>
-            <MobileMenuTrigger className="text-white hover:bg-white/5">
-              <Menu className="h-6 w-6" />
-            </MobileMenuTrigger>
+        <MobileMenu>
+          <MobileMenuTrigger>
+            <Menu className="h-6 w-6 group-data-[state=open]/menu-trigger:hidden" />
+            <X className="h-6 w-6 group-data-[state=closed]/menu-trigger:hidden" />
+          </MobileMenuTrigger>
 
-            <MobileMenuContent>
-              <MobileMenuNav>
-                <MobileMenuLink href="#">
-                  <Home className="h-5 w-5 opacity-70" />
-                  Home
-                </MobileMenuLink>
-                <MobileMenuLink href="#">
-                  <User className="h-5 w-5 opacity-70" />
-                  Profile
-                </MobileMenuLink>
-                <MobileMenuLink href="#">
-                  <Settings className="h-5 w-5 opacity-70" />
-                  Settings
-                </MobileMenuLink>
-                <MobileMenuLink href="#">
-                  <Mail className="h-5 w-5 opacity-70" />
-                  Contact
-                </MobileMenuLink>
-              </MobileMenuNav>
-            </MobileMenuContent>
-          </MobileMenu>
-        </div>
+          <MobileMenuContent>
+            <MobileMenuNav>
+              <MobileMenuLink href="#">
+                Home
+              </MobileMenuLink>
+              <MobileMenuLink href="#">
+                Profile
+              </MobileMenuLink>
+              <MobileMenuLink href="#">
+                Settings
+              </MobileMenuLink>
+              <MobileMenuLink href="#">
+                Contact
+              </MobileMenuLink>
+            </MobileMenuNav>
+            <MobileMenuFooter>
+              <p className="text-sm text-muted-foreground">© 2025 Your Company</p>
+            </MobileMenuFooter>
+          </MobileMenuContent>
+        </MobileMenu>
       </header>
     </div>
   )
