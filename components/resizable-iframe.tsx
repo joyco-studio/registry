@@ -155,14 +155,14 @@ export function ResizableIframe({
 
         {/* Resizable content area - centered */}
         <div
-          className="relative z-10"
+          className="relative z-10 border-l border-border"
           style={{ width: `${width}px`, maxWidth: "100%" }}
         >
           <iframe
             ref={iframeRef}
             src={src}
             srcDoc={srcDoc}
-            className={cn("border-0 bg-neutral-950", iframeClassName)}
+            className={cn("border-0 bg-background", iframeClassName)}
             style={{
               width: "calc(100% - 20px)", // Account for resize handle width
               height: heightStyle,

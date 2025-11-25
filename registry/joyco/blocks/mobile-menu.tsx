@@ -18,7 +18,7 @@ const MobileMenuTrigger = React.forwardRef<
   <Dialog.Trigger
     ref={ref}
     className={cn(
-      "inline-flex group/menu-trigger items-center z-10 justify-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      "group/menu-trigger md:hidden z-10 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       className
     )}
     {...props}
@@ -52,11 +52,12 @@ const MobileMenuContent = React.forwardRef<
   <Dialog.Content
     ref={ref}
     className={cn(
-      "fixed inset-0 pt-heading-height bg-background flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
+      "fixed md:hidden inset-0 pt-heading-height bg-background flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
       className
     )}
     {...props}
   >
+    <Dialog.Title className="sr-only">Menu</Dialog.Title>
     {children}
   </Dialog.Content>
 ))
