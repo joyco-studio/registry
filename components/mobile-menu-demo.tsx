@@ -3,16 +3,15 @@
 import { Card } from "@/components/ui/card"
 import { ResizableIframe } from "@/components/resizable-iframe"
 
-import { useEffect } from "react"
-import { Menu, X, Home, User, Settings, Mail } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import * as MobileMenu from "@/registry/joyco/blocks/mobile-menu"
 
 export function DemoPage() {
   return (
-    <div className="min-h-screen bg-background w-full text-foreground font-sans">
+    <div className="min-h-svh bg-background w-full text-foreground font-sans">
       {/* Header */}
       <header className="flex items-center justify-between px-6 h-heading-height border-b border-border sticky top-0 bg-background z-40">
-        <div className="font-bold text-xl tracking-tight z-10 relative">NOT JOYCO</div>
+        <div className="font-bold text-xl tracking-tight z-20 relative">NOT JOYCO</div>
 
         {/* Desktop nav - visible on md+ */}
         <nav className="hidden md:flex items-center gap-8">

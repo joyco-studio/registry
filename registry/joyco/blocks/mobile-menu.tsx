@@ -18,7 +18,7 @@ const Trigger = React.forwardRef<
   <Dialog.Trigger
     ref={ref}
     className={cn(
-      "group/menu-trigger md:hidden z-10 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      "group/menu-trigger transform-gpu md:hidden z-20 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       className
     )}
     {...props}
@@ -52,7 +52,7 @@ const Content = React.forwardRef<
   <Dialog.Content
     ref={ref}
     className={cn(
-      "fixed md:hidden inset-0 pt-heading-height bg-background flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
+      "fixed md:hidden inset-0 z-10 pt-heading-height bg-background flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4",
       className
     )}
     {...props}
