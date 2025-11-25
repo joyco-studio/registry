@@ -26,7 +26,6 @@
     "next": "16.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-frame-component": "^5.2.7",
     "react-remove-scroll": "^2.7.1",
     "rehype-pretty-code": "^0.14.1",
     "shadcn": "^3.5.0",
