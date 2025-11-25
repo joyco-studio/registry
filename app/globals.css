@@ -2,6 +2,7 @@
 @import 'fumadocs-ui/css/shadcn.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'tw-animate-css';
+@import 'tailwindcss-better-gradient';
 
 @layer components {
   [data-rehype-pretty-code-figure] {
@@ -16,7 +17,7 @@
     outline: none;
     position: relative;
 
-    &:has([data-rehype-pretty-code-title]) [data-slot="copy-button"] {
+    &:has([data-rehype-pretty-code-title]) [data-slot='copy-button'] {
       top: calc(var(--spacing) * 1.5) !important;
     }
   }
@@ -88,12 +89,8 @@
       left: 0;
       width: 2px;
       height: 100%;
-      content: "";
-      background-color: color-mix(
-        in oklab,
-        var(--muted-foreground) 50%,
-        transparent
-      );
+      content: '';
+      background-color: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
     }
   }
 

@@ -3,7 +3,7 @@ title: Scroll Area
 description: A scrollable area component with customizable top and bottom shadows that appear when content overflows.
 ---
 
-import { ScrollAreaDemo } from '@/components/scroll-area-demo';
+import { ScrollAreaDemo, ChevronExample } from '@/components/demos/scroll-area-demo';
 
 ## Demo
 
@@ -13,6 +13,32 @@ import { ScrollAreaDemo } from '@/components/scroll-area-demo';
 
 ```bash
 npx shadcn@latest add @joyco/scroll-area
+```
+
+## Simple Example
+
+A basic scroll area with automatic shadow indicators:
+
+```tsx
+import { ScrollArea } from '@/registry/joyco/blocks/scroll-area';
+
+function SimpleScrollArea() {
+  return (
+    <ScrollArea.Root className="h-64">
+      <ScrollArea.Content className="space-y-4 p-6">
+        <div className="rounded-lg bg-background p-4 border shadow-sm">
+          <h3 className="font-semibold mb-2">Item 1</h3>
+          <p className="text-sm text-muted-foreground">Content here</p>
+        </div>
+        <div className="rounded-lg bg-background p-4 border shadow-sm">
+          <h3 className="font-semibold mb-2">Item 2</h3>
+          <p className="text-sm text-muted-foreground">More content</p>
+        </div>
+        {/* Add more items to see scrolling */}
+      </ScrollArea.Content>
+    </ScrollArea.Root>
+  );
+}
 ```
 
 ## API Reference
@@ -34,6 +60,14 @@ The root container that handles scrolling behavior and automatically renders sha
 | `className`            | `string`    | -                                  | Additional CSS classes                             |
 | `children`             | `ReactNode` | -                                  | Child components (must include ScrollArea.Content) |
 
+The `ScrollArea.Root` component automatically adds data attributes to help you style custom elements based on scroll state:
+
+- `data-has-scroll` - `true` when content is scrollable (either top or bottom)
+- `data-scroll-top` - `true` when user can scroll up (not at the top)
+- `data-scroll-bottom` - `true` when user can scroll down (not at the bottom)
+
+These attributes can be used with Tailwind's `group-data-[]` modifiers to conditionally show/hide custom UI elements.
+
 #### ScrollArea.Content
 
 The scrollable content container with built-in scrollbar styling.
@@ -42,23 +76,6 @@ The scrollable content container with built-in scrollbar styling.
 | ----------- | ----------- | ------- | ---------------------- |
 | `className` | `string`    | -       | Additional CSS classes |
 | `children`  | `ReactNode` | -       | The scrollable content |
-
-## Basic Usage
-
-```tsx
-import { ScrollArea } from '@/registry/joyco/blocks/scroll-area';
-
-function App() {
-  return (
-    <ScrollArea.Root className="h-64">
-      <ScrollArea.Content>
-        {/* Your scrollable content */}
-        <div>Content here</div>
-      </ScrollArea.Content>
-    </ScrollArea.Root>
-  );
-}
-```
 
 ## Customization
 
@@ -77,6 +94,57 @@ You can customize the shadow appearance using the `topShadowGradient` and `botto
   </ScrollArea.Content>
 </ScrollArea.Root>
 ```
+
+### Custom Elements Based on Scroll State
+
+You can add custom UI elements (like chevron indicators) that show/hide based on scroll position using the data attributes provided by `ScrollArea.Root`. Use Tailwind's `group-data-[]` modifiers to style elements conditionally.
+
+<ChevronExample />
+
+Here's the code for the chevron indicators example:
+
+```tsx
+import { ScrollArea } from '@/registry/joyco/blocks/scroll-area';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+function ScrollAreaWithChevrons() {
+  return (
+    <ScrollArea.Root className="h-96 p-4 relative">
+      {/* Top chevron indicator */}
+      <div
+        className={cn(
+          'absolute left-1/2 top-2 -translate-x-1/2 z-30 pointer-events-none',
+          'group-data-[scroll-top=true]/scroll-area:opacity-100 group-data-[scroll-top=true]/scroll-area:animate-in group-data-[scroll-top=true]/scroll-area:fade-in group-data-[scroll-top=true]/scroll-area:duration-300',
+          'group-data-[scroll-top=false]/scroll-area:opacity-0 group-data-[scroll-top=false]/scroll-area:animate-out group-data-[scroll-top=false]/scroll-area:fade-out group-data-[scroll-top=false]/scroll-area:duration-300',
+          'opacity-0'
+        )}
+      >
+        <ChevronUp className="w-5 h-5 text-muted-foreground" />
+      </div>
+      
+      {/* Bottom chevron indicator */}
+      <div
+        className={cn(
+          'absolute left-1/2 bottom-2 -translate-x-1/2 z-30 pointer-events-none',
+          'group-data-[scroll-bottom=true]/scroll-area:opacity-100 group-data-[scroll-bottom=true]/scroll-area:animate-in group-data-[scroll-bottom=true]/scroll-area:fade-in group-data-[scroll-bottom=true]/scroll-area:duration-200',
+          'group-data-[scroll-bottom=false]/scroll-area:opacity-0 group-data-[scroll-bottom=false]/scroll-area:animate-out group-data-[scroll-bottom=false]/scroll-area:fade-out group-data-[scroll-bottom=false]/scroll-area:duration-200',
+          'opacity-0'
+        )}
+      >
+        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+      </div>
+      
+      <ScrollArea.Content className="space-y-4 p-6">
+        {/* Your scrollable content */}
+        <div>Content here</div>
+      </ScrollArea.Content>
+    </ScrollArea.Root>
+  );
+}
+```
+
+The chevrons use the `data-scroll-top` and `data-scroll-bottom` attributes on the root element to show/hide based on scroll position. These attributes are automatically managed by the `ScrollArea.Root` component.
 
 ### Scrollbar Styling
 

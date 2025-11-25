@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { Card } from "@/components/ui/card"
-import { ResizableIframe } from "@/components/resizable-iframe"
+import { Card } from '@/components/ui/card';
+import { ResizableIframe } from '@/components/resizable-iframe';
 
-import { Menu, X } from "lucide-react"
-import * as MobileMenu from "@/registry/joyco/blocks/mobile-menu"
+import { Menu, X } from 'lucide-react';
+import * as MobileMenu from '@/registry/joyco/blocks/mobile-menu';
 
 export function DemoPage() {
   return (
@@ -35,18 +35,10 @@ export function DemoPage() {
 
           <MobileMenu.Content>
             <MobileMenu.Navigation>
-              <MobileMenu.Item href="#">
-                Home
-              </MobileMenu.Item>
-              <MobileMenu.Item href="#">
-                Profile
-              </MobileMenu.Item>
-              <MobileMenu.Item href="#">
-                Settings
-              </MobileMenu.Item>
-              <MobileMenu.Item href="#">
-                Contact
-              </MobileMenu.Item>
+              <MobileMenu.Item href="#">Home</MobileMenu.Item>
+              <MobileMenu.Item href="#">Profile</MobileMenu.Item>
+              <MobileMenu.Item href="#">Settings</MobileMenu.Item>
+              <MobileMenu.Item href="#">Contact</MobileMenu.Item>
             </MobileMenu.Navigation>
             <MobileMenu.Footer>
               <p className="text-sm text-muted-foreground">© 2025 Defenitely Not Joyco Inc.</p>
@@ -55,7 +47,7 @@ export function DemoPage() {
         </MobileMenu.Root>
       </header>
     </div>
-  )
+  );
 }
 
 export function MobileMenuDemo() {
@@ -75,5 +67,5 @@ export function MobileMenuDemo() {
         Drag the right edge to resize. Menu button appears below 768px.
       </p>
     </div>
-  )
+  );
 }
