@@ -1,0 +1,152 @@
+---
+title: Scripts
+description: HTTP-linkable utility scripts for image processing and workflow automation.
+---
+
+A collection of utility scripts that can be fetched and executed directly via HTTP. Add them to your `package.json` without cluttering your project.
+
+## Overview
+
+These scripts are hosted on [GitHub](https://github.com/joyco-studio/scripts/tree/main/public) and can be run directly using `curl` and `python`. They're designed for batch image processing operations commonly needed in web development.
+
+| Script | Description |
+|--------|-------------|
+| `compress.py` | Batch compress images to WebP format |
+| `rename.py` | Sequential file renaming for image sequences |
+| `resize.py` | Batch resize images by dimensions or scale |
+
+## Requirements
+
+- Python 3.x
+- [Pillow](https://pillow.readthedocs.io/) (PIL fork) for image processing
+
+```bash
+pip install pillow
+```
+
+---
+
+## compress.py
+
+Batch compress images to WebP format with configurable quality settings.
+
+### Usage
+
+```bash
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/compress.py | python - [options] <input_dir>
+```
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `<input_dir>` | Directory containing images to compress | Required |
+| `-q, --quality` | WebP quality (0-100) | `80` |
+| `-o, --output` | Output directory | Same as input |
+
+### Example
+
+```bash
+# Compress all images in ./assets to WebP with 85% quality
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/compress.py | python - -q 85 ./assets
+
+# Compress and output to a different directory
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/compress.py | python - -q 90 -o ./dist/images ./src/images
+```
+
+### package.json Integration
+
+```json
+{
+  "scripts": {
+    "compress": "curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/compress.py | python - -q 85 ./public/images"
+  }
+}
+```
+
+---
+
+## rename.py
+
+Sequential file renaming utility, perfect for image sequences and sprite sheets.
+
+### Usage
+
+```bash
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/rename.py | python - [options] <input_dir>
+```
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `<input_dir>` | Directory containing files to rename | Required |
+| `-p, --prefix` | Filename prefix | `frame` |
+| `-s, --start` | Starting number | `0` |
+| `-z, --zeros` | Zero-padding width | `4` |
+
+### Example
+
+```bash
+# Rename files to frame_0001.png, frame_0002.png, etc.
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/rename.py | python - -p frame_ -z 4 ./sprites
+
+# Start numbering from 100
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/rename.py | python - -s 100 ./sequence
+```
+
+### package.json Integration
+
+```json
+{
+  "scripts": {
+    "rename:sprites": "curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/rename.py | python - -p sprite_ ./public/sprites"
+  }
+}
+```
+
+---
+
+## resize.py
+
+Batch resize images by dimensions or scale factor.
+
+### Usage
+
+```bash
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resize.py | python - [options] <input_dir>
+```
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `<input_dir>` | Directory containing images to resize | Required |
+| `-w, --width` | Target width in pixels | - |
+| `-h, --height` | Target height in pixels | - |
+| `-s, --scale` | Scale factor (e.g., 0.5 for half size) | - |
+| `-o, --output` | Output directory | Same as input |
+
+### Example
+
+```bash
+# Resize all images to 800px width (maintaining aspect ratio)
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resize.py | python - -w 800 ./images
+
+# Scale down to 50%
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resize.py | python - -s 0.5 ./images
+
+# Resize to specific dimensions
+curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resize.py | python - -w 1920 -h 1080 -o ./thumbnails ./originals
+```
+
+### package.json Integration
+
+```json
+{
+  "scripts": {
+    "resize:thumbnails": "curl -s https://raw.githubusercontent.com/joyco-studio/scripts/main/public/resize.py | python - -w 400 -o ./public/thumbnails ./public/images"
+  }
+}
+```
+
