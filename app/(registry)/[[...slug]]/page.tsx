@@ -3,6 +3,7 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
+  PageLastUpdate,
 } from 'fumadocs-ui/page'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -23,7 +24,16 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
-      tableOfContent={{ footer: <Maintainers maintainers={page.data.maintainers} /> }}
+      tableOfContent={{
+        footer: (
+          <div className='flex flex-col gap-2 py-2'>
+            <Maintainers maintainers={page.data.maintainers} />
+            {page.data.lastModified && (
+              <PageLastUpdate className='opacity-50' date={new Date(page.data.lastModified)} />
+            )}
+          </div>
+        ),
+      }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>

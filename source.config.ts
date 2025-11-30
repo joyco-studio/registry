@@ -1,3 +1,4 @@
+import lastModified from 'fumadocs-mdx/plugins/last-modified'
 import rehypePrettyCode from 'rehype-pretty-code'
 import { z } from 'zod'
 import {
@@ -43,4 +44,5 @@ export default defineConfig({
       return plugins
     },
   },
+  plugins: [lastModified()],
 })

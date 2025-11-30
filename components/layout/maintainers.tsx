@@ -5,7 +5,7 @@ export function Maintainers({ maintainers }: { maintainers: string[] }) {
   if (maintainers.length === 0) return null
 
   return (
-    <div className="mt-2 flex flex-col">
+    <div className="flex flex-col">
       <h3 className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-sm">
         <CircleDotDashed className="size-4" />
         Maintainers
