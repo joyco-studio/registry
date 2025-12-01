@@ -10,8 +10,10 @@ import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
 
 import { getPageImage, source } from '@/lib/source'
+import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
+import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
@@ -19,6 +21,8 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   if (!page) notFound()
 
   const MDX = page.data.body
+  const componentSlug = page.slugs[page.slugs.length - 1]
+  const downloadStats = await getDownloadStats(componentSlug)
 
   return (
     <DocsPage
@@ -26,8 +30,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       full={page.data.full}
       tableOfContent={{
         footer: (
-          <div className='flex flex-col gap-2 py-2'>
+          <div className='flex flex-col gap-4 py-2'>
             <Maintainers maintainers={page.data.maintainers} />
+            <WeeklyDownloads data={downloadStats} />
             {page.data.lastModified && (
               <PageLastUpdate className='opacity-50' date={new Date(page.data.lastModified)} />
             )}
