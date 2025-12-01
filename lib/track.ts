@@ -19,7 +19,7 @@ export async function trackDownload(componentName: string) {
     if (response.ok) {
       console.info(`[Registry Download] Tracked download for ${componentName}`, await response.text())
     } else {
-      console.error(`[Registry Download] Failed to track for ${componentName}:`, response.status)
+      console.error(`[Registry Download] Failed to track for ${componentName}:`, await response.text())
     }
 
     return response.ok
