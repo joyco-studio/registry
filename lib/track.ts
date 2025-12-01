@@ -6,7 +6,7 @@ export function trackDownload(componentName: string) {
     return
   }
 
-  fetch("https://registry.joyco.studio/registry/downloads", {
+  fetch("https://workers.joyco.studio/registry/downloads", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
