@@ -17,9 +17,7 @@ export interface UseFileUploadReturn {
   files: FileWithPreview[]
   errors: string[]
   isDragging: boolean
-  addFiles: (fileList: FileList | File[]) => Promise<void>
   removeFile: (id: string) => void
-  clearErrors: () => void
   openFileDialog: () => void
   getInputProps: () => {
     ref: React.RefObject<HTMLInputElement | null>
@@ -42,7 +40,7 @@ export function useFileUpload(
 
   const id = useId()
   const inputRef = useRef<HTMLInputElement>(null)
-  const dragCounterRef = useRef(0) // Track nested drag events to prevent flickering
+  const dragCounterRef = useRef(0)
 
   const [files, setFiles] = useState<FileWithPreview[]>([])
   const [errors, setErrors] = useState<string[]>([])
@@ -54,7 +52,6 @@ export function useFileUpload(
         const acceptedTypes = accept.split(',').map((t) => t.trim())
         const fileType = file.type
         const isAccepted = acceptedTypes.some((type) => {
-          // Support wildcards like "image/*"
           if (type.endsWith('/*')) {
             return fileType.startsWith(type.replace('/*', ''))
           }
@@ -76,7 +73,6 @@ export function useFileUpload(
     [accept, maxSize]
   )
 
-  // Generate base64 preview for images only
   const createPreview = useCallback(
     (file: File): Promise<string | undefined> => {
       return new Promise((resolve) => {
@@ -93,7 +89,7 @@ export function useFileUpload(
     []
   )
 
-  const addFiles = useCallback(
+  const processFiles = useCallback(
     async (fileList: FileList | File[]) => {
       const filesArray = Array.from(fileList)
       const newErrors: string[] = []
@@ -122,7 +118,7 @@ export function useFileUpload(
       setErrors(newErrors)
       setFiles((prev) => {
         const combined = [...prev, ...validFiles]
-        return combined.slice(0, maxFiles) // Respect maxFiles limit
+        return combined.slice(0, maxFiles)
       })
     },
     [validateFile, createPreview, onUpload, maxFiles]
@@ -130,10 +126,6 @@ export function useFileUpload(
 
   const removeFile = useCallback((fileId: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== fileId))
-  }, [])
-
-  const clearErrors = useCallback(() => {
-    setErrors([])
   }, [])
 
   const openFileDialog = useCallback(() => {
@@ -144,12 +136,11 @@ export function useFileUpload(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const fileList = event.target.files
       if (fileList && fileList.length > 0) {
-        await addFiles(fileList)
+        await processFiles(fileList)
       }
-      // Reset input to allow uploading the same file again
       event.target.value = ''
     },
-    [addFiles]
+    [processFiles]
   )
 
   const getInputProps = useCallback(() => {
@@ -176,7 +167,6 @@ export function useFileUpload(
     e.preventDefault()
     e.stopPropagation()
     dragCounterRef.current--
-    // Only disable when completely outside the drop zone
     if (dragCounterRef.current === 0) {
       setIsDragging(false)
     }
@@ -196,19 +186,17 @@ export function useFileUpload(
 
       const fileList = e.dataTransfer.files
       if (fileList && fileList.length > 0) {
-        await addFiles(fileList)
+        await processFiles(fileList)
       }
     },
-    [addFiles]
+    [processFiles]
   )
 
   return {
     files,
     errors,
     isDragging,
-    addFiles,
     removeFile,
-    clearErrors,
     openFileDialog,
     getInputProps,
     handleDragEnter,
