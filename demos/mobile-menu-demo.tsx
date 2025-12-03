@@ -1,7 +1,7 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { ResizableIframe } from '@/components/resizable-iframe'
+import { ResizableIframe } from '@/components/preview/resizable-iframe'
 
 import { Menu, X } from 'lucide-react'
 import * as MobileMenu from '@/registry/joyco/blocks/mobile-menu'

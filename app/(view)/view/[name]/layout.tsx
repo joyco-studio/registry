@@ -5,6 +5,12 @@ export default function ViewLayout({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center">
+      <style>{`
+        body,
+        html {
+          background-color: transparent !important;
+        }
+      `}</style>
       {children}
     </div>
   )

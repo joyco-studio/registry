@@ -1,7 +1,6 @@
 import { readdir, readFile } from 'fs/promises'
 import path from 'path'
 import { lazy } from 'react'
-import registry from '@/registry.json'
 const allBlocks = [...(await readdir(path.join(process.cwd(), 'demos')))]
 
 type Block = {
@@ -91,17 +90,7 @@ export async function getRegistryExampleComponentFile(name: string) {
 
 async function getFileContent(filePath: string) {
   const raw = await readFile(filePath, 'utf-8')
-
-  // Remove meta variables.
-  // removeVariable(sourceFile, "iframeHeight")
-  // removeVariable(sourceFile, "containerClassName")
-  // removeVariable(sourceFile, "description")
-
   let code = raw
-
-  // Some registry items uses default export.
-  // We want to use named export instead.
-  // TODO: do we really need this? - @shadcn.
   code = code.replaceAll('export default', 'export')
 
   return code

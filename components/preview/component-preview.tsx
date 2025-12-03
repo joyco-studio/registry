@@ -1,20 +1,20 @@
 import { getRegistryExampleComponent } from '@/lib/registry-examples'
 import { cn } from '@/lib/utils'
 import { ComponentSource } from './component-source-code'
-import { Card } from 'fumadocs-ui/components/card'
-import { ResizableIframe } from '../resizable-iframe'
-import { PatternOverlay } from './pattern-overlay'
+import { ResizableIframe } from './resizable-iframe'
 
 interface ComponentPreviewProps extends React.ComponentProps<'div'> {
   name: string
   defaultWidth?: number
   height?: number | string
+  resizable?: boolean
 }
 export function ComponentPreview({
   name,
   className,
   defaultWidth = 800,
   height = 600,
+  resizable = false,
   ...props
 }: ComponentPreviewProps) {
   const Component = getRegistryExampleComponent(name)
@@ -31,26 +31,38 @@ export function ComponentPreview({
     )
   }
 
+  const heightStyle = typeof height === 'number' ? `${height}px` : height
+
   return (
     <div
       className={cn(
-        'group not-prose relative overflow-clip rounded-lg',
+        'group not-prose border-border relative overflow-clip rounded-lg border',
         className
       )}
       {...props}
     >
-      <div className={cn('preview bg-card relative flex px-4 py-10')}>
-        <PatternOverlay className="bg-card pointer-events-none absolute inset-0" />
+      <div className={cn('preview bg-card relative flex')}>
         <div
           title={undefined}
-          className="bg-card border-border my-0 w-full overflow-hidden rounded-none"
+          className="bg-card border-border my-0 w-full overflow-hidden rounded-none border-b"
         >
-          <ResizableIframe
-            src={`/view/${name}`}
-            defaultWidth={defaultWidth}
-            minWidth={280}
-            height={height}
-          />
+          {resizable ? (
+            <ResizableIframe
+              src={`/view/${name}`}
+              defaultWidth={defaultWidth}
+              minWidth={280}
+              height={height}
+            />
+          ) : (
+            <iframe
+              src={`/view/${name}`}
+              className="w-full border-0"
+              style={{
+                height: heightStyle,
+              }}
+              title={`Preview of ${name} component`}
+            />
+          )}
         </div>
       </div>
       <ComponentSource name={name} language="tsx" />

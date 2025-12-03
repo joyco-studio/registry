@@ -37,7 +37,6 @@ export async function ComponentSource({
 
   const highlightedCode = await codeToHtml(code, {
     lang: language,
-    defaultColor: 'light-dark()',
     themes: {
       dark: 'github-dark',
       light: 'github-light-default',
