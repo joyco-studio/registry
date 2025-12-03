@@ -17,6 +17,7 @@ type Block = {
 const blocks: Block[] = (
   await Promise.all(
     allBlocks.map(async (block) => {
+      if (!block.endsWith('.tsx')) return null
       const blockName = block.replace('.tsx', '').replace('.ts', '')
       // get the name of file without the -test...
       return {
