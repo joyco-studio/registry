@@ -9,7 +9,7 @@ const ITEMS = [...LOGOS, ...LOGOS].map((Logo, i) => ({ Logo, id: i }))
 export function MarqueeDemo() {
   return (
     <div className="not-prose max-w-full">
-      <Card className="bg-card overflow-hidden rounded-none">
+      <Card className="bg-card overflow-hidden rounded-none border-none shadow-none">
         <div className="py-6">
           <Marquee speed={100} speedFactor={0.5} direction={1} play>
             {ITEMS.map(({ Logo, id }) => (
