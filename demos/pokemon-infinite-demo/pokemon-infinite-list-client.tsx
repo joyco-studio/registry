@@ -35,7 +35,7 @@ export function PokemonInfiniteListClient({
   }
 
   return (
-    <div className="not-prose overflow-autop-4 h-[500px] w-full p-10">
+    <div className="not-prose overflow-auto h-[500px] w-full p-10">
       <div className="bg-card/90 border-border fixed top-10 right-10 z-10 -mb-7 ml-auto max-w-max rounded-md border px-3 py-2 font-mono text-xs uppercase backdrop-blur-md">
         Displayed: {list.displayLimit} | Loaded: {list.offset}
       </div>
