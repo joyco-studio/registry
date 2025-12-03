@@ -54,22 +54,4 @@ export function DemoPage() {
   )
 }
 
-export function MobileMenuDemo() {
-  return (
-    <div className="not-prose">
-      <Card className="bg-card border-border overflow-hidden py-0">
-        <ResizableIframe
-          src="/demos/mobile-menu"
-          defaultWidth={400}
-          minWidth={280}
-          height={600}
-          title="mobile-menu demo page"
-        />
-      </Card>
-
-      <p className="text-muted-foreground mt-3 text-center text-sm">
-        Drag the right edge to resize. Menu button appears below 768px.
-      </p>
-    </div>
-  )
-}
+export default DemoPage

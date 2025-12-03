@@ -188,8 +188,8 @@ export function MarqueeDemo() {
     'text-sm absolute inset-0 z-10 flex items-center pointer-events-none justify-center font-medium whitespace-now uppercase nowrap font-mono'
 
   return (
-    <div className="not-prose">
-      <Card className="bg-card overflow-hidden rounded-b-none">
+    <div className="not-prose max-w-full">
+      <Card className="bg-card overflow-hidden rounded-none">
         <div className="py-6">
           <Marquee
             speed={100}
@@ -205,7 +205,7 @@ export function MarqueeDemo() {
         </div>
       </Card>
 
-      <div className="bg-card border-border overflow-hidden rounded-b-lg border border-t-0">
+      <div className="bg-card border-border overflow-hidden border border-t-0">
         <div className="grid grid-cols-2 sm:grid-cols-4">
           <ControlButton
             onClick={() => setPlay(!play)}
@@ -304,3 +304,5 @@ const ControlButton = ({
     </Button>
   )
 }
+
+export default MarqueeDemo

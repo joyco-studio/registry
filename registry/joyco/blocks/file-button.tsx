@@ -1,3 +1,4 @@
+'use client'
 import { Button } from '@/components/ui/button'
 import { useCallback, useId, useMemo } from 'react'
 

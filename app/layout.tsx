@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex min-h-screen flex-1 flex-col">
         <RootProvider>{children}</RootProvider>
       </body>
     </html>

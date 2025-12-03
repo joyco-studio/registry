@@ -140,21 +140,6 @@ export function ResizableIframe({
         ref={containerRef}
         className="relative flex w-full justify-center overflow-hidden"
       >
-        {/* Background fill for space on both sides */}
-        <div
-          className="bg-card pointer-events-none absolute inset-0"
-          style={
-            {
-              '--pattern-fg':
-                'color-mix(in oklab, var(--border) 30%, transparent)',
-              backgroundImage:
-                'repeating-linear-gradient(315deg,var(--pattern-fg) 0,var(--pattern-fg) 1px,transparent 0,transparent 50%)',
-              backgroundAttachment: 'fixed',
-              backgroundSize: '10px 10px',
-            } as React.CSSProperties
-          }
-        />
-
         {/* Resizable content area - centered */}
         <div
           className="border-border relative z-10 border-l"
@@ -167,7 +152,7 @@ export function ResizableIframe({
             className={cn('bg-background border-0', iframeClassName)}
             style={{
               width: 'calc(100% - 20px)', // Account for resize handle width
-              height: heightStyle,
+              height: `calc(${heightStyle} - 80px)`,
               pointerEvents: isDragging ? 'none' : 'auto',
             }}
             title={title}
@@ -190,18 +175,16 @@ export function ResizableIframe({
 
       {/* Width indicator */}
       {showIndicator && (
-        <div className="border-border bg-card flex items-center justify-between border-t px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground font-mono text-xs uppercase">
-              Width:
-            </span>
-            <span className="text-foreground font-mono text-sm font-medium">
-              {Math.round(width)}px
-            </span>
-            <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-xs">
-              {getBreakpointLabel(width)}
-            </span>
-          </div>
+        <div className="border-border text-foreground z-10 flex items-center justify-between border-t px-4 py-2">
+          <span className="text-muted-foreground font-mono text-xs uppercase">
+            Width:
+          </span>
+          <span className="text-foreground font-mono text-sm font-medium">
+            {Math.round(width)}px
+          </span>
+          <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-xs">
+            {getBreakpointLabel(width)}
+          </span>
         </div>
       )}
     </div>

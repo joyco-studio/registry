@@ -4,14 +4,11 @@ description: A scrollable area component with customizable top and bottom shadow
 maintainers: ['fabroos']
 ---
 
-import {
-  ScrollAreaDemo,
-  ChevronExample,
-} from '@/components/demos/scroll-area-demo'
+import { ComponentPreview } from '@/components/preview/component-preview'
 
 ## Demo
 
-<ScrollAreaDemo />
+<ComponentPreview name="scroll-area-demo" />
 
 ## Installation
 
@@ -103,18 +100,12 @@ You can customize the shadow appearance using the `topShadowGradient` and `botto
 
 You can add custom UI elements (like chevron indicators) that show/hide based on scroll position using the data attributes provided by `ScrollArea.Root`. Use Tailwind's `group-data-[]` modifiers to style elements conditionally.
 
-<ChevronExample />
+<ComponentPreview name="scroll-area-chevron-example" />
 
-Here's the code for the chevron indicators example:
+## Code
 
 ```tsx
-import { ScrollArea } from '@/registry/joyco/blocks/scroll-area'
-import { ChevronUp, ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
-
-function ScrollAreaWithChevrons() {
-  return (
-    <ScrollArea.Root className="relative h-96 p-4">
+<ScrollArea.Root className="relative h-96 p-4">
       {/* Top chevron indicator */}
       <div
         className={cn(

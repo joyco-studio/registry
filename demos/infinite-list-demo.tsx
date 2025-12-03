@@ -1,5 +1,5 @@
-import { PokemonInfiniteListClient } from './pokemon-infinite-list-client'
-import { fetchPokemon } from './api'
+import { PokemonInfiniteListClient } from './pokemon-infinite-demo/pokemon-infinite-list-client'
+import { fetchPokemon } from './pokemon-infinite-demo/api'
 
 export async function PokemonInfiniteList() {
   const pageSize = 12
@@ -13,3 +13,5 @@ export async function PokemonInfiniteList() {
     />
   )
 }
+
+export default PokemonInfiniteList

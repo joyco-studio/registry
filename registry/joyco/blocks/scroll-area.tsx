@@ -55,10 +55,7 @@ interface ScrollAreaRootProps extends React.ComponentProps<'div'> {
  * </ScrollArea.Root>
  * ```
  */
-export const Root = React.forwardRef<
-  HTMLDivElement,
-  ScrollAreaRootProps
->(
+export const Root = React.forwardRef<HTMLDivElement, ScrollAreaRootProps>(
   (
     {
       className,
@@ -251,40 +248,39 @@ type ScrollAreaContentProps = React.ComponentProps<'div'>
  *   <div>Content here</div>
  * </ScrollArea.Content>
  */
-export const Content = React.forwardRef<
-  HTMLDivElement,
-  ScrollAreaContentProps
->(({ className, children, ...props }, ref) => {
-  const { scrollRef, orientation } = useScrollAreaContext()
+export const Content = React.forwardRef<HTMLDivElement, ScrollAreaContentProps>(
+  ({ className, children, ...props }, ref) => {
+    const { scrollRef, orientation } = useScrollAreaContext()
 
-  const combinedRef = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      scrollRef.current = node
-      if (typeof ref === 'function') ref(node)
-      else if (ref)
-        (ref as React.RefObject<HTMLDivElement | null>).current = node
-    },
-    [ref, scrollRef]
-  )
+    const combinedRef = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        scrollRef.current = node
+        if (typeof ref === 'function') ref(node)
+        else if (ref)
+          (ref as React.RefObject<HTMLDivElement | null>).current = node
+      },
+      [ref, scrollRef]
+    )
 
-  const overflowClasses =
-    orientation === 'horizontal'
-      ? 'overflow-x-auto overflow-y-hidden'
-      : 'overflow-y-auto h-full'
+    const overflowClasses =
+      orientation === 'horizontal'
+        ? 'overflow-x-auto overflow-y-hidden'
+        : 'overflow-y-auto h-full'
 
-  return (
-    <div
-      ref={combinedRef}
-      className={cn(
-        '[scrollbar-color:hsl(0_0%_50%)] [scrollbar-gutter:stable] [scrollbar-width:thin]',
-        overflowClasses,
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-})
+    return (
+      <div
+        ref={combinedRef}
+        className={cn(
+          '[scrollbar-color:hsl(0_0%_50%)] [scrollbar-gutter:stable] [scrollbar-width:thin]',
+          overflowClasses,
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  }
+)
 
 Content.displayName = 'ScrollAreaContent'
