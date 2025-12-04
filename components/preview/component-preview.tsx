@@ -12,7 +12,7 @@ interface ComponentPreviewProps extends React.ComponentProps<'div'> {
 export function ComponentPreview({
   name,
   className,
-  defaultWidth = 800,
+  defaultWidth = 375,
   height = 600,
   resizable = false,
   ...props
