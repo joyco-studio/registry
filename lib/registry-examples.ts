@@ -16,7 +16,6 @@ type Block = {
 const blocks: Block[] = (
   await Promise.all(
     allBlocks.map(async (block) => {
-      if (!block.endsWith('.tsx')) return null
       const blockName = block.replace('.tsx', '').replace('.ts', '')
       // get the name of file without the -test...
       return {
@@ -40,15 +39,21 @@ export function getRegistryExampleComponent(name: string) {
 }
 
 export function getRegistryExampleItems() {
-  return blocks.map((block) => ({
-    name: block.name,
-    description: block.description,
-    type: block.type,
-    component: block.component,
-  }))
+  return blocks
+    .filter((block) => block.name.endsWith('demo.tsx'))
+    .map((block) => ({
+      name: block.name,
+      description: block.description,
+      type: block.type,
+      component: block.component,
+    }))
 }
 
 export function getRegistryExampleItem(name: string) {
+  // if the name doesnt ends with demo, return null
+  if (!name.endsWith('demo.tsx')) {
+    return null
+  }
   const block = blocks.find((block) => block.name === name)
   if (!block) {
     return null

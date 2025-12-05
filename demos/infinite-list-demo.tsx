@@ -1,4 +1,4 @@
-import { PokemonInfiniteListClient } from './infinite-list-client-demo'
+import { PokemonInfiniteListClient } from './infinite-list-client'
 
 type Pokemon = { name: string; url: string; image: string }
 
