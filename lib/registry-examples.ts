@@ -40,7 +40,7 @@ export function getRegistryExampleComponent(name: string) {
 
 export function getRegistryExampleItems() {
   return blocks
-    .filter((block) => block.name.endsWith('demo.tsx'))
+    .filter((block) => block.name.endsWith('demo'))
     .map((block) => ({
       name: block.name,
       description: block.description,
