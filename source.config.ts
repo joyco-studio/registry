@@ -17,6 +17,14 @@ export const docs = defineDocs({
   docs: {
     schema: frontmatterSchema.extend({
       maintainers: z.array(z.string()).default([]),
+      docLinks: z
+        .array(
+          z.object({
+            label: z.string(),
+            href: z.string(),
+          })
+        )
+        .default([]),
     }),
     postprocess: {
       includeProcessedMarkdown: true,
