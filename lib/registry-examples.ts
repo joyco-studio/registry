@@ -51,7 +51,7 @@ export function getRegistryExampleItems() {
 
 export function getRegistryExampleItem(name: string) {
   // if the name doesnt ends with demo, return null
-  if (!name.endsWith('demo.tsx')) {
+  if (!name.endsWith('demo')) {
     return null
   }
   const block = blocks.find((block) => block.name === name)
