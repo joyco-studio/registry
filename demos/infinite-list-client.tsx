@@ -51,8 +51,8 @@ export function PokemonInfiniteListClient({
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
           <MaskedList {...list}>
             {pokemon.map((p) => (
-              <Card key={p.url} className="gap-0 p-0">
-                <div className="aspect-square bg-gray-100">
+              <Card key={p.url} className="gap-0 overflow-hidden p-0">
+                <div className="bg-muted aspect-square">
                   <Image
                     src={p.image}
                     alt={p.name}
