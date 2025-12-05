@@ -67,4 +67,3 @@ export const IBMLogo = ({ className }: { className?: string }) => (
     </g>
   </svg>
 )
-

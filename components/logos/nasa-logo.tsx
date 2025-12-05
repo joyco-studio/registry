@@ -20,4 +20,3 @@ export const NasaLogo = ({ className }: { className?: string }) => (
     </g>
   </svg>
 )
-

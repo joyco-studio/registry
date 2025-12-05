@@ -19,4 +19,3 @@ export const Logo = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   )
 }
-

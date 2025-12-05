@@ -32,4 +32,3 @@ export const ValveLogo = ({ className }: { className?: string }) => (
     />
   </svg>
 )
-

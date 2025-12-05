@@ -28,4 +28,3 @@ export const SpaceXLogo = ({ className }: { className?: string }) => (
     </g>
   </svg>
 )
-
