@@ -72,7 +72,7 @@
       "name": "mobile-menu",
       "type": "registry:component",
       "title": "Mobile Menu",
-      "description": "A full-screen overlay mobile menu built with Radix Dialog.",
+      "description": "A full-screen overlay mobile menu.",
       "files": [
         {
           "path": "registry/joyco/blocks/mobile-menu.tsx",

@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { FileInputButton } from '@/registry/joyco/blocks/file-button'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import {
   Upload,
@@ -50,38 +49,31 @@ export function FileInputButtonDemo() {
   }
 
   return (
-    <Card className="not-prose">
-      <CardContent>
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <FileInputButton
-            onUpload={handleUpload}
-            inputProps={{ multiple: true }}
-            variant="default"
-          >
-            <Upload />
-            Upload Files
-          </FileInputButton>
-          {uploadedFiles.length > 0 && (
-            <Button variant="ghost" onClick={() => setUploadedFiles([])}>
-              Clear All
-            </Button>
-          )}
-        </div>
-
+    <div className="mx-auto flex w-full max-w-sm flex-col items-center justify-center p-8">
+      <div className="mb-6 flex w-full items-center justify-center gap-2">
+        <FileInputButton
+          onUpload={handleUpload}
+          inputProps={{ multiple: true }}
+          variant="default"
+        >
+          <Upload />
+          Upload Files
+        </FileInputButton>
+        {uploadedFiles.length > 0 && (
+          <Button variant="ghost" onClick={() => setUploadedFiles([])}>
+            Clear All
+          </Button>
+        )}
+      </div>
+      <div className="bg-muted/40 border-border flex min-h-21 w-full items-center rounded-lg border">
         {uploadedFiles.length > 0 ? (
-          <div className="space-y-2">
+          <div className="max-h-90 w-full flex-1 space-y-2 overflow-y-auto">
             {uploadedFiles.map((file, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg p-3',
-                  'bg-muted/50 border-border border'
-                )}
-              >
+              <div key={index} className="flex items-center gap-3 p-3">
                 <div className="text-muted-foreground">
                   {getFileIcon(file.type)}
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="max-w-full min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{file.name}</p>
                   <p className="text-muted-foreground text-xs">
                     {formatFileSize(file.size)}
@@ -91,11 +83,13 @@ export function FileInputButtonDemo() {
             ))}
           </div>
         ) : (
-          <div className="bg-muted/50 border-border text-muted-foreground rounded-lg border p-4 py-8 text-center text-sm">
+          <div className="text-muted-foreground flex-1 text-center text-sm">
             No files uploaded yet
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
+
+export default FileInputButtonDemo

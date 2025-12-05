@@ -3,7 +3,8 @@
 import * as React from 'react'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, Monitor, Tablet, Smartphone } from 'lucide-react'
+import { PatternOverlay } from './pattern-overlay'
 
 interface ResizableIframeProps {
   /** The URL for the iframe */
@@ -40,6 +41,13 @@ const DEFAULT_BREAKPOINTS = [
   { label: 'xl', minWidth: 1280 },
 ]
 
+type DevicePreset = 'desktop' | 'mobile'
+
+const DEVICE_PRESETS: Record<DevicePreset, number> = {
+  desktop: 800,
+  mobile: 375,
+}
+
 export function ResizableIframe({
   src,
   srcDoc,
@@ -54,22 +62,43 @@ export function ResizableIframe({
   className,
   iframeClassName,
 }: ResizableIframeProps) {
-  const [width, setWidth] = useState(defaultWidth)
+  // Detect which device preset matches the current width
+  const detectDeviceFromWidth = useCallback((w: number): DevicePreset => {
+    const desktopDiff = Math.abs(w - DEVICE_PRESETS.desktop)
+    const mobileDiff = Math.abs(w - DEVICE_PRESETS.mobile)
+
+    if (desktopDiff <= mobileDiff) {
+      return 'desktop'
+    } else {
+      return 'mobile'
+    }
+  }, [])
+
+  // Initialize width - use desktop preset if defaultWidth is the default value
+  const initialWidth =
+    defaultWidth === 400 ? DEVICE_PRESETS.desktop : defaultWidth
+  const [width, setWidth] = useState(initialWidth)
   const [isDragging, setIsDragging] = useState(false)
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(() =>
+    detectDeviceFromWidth(initialWidth)
+  )
   const containerRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   const updateWidth = useCallback(
-    (newWidth: number) => {
+    (newWidth: number, updateDevice = true) => {
       const containerWidth = containerRef.current?.offsetWidth ?? Infinity
       const clampedWidth = Math.max(
         minWidth,
         Math.min(newWidth, maxWidth ?? containerWidth)
       )
       setWidth(clampedWidth)
+      if (updateDevice) {
+        setSelectedDevice(detectDeviceFromWidth(clampedWidth))
+      }
       onWidthChange?.(clampedWidth)
     },
-    [minWidth, maxWidth, onWidthChange]
+    [minWidth, maxWidth, onWidthChange, detectDeviceFromWidth]
   )
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -132,69 +161,21 @@ export function ResizableIframe({
     [breakpoints]
   )
 
+  const handleDeviceSelect = useCallback(
+    (device: DevicePreset) => {
+      setSelectedDevice(device)
+      updateWidth(DEVICE_PRESETS[device], false)
+    },
+    [updateWidth]
+  )
+
   const heightStyle = typeof height === 'number' ? `${height}px` : height
   // absolute inset-0
   return (
-    <div className={cn('flex flex-col', className)}>
-      <div
-        ref={containerRef}
-        className="relative flex w-full justify-center overflow-hidden"
-      >
-        {/* Background fill for space on both sides */}
-        <div
-          className="bg-card pointer-events-none absolute inset-0"
-          style={
-            {
-              '--pattern-fg':
-                'color-mix(in oklab, var(--border) 30%, transparent)',
-              backgroundImage:
-                'repeating-linear-gradient(315deg,var(--pattern-fg) 0,var(--pattern-fg) 1px,transparent 0,transparent 50%)',
-              backgroundAttachment: 'fixed',
-              backgroundSize: '10px 10px',
-            } as React.CSSProperties
-          }
-        />
-
-        {/* Resizable content area - centered */}
-        <div
-          className="border-border relative z-10 border-l"
-          style={{ width: `${width}px`, maxWidth: '100%' }}
-        >
-          <iframe
-            ref={iframeRef}
-            src={src}
-            srcDoc={srcDoc}
-            className={cn('bg-background border-0', iframeClassName)}
-            style={{
-              width: 'calc(100% - 20px)', // Account for resize handle width
-              height: heightStyle,
-              pointerEvents: isDragging ? 'none' : 'auto',
-            }}
-            title={title}
-          />
-
-          {/* Resize handle */}
-          <div
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-            className={cn(
-              'absolute top-0 right-0 flex h-full w-5 cursor-ew-resize items-center justify-center',
-              'bg-border hover:bg-border/80 border-border border-l transition-colors',
-              isDragging && 'bg-border'
-            )}
-          >
-            <GripVertical className="h-3.5 w-3.5 text-neutral-400" />
-          </div>
-        </div>
-      </div>
-
-      {/* Width indicator */}
-      {showIndicator && (
-        <div className="border-border bg-card flex items-center justify-between border-t px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground font-mono text-xs uppercase">
-              Width:
-            </span>
+    <div className="flex flex-col">
+      <div className="bg-card border-border z-10 flex items-center justify-between border-b">
+        {showIndicator && (
+          <div className="text-foreground z-10 flex items-center gap-2 px-4 py-2">
             <span className="text-foreground font-mono text-sm font-medium">
               {Math.round(width)}px
             </span>
@@ -202,8 +183,78 @@ export function ResizableIframe({
               {getBreakpointLabel(width)}
             </span>
           </div>
+        )}
+        <div className="ml-auto flex items-center gap-1 px-2">
+          <button
+            onClick={() => handleDeviceSelect('desktop')}
+            className={cn(
+              'flex items-center justify-center rounded-md p-1.5 transition-colors',
+              'hover:bg-accent hover:text-accent-foreground',
+              selectedDevice === 'desktop'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-muted-foreground'
+            )}
+            aria-label="Desktop view"
+          >
+            <Monitor className="size-4" />
+          </button>
+
+          <button
+            onClick={() => handleDeviceSelect('mobile')}
+            className={cn(
+              'flex items-center justify-center rounded-md p-1.5 transition-colors',
+              'hover:bg-accent hover:text-accent-foreground',
+              selectedDevice === 'mobile'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-muted-foreground'
+            )}
+            aria-label="Mobile view"
+          >
+            <Smartphone className="size-4" />
+          </button>
         </div>
-      )}
+      </div>
+      <div className={cn('relative flex flex-col', className)}>
+        <PatternOverlay className="bg-card pointer-events-none absolute inset-0" />
+
+        <div
+          ref={containerRef}
+          className="relative flex w-full justify-center overflow-hidden"
+        >
+          {/* Resizable content area - centered */}
+          <div
+            className="relative z-10 border-l"
+            style={{ width: `${width}px`, maxWidth: '100%' }}
+          >
+            <iframe
+              ref={iframeRef}
+              src={src}
+              srcDoc={srcDoc}
+              className={cn('border-0', iframeClassName)}
+              style={{
+                width: 'calc(100% - 20px)', // Account for resize handle width
+                height: `calc(${heightStyle} - 80px)`,
+                pointerEvents: isDragging ? 'none' : 'auto',
+              }}
+              title={title}
+            />
+
+            {/* Resize handle */}
+            <div
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
+              className={cn(
+                'absolute top-0 right-0 flex h-full w-5 cursor-ew-resize items-center justify-center',
+                'bg-border hover:bg-border/80 transition-colors',
+                isDragging && 'bg-border'
+              )}
+            >
+              <GripVertical className="h-3.5 w-3.5 text-neutral-400" />
+            </div>
+          </div>
+        </div>
+        {/* Width indicator */}
+      </div>
     </div>
   )
 }

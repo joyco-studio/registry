@@ -4,35 +4,23 @@ description: A simple and flexible file upload button component with custom styl
 maintainers: ['matiasperz']
 ---
 
-import { FileInputButtonDemo } from '@/components/demos/file-button-demo'
+import { ComponentPreview } from '@/components/preview/component-preview'
 
 ## Demo
 
-<FileInputButtonDemo />
+<ComponentPreview name="file-button-demo" />
 
 ## Installation
 
 ```bash
-npx shadcn@latest add @joyco/file-button
+npx shadcn@latest add https://registry.joyco.studio/r/file-button.json
 ```
 
-## API Reference
-
-### FileInputButton
-
-The `FileInputButton` component provides a simple way to create a styled file upload button that works with any children content.
-
-#### Props
-
-| Prop         | Type                                          | Default | Description                                               |
-| ------------ | --------------------------------------------- | ------- | --------------------------------------------------------- |
-| `onUpload`   | `(file: File) => Promise<any> \| void`        | -       | Callback function called when a file is selected          |
-| `inputProps` | `React.InputHTMLAttributes<HTMLInputElement>` | `{}`    | Additional props to pass to the hidden file input element |
-| `children`   | `ReactNode`                                   | -       | The content to display inside the button                  |
-
-#### Basic Usage
+## Usage
 
 ```tsx
+import { FileInputButton } from '@joyco/file-button'
+
 function App() {
   const handleUpload = (file: File) => {
     console.log('Selected file:', file)
@@ -41,94 +29,3 @@ function App() {
   return <FileInputButton onUpload={handleUpload}>Upload File</FileInputButton>
 }
 ```
-
-#### Multiple Files
-
-```tsx
-function App() {
-  const handleUpload = (file: File) => {
-    // This will be called for each file
-    console.log('Selected file:', file)
-  }
-
-  return (
-    <FileInputButton onUpload={handleUpload} inputProps={{ multiple: true }}>
-      Upload Multiple Files
-    </FileInputButton>
-  )
-}
-```
-
-#### Accept Specific File Types
-
-```tsx
-function App() {
-  const handleUpload = (file: File) => {
-    console.log('Selected image:', file)
-  }
-
-  return (
-    <FileInputButton onUpload={handleUpload} inputProps={{ accept: 'image/*' }}>
-      Upload Image
-    </FileInputButton>
-  )
-}
-```
-
-### useFileUpload
-
-For more control, you can use the `useFileUpload` hook directly. This is particularly useful when you need to:
-
-- Use a custom button component or element
-- Have more granular control over the file input behavior
-- Integrate with existing form systems
-
-#### Parameters
-
-| Parameter  | Type                                      | Description                                      |
-| ---------- | ----------------------------------------- | ------------------------------------------------ |
-| `accept`   | `string`                                  | Comma-separated list of accepted MIME types      |
-| `maxSize`  | `number`                                  | Maximum file size in bytes                       |
-| `maxFiles` | `number`                                  | Maximum number of files (default: 1)             |
-| `onUpload` | `(file: File) => Promise<any> \| void`    | Callback function called when a file is selected |
-
-#### Returns
-
-The hook returns an object with:
-
-| Property         | Type         | Description                                  |
-| ---------------- | ------------ | -------------------------------------------- |
-| `openFileDialog` | `() => void` | Function to trigger the file input dialog    |
-| `getInputProps`  | `() => {...}`| Returns props to spread on the input element |
-| `files`          | `FileWithPreview[]` | Array of uploaded files with previews |
-| `errors`         | `string[]`   | Array of validation error messages           |
-| ...and more (see [File Dropzone](/components/file-dropzone) for full API) |
-
-#### Hook Usage
-
-```tsx
-function CustomUploadButton() {
-  const { openFileDialog, getInputProps } = useFileUpload({
-    accept: '.pdf,.doc,.docx',
-    maxSize: 10 * 1024 * 1024, // 10MB
-    onUpload: (file) => {
-      console.log('File selected:', file)
-    },
-  })
-
-  return (
-    <div>
-      <input {...getInputProps()} className="sr-only" />
-      <button onClick={openFileDialog}>Choose Files</button>
-    </div>
-  )
-}
-```
-
-## Notes
-
-- The `onUpload` callback is called for each file individually when multiple files are selected
-- The component uses a hidden file input element that is triggered programmatically
-- The file input is completely hidden using CSS (not just `display: none`) to ensure it doesn't interfere with layout
-- You can pass any valid HTML input attributes through `inputProps` (e.g., `accept`, `multiple`, `capture`)
-- The `useFileUpload` hook also powers advanced dropzones with drag & drop - see the [File Dropzone](/components/file-dropzone) documentation

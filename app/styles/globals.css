@@ -3,121 +3,7 @@
 @import 'fumadocs-ui/css/preset.css';
 @import 'tw-animate-css';
 @import 'tailwindcss-better-gradient';
-
-@layer components {
-  [data-rehype-pretty-code-figure] {
-    background-color: var(--color-code);
-    color: var(--color-code-foreground);
-    border-radius: var(--radius-lg);
-    border-width: 0px;
-    border-color: var(--border);
-    margin-top: calc(var(--spacing) * 6);
-    overflow: hidden;
-    font-size: var(--text-sm);
-    outline: none;
-    position: relative;
-
-    &:has([data-rehype-pretty-code-title]) [data-slot='copy-button'] {
-      top: calc(var(--spacing) * 1.5) !important;
-    }
-  }
-
-  [data-rehype-pretty-code-title] {
-    border-bottom: color-mix(in oklab, var(--border) 30%, transparent);
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    padding-block: calc(var(--spacing) * 2.5);
-    padding-inline: calc(var(--spacing) * 4);
-    font-size: var(--text-sm);
-    font-family: var(--font-mono);
-    color: var(--color-code-foreground);
-  }
-
-  [data-line-numbers] {
-    display: grid;
-    min-width: 100%;
-    white-space: pre;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    counter-reset: line;
-    box-decoration-break: clone;
-  }
-
-  [data-line-numbers] [data-line]::before {
-    font-size: var(--text-sm);
-    counter-increment: line;
-    content: counter(line);
-    display: inline-block;
-    width: calc(var(--spacing) * 16);
-    padding-right: calc(var(--spacing) * 6);
-    text-align: right;
-    color: var(--color-code-number);
-    background-color: var(--color-code);
-    position: sticky;
-    left: 0;
-  }
-
-  [data-line-numbers] [data-highlighted-line][data-line]::before {
-    background-color: var(--color-code-highlight);
-  }
-
-  [data-line] {
-    width: 100%;
-    display: inline-block;
-    line-height: 1.9;
-  }
-
-  [data-line] span {
-    color: var(--shiki-light);
-
-    @variant dark {
-      color: var(--shiki-dark);
-    }
-  }
-
-  [data-highlighted-line],
-  [data-highlighted-chars] {
-    position: relative;
-    background-color: var(--color-code-highlight);
-  }
-
-  [data-highlighted-line] {
-    &:after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 2px;
-      height: 100%;
-      content: '';
-      background-color: color-mix(
-        in oklab,
-        var(--muted-foreground) 50%,
-        transparent
-      );
-    }
-  }
-
-  [data-highlighted-chars] {
-    border-radius: var(--radius-sm);
-    padding-inline: 0.3rem;
-    padding-block: 0.1rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-  }
-}
-
-@theme static {
-  --color-fd-info: oklch(62.3% 0.214 259.815);
-  --color-fd-warning: oklch(76.9% 0.188 70.08);
-  --color-fd-error: oklch(63.7% 0.237 25.331);
-  --color-fd-success: oklch(72.3% 0.219 149.579);
-  --color-fd-idea: oklch(70.5% 0.209 60.849);
-  --color-fd-diff-remove: rgba(200, 10, 100, 0.12);
-  --color-fd-diff-remove-symbol: rgb(230, 10, 100);
-  --color-fd-diff-add: rgba(14, 180, 100, 0.1);
-  --color-fd-diff-add-symbol: rgb(10, 200, 100);
-}
+@import './shiki.css' layer(components);
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -155,6 +41,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-code: var(--code);
+  --color-code-foreground: var(--code-foreground);
+  --color-code-highlight: var(--code-highlight);
+  --color-code-number: var(--code-number);
 
   /* Spacing */
   --spacing-heading-height: 64px;
@@ -180,6 +70,10 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  --code: var(--card);
+  --code-foreground: var(--card-foreground);
+  --code-highlight: oklch(0.96 0 0);
+  --code-number: oklch(0.56 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -214,6 +108,10 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --code: var(--card);
+  --code-foreground: var(--surface-foreground);
+  --code-highlight: oklch(0.27 0 0);
+  --code-number: oklch(0.72 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -231,4 +129,113 @@
 
 @layer base {
   /* No base styles */
+}
+
+
+@layer components {
+  /* Fancy scrollbar styles */
+  .fancy-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(
+        in oklab,
+        var(--muted-foreground) 40%,
+        transparent
+      )
+      transparent;
+  }
+
+  .fancy-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .fancy-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  .fancy-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+  }
+
+  .fancy-scroll::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
+    background-clip: padding-box;
+  }
+
+  .fancy-scroll::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Enhanced pre element styling */
+  .fancy-scroll > pre {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(
+        in oklab,
+        var(--muted-foreground) 40%,
+        transparent
+      )
+      transparent;
+  }
+
+  .fancy-scroll > pre::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .fancy-scroll > pre::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  .fancy-scroll > pre::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+  }
+
+  .fancy-scroll > pre::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
+    background-clip: padding-box;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar-track {
+    display: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar-thumb {
+    display: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar-thumb:hover {
+    display: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar-corner {
+    display: none;
+  }
+}
+
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--card) !important;
+  /* Optional, if you also want font styles */
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }

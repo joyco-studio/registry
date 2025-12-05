@@ -55,10 +55,7 @@ interface ScrollAreaRootProps extends React.ComponentProps<'div'> {
  * </ScrollArea.Root>
  * ```
  */
-export const Root = React.forwardRef<
-  HTMLDivElement,
-  ScrollAreaRootProps
->(
+export const Root = React.forwardRef<HTMLDivElement, ScrollAreaRootProps>(
   (
     {
       className,
@@ -106,20 +103,16 @@ export const Root = React.forwardRef<
       }
     }, [orientation])
 
-    // scroll event, resize observer, and mutation observer
     React.useEffect(() => {
       const el = scrollRef.current
       if (!el) return
 
-      // scroll event handler` (detects the scroll event)
       const handleScroll = () => requestAnimationFrame(update)
       el.addEventListener('scroll', handleScroll, { passive: true })
 
-      // resize observer (detects when the container size changes)
       const ro = new ResizeObserver(update)
       ro.observe(el)
 
-      // mutation observer (detects when the children of the container change)
       const mo = new MutationObserver(update)
       mo.observe(el, { childList: true })
 
@@ -144,7 +137,6 @@ export const Root = React.forwardRef<
       [hasScroll, orientation]
     )
 
-    // Common shadow classes
     const shadowBaseClasses =
       'pointer-events-none absolute z-20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300 ease-out'
 
@@ -153,7 +145,7 @@ export const Root = React.forwardRef<
         ? [
             {
               present: hasScrollTop,
-              position: 'inset-x-0 top-0 h-8',
+              position: 'left-0 top-0 right-2 h-8',
               slide:
                 'data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2',
               gradient:
@@ -162,7 +154,7 @@ export const Root = React.forwardRef<
             },
             {
               present: hasScrollBottom,
-              position: 'inset-x-0 bottom-0 h-8',
+              position: 'left-0 bottom-0 right-2 h-8',
               slide:
                 'data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2',
               gradient:
@@ -173,7 +165,7 @@ export const Root = React.forwardRef<
         : [
             {
               present: hasScrollLeft,
-              position: 'inset-y-0 left-0 w-8',
+              position: 'inset-y-0 left-0 bottom-2 w-8',
               slide:
                 'data-[state=closed]:slide-out-to-left-2 data-[state=open]:slide-in-from-left-2',
               gradient:
@@ -182,7 +174,7 @@ export const Root = React.forwardRef<
             },
             {
               present: hasScrollRight,
-              position: 'inset-y-0 right-0 w-8',
+              position: 'inset-y-0 right-0 bottom-2 w-8',
               slide:
                 'data-[state=closed]:slide-out-to-right-2 data-[state=open]:slide-in-from-right-2',
               gradient:
@@ -251,40 +243,39 @@ type ScrollAreaContentProps = React.ComponentProps<'div'>
  *   <div>Content here</div>
  * </ScrollArea.Content>
  */
-export const Content = React.forwardRef<
-  HTMLDivElement,
-  ScrollAreaContentProps
->(({ className, children, ...props }, ref) => {
-  const { scrollRef, orientation } = useScrollAreaContext()
+export const Content = React.forwardRef<HTMLDivElement, ScrollAreaContentProps>(
+  ({ className, children, ...props }, ref) => {
+    const { scrollRef, orientation } = useScrollAreaContext()
 
-  const combinedRef = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      scrollRef.current = node
-      if (typeof ref === 'function') ref(node)
-      else if (ref)
-        (ref as React.RefObject<HTMLDivElement | null>).current = node
-    },
-    [ref, scrollRef]
-  )
+    const combinedRef = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        scrollRef.current = node
+        if (typeof ref === 'function') ref(node)
+        else if (ref)
+          (ref as React.RefObject<HTMLDivElement | null>).current = node
+      },
+      [ref, scrollRef]
+    )
 
-  const overflowClasses =
-    orientation === 'horizontal'
-      ? 'overflow-x-auto overflow-y-hidden'
-      : 'overflow-y-auto h-full'
+    const overflowClasses =
+      orientation === 'horizontal'
+        ? 'overflow-x-auto overflow-y-hidden'
+        : 'overflow-y-auto h-full'
 
-  return (
-    <div
-      ref={combinedRef}
-      className={cn(
-        '[scrollbar-color:hsl(0_0%_50%)] [scrollbar-gutter:stable] [scrollbar-width:thin]',
-        overflowClasses,
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-})
+    return (
+      <div
+        ref={combinedRef}
+        className={cn(
+          '[scrollbar-color:hsl(0_0%_50%)] [scrollbar-gutter:stable] [scrollbar-width:thin]',
+          overflowClasses,
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  }
+)
 
 Content.displayName = 'ScrollAreaContent'

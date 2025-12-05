@@ -1,4 +1,4 @@
-import './globals.css'
+import './styles/globals.css'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { RootProvider } from 'fumadocs-ui/provider/next'
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex min-h-screen flex-1 flex-col">
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
