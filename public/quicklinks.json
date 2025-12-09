@@ -2,6 +2,7 @@
   { "name": "Desmos", "link": "https://www.desmos.com/calculator" },
   { "name": "Vercel", "link": "https://vercel.com" },
   { "name": "Easings", "link": "https://www.easing.dev/" },
+  { "name": "GSAP Easings", "link": "https://gsap.com/docs/v3/Eases/" },
   { "name": "Claude", "link": "https://claude.ai/new" },
   { "name": "ChatGPT", "link": "https://chatgpt.com/" },
   { "name": "Linear", "link": "linear.app" },
