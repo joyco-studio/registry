@@ -7,12 +7,16 @@ import { CodeBlockCommand } from './components/code-block-cmd'
 import { FileCodeblock } from './components/code-source'
 import { CopyButton } from './components/copy-button'
 import { codeClasses } from './lib/shiki'
+import Image from 'next/image'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
+    Image: ({ className, alt, ...props }: React.ComponentProps<typeof Image>) => (
+      <Image className={cn("rounded-lg", className)} alt={alt} {...props} />
+    ),
     Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => {
       return <Tabs className={cn('relative w-full', className)} {...props} />
     },
