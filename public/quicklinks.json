@@ -3,10 +3,8 @@
   { "name": "Vercel", "link": "https://vercel.com" },
   { "name": "Easings", "link": "https://www.easing.dev/" },
   { "name": "Claude", "link": "https://claude.ai/new" },
+  { "name": "ChatGPT", "link": "https://chatgpt.com/" },
   { "name": "Linear", "link": "linear.app" },
-  { "name": "Youtube", "link": "youtube.com" },
-  { "name": "Lightpicker", "link": "https://lightpicker.vercel.app/" },
-  { "name": "Twitter", "link": "https://x.com" },
   { "name": "Shadcn", "link": "https://ui.shadcn.com/docs/components" },
   {
     "name": "Registry",
