@@ -4,15 +4,15 @@ import { CodeTabs } from '@/components/code-tabs'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from './lib/utils'
 import { CodeBlockCommand } from './components/code-block-cmd'
-import { CodeBlock } from './components/code-block'
+import { FileCodeblock } from './components/code-source'
+import { CopyButton } from './components/copy-button'
+import { codeClasses } from './lib/shiki'
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     CodeTabs: CodeTabs,
-    pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
-      return <pre className={cn('relative w-full', className)} {...props} />
-    },
+    FileCodeblock: FileCodeblock,
     Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => {
       return <Tabs className={cn('relative w-full', className)} {...props} />
     },
@@ -57,6 +57,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ),
     code: ({
       className,
+      __raw__,
       __npm__,
       __yarn__,
       __pnpm__,
@@ -96,10 +97,18 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         )
       }
 
-      // Default codeblock.
       return (
-        <CodeBlock className={className} __raw__={props.__raw__} {...props} />
+        <>
+          <code className='not-prose' {...props} />
+          {__raw__ && <CopyButton value={__raw__} />}
+        </>
       )
+    },
+    figure: ({ className, ...props }: React.ComponentProps<'figure'>) => {
+      return <figure className={cn("not-prose", className)} {...props} />
+    },
+    pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
+      return <pre className={cn(codeClasses.pre, className)} {...props} />
     },
     ...components,
   }
