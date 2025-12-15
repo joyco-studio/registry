@@ -1,4 +1,5 @@
 'use client'
+
 import { Marquee } from '@/registry/joyco/blocks/marquee'
 import { IBMLogo, NasaLogo, SpaceXLogo, ValveLogo } from '@/components/logos'
 

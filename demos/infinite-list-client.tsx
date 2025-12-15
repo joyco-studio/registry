@@ -46,7 +46,7 @@ export function PokemonInfiniteListClient({
   }
 
   return (
-    <div className="not-prose relative h-[500px] w-full overflow-auto">
+    <div className="relative h-[500px] w-full overflow-auto">
       <div className="bg-background/90 border-border sticky top-4 right-8 z-10 ml-auto w-fit rounded-lg border px-3 py-2 font-mono text-xs">
         DISPLAYED: {Math.min(list.displayLimit, pokemon.length)} | LOADED:{' '}
         {pokemon.length}
