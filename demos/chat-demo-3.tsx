@@ -78,7 +78,7 @@ export function ChatDemo() {
           </ChatMessages>
 
           <div className="sticky bottom-0 z-10 mt-auto pb-4">
-            <ChatInputArea className="dark:bg-card rounded-lg">
+            <ChatInputArea className="dark:bg-card rounded-lg has-[[data-slot=input-group-control]:focus-visible]:border-joyco-blue has-[[data-slot=input-group-control]:focus-visible]:ring-joyco-blue/50">
               <ChatInputField
                 multiline
                 placeholder="Joyco says..."
