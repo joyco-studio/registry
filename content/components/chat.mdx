@@ -50,12 +50,8 @@ function App() {
                 alt={message.name}
                 fallback={message.name?.charAt(0)}
               />
-              <ChatMessageBubble variant={message.role}>
-                {message.content}
-              </ChatMessageBubble>
-              <ChatMessageTime dateTime={message.timestamp.toISOString()}>
-                {message.timestamp.toLocaleTimeString()}
-              </ChatMessageTime>
+              <ChatMessageBubble>{message.content}</ChatMessageBubble>
+              <ChatMessageTime dateTime={message.timestamp} />
             </ChatMessageRow>
           ))}
         </ChatMessages>
