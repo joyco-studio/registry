@@ -71,7 +71,7 @@ const initialChat: Chat[] = [
     type: 'message',
     id: '3',
     avatar: JOYBOY_AVATAR,
-    name: 'JOYCO',
+    name: '__JOYBOY__',
     content: 'You are absolutely right!',
     role: 'peer',
     timestamp: new Date(Date.now() - 1000 * 60 * 5),
