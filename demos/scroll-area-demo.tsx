@@ -1,6 +1,9 @@
 'use client'
 
-import * as ScrollArea from '@/registry/joyco/blocks/scroll-area'
+import {
+  ScrollAreaViewport,
+  ScrollAreaContent,
+} from '@/registry/joyco/blocks/scroll-area'
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '../components/ui/button'
 import {
@@ -75,12 +78,12 @@ function ScrollAreaDemo() {
 
   return (
     <div className="mx-auto w-full max-w-md p-10">
-      <ScrollArea.Root
+      <ScrollAreaViewport
         className="h-100 w-full"
         topShadowGradient="bg-linear-to-b from-card to-transparent"
         bottomShadowGradient="bg-linear-to-t from-card to-transparent"
       >
-        <ScrollArea.Content ref={scrollRef} className="fancy-scroll space-y-2">
+        <ScrollAreaContent ref={scrollRef} className="fancy-scroll space-y-2">
           {items.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center text-center">
               <div className="bg-muted mb-3 rounded-full p-3">
@@ -118,8 +121,8 @@ function ScrollAreaDemo() {
               )
             })
           )}
-        </ScrollArea.Content>
-      </ScrollArea.Root>
+        </ScrollAreaContent>
+      </ScrollAreaViewport>
       <div className="mt-4 w-full">
         <Button className="w-full" onClick={addNotification}>
           <Plus className="h-4 w-4" />
