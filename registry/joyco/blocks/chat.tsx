@@ -191,7 +191,7 @@ export function ChatViewport({
     <div
       ref={viewportRef}
       className={cn(
-        'bg-muted/40 border-border flex flex-col overflow-y-auto rounded-xl border px-4',
+        'bg-card border-border flex flex-col overflow-y-auto rounded-xl border px-4',
         className
       )}
       {...props}
@@ -296,7 +296,7 @@ export function ChatMessageBubble({
         /* Self */
         'group-data-[variant=self]/message-row:bg-primary group-data-[variant=self]/message-row:text-primary-foreground',
         /* Peer */
-        'group-data-[variant=peer]/message-row:bg-muted group-data-[variant=peer]/message-row:text-foreground',
+        'group-data-[variant=peer]/message-row:bg-primary/10 group-data-[variant=peer]/message-row:text-foreground',
         /* System */
         'group-data-[variant=system]/message-row:text-muted-foreground group-data-[variant=system]/message-row:px-1',
         className
