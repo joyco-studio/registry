@@ -120,7 +120,8 @@
         "react-use-measure"
       ],
       "registryDependencies": [
-        "input-group"
+        "input-group",
+        "avatar"
       ]
     }
   ]
