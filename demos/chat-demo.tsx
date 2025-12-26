@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import {
+  Chat,
   ChatInputArea,
   ChatInputField,
   ChatInputSubmit,
@@ -10,7 +11,6 @@ import {
   ChatMessageRow,
   ChatMessageBubble,
   ChatMessageTime,
-  Chat,
   ChatMessageAvatar,
 } from '@/registry/joyco/blocks/chat'
 
@@ -37,6 +37,7 @@ type Message = {
   id: string
   avatar?: string
   name?: string
+  fallback?: string
   content: string
   role: 'self' | 'peer' | 'system'
   timestamp: Date
@@ -54,6 +55,7 @@ const initialChat: Chat[] = [
     id: '1',
     avatar: MTPRZ_AVATAR,
     name: 'You',
+    fallback: 'M',
     content: "Dud, what's wrong, the build is not passing...",
     role: 'self',
     timestamp: new Date(Date.now() - 1000 * 60 * 4),
@@ -62,6 +64,7 @@ const initialChat: Chat[] = [
     type: 'message',
     id: '2',
     avatar: FABROOS_AVATAR,
+    fallback: 'F',
     name: 'Fabroos',
     content: 'Why is it all full of comments and emojis?!',
     role: 'peer',
@@ -72,6 +75,7 @@ const initialChat: Chat[] = [
     id: '3',
     avatar: JOYBOY_AVATAR,
     name: '__JOYBOY__',
+    fallback: 'J',
     content: 'You are absolutely right!',
     role: 'peer',
     timestamp: new Date(Date.now() - 1000 * 60 * 5),
@@ -121,6 +125,7 @@ export function ChatDemo() {
           avatar: JOYCO_AVATAR,
           name: 'Assistant',
           content: '',
+          fallback: 'A',
           role: 'system',
           timestamp: assistantTimestamp,
         },
