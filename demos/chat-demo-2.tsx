@@ -32,7 +32,7 @@ const initialChat: Message[] = [
   {
     type: 'message',
     id: '2',
-    content: 'So no one knows am I?',
+    content: 'So nobody knows who I am?',
     role: 'peer',
     timestamp: new Date('2025-12-26T02:01:00.000Z'),
   },

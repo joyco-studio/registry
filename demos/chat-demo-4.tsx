@@ -30,21 +30,21 @@ const initialChat: Message[] = [
     id: '1',
     content: 'DUD, I HAVE SOMETHING TO TELL YOU',
     role: 'peer',
-    timestamp: new Date("2025-12-26T04:00:00.000Z"),
+    timestamp: new Date('2025-12-26T04:00:00.000Z'),
   },
   {
     type: 'message',
     id: '2',
     content: 'what is it?',
     role: 'self',
-    timestamp: new Date("2025-12-26T04:01:00.000Z"),
+    timestamp: new Date('2025-12-26T04:01:00.000Z'),
   },
   {
     type: 'message',
     id: '3',
     content: 'gimme 5',
     role: 'peer',
-    timestamp: new Date("2025-12-26T04:03:00.000Z"),
+    timestamp: new Date('2025-12-26T04:03:00.000Z'),
   },
 ]
 
@@ -67,21 +67,14 @@ export function ChatDemo() {
 
   return (
     <Chat onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--radius:0] [--primary:var(--color-mustard-yellow)] [--ring:var(--color-mustard-yellow)]">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 [--primary:var(--color-mustard-yellow)] [--radius:0] [--ring:var(--color-mustard-yellow)]">
         <ChatViewport className="h-96">
           <ChatMessages className="w-full py-3">
             {chat.map((message, idx) => (
               <ChatMessageRow key={message.id} variant={message.role}>
-                <ChatMessageBubble>
-                  {message.content}
-                </ChatMessageBubble>
+                <ChatMessageBubble>{message.content}</ChatMessageBubble>
                 <ChatMessageAddon align="inline">
-                  <Button
-                    variant="secondary"
-                    className="rounded-none"
-                    size="icon-sm"
-                    title="React"
-                  >
+                  <Button variant="secondary" size="icon-sm" title="React">
                     {message.role === 'self' ? (
                       <EllipsisVertical />
                     ) : (
