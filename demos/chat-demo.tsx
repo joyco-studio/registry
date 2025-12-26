@@ -59,7 +59,7 @@ const initialChat: Chat[] = [
     fallback: 'M',
     content: "Dud, what's wrong, the build is not passing...",
     role: 'self',
-    timestamp: new Date(Date.now() - 1000 * 60 * 4),
+    timestamp: new Date("2025-12-26T01:00:00.000Z"),
   },
   {
     type: 'message',
@@ -69,7 +69,7 @@ const initialChat: Chat[] = [
     name: 'Fabroos',
     content: 'Why is it all full of comments and emojis?!',
     role: 'peer',
-    timestamp: new Date(Date.now() - 1000 * 60 * 3),
+    timestamp: new Date("2025-12-26T01:01:00.000Z"),
   },
   {
     type: 'message',
@@ -79,7 +79,7 @@ const initialChat: Chat[] = [
     fallback: 'J',
     content: 'You are absolutely right!',
     role: 'peer',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    timestamp: new Date("2025-12-26T01:03:00.000Z"),
   },
   { type: 'event', id: '4', content: '__JOYBOY__ left the group' },
 ]

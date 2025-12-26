@@ -30,21 +30,21 @@ const initialChat: Message[] = [
     id: '1',
     content: 'DUD, I HAVE SOMETHING TO TELL YOU',
     role: 'peer',
-    timestamp: new Date(Date.now() - 1000 * 60 * 4),
+    timestamp: new Date("2025-12-26T04:00:00.000Z"),
   },
   {
     type: 'message',
     id: '2',
     content: 'what is it?',
     role: 'self',
-    timestamp: new Date(Date.now() - 1000 * 60 * 3),
+    timestamp: new Date("2025-12-26T04:01:00.000Z"),
   },
   {
     type: 'message',
     id: '3',
     content: 'gimme 5',
     role: 'peer',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    timestamp: new Date("2025-12-26T04:03:00.000Z"),
   },
 ]
 
