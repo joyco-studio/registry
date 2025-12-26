@@ -32,7 +32,7 @@ export function DownloadFileButton({
       variant="ghost"
       size="sm"
       className={cn(
-        'dark:hover:bg-accent font-normal px-2! h-7 opacity-70 hover:opacity-100',
+        'dark:hover:bg-accent h-7 px-2! font-normal opacity-70 hover:opacity-100',
         className
       )}
       onClick={downloadFile}
@@ -42,4 +42,3 @@ export function DownloadFileButton({
     </Button>
   )
 }
-

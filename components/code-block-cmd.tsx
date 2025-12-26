@@ -32,7 +32,10 @@ export function CodeBlockCommand({
   const command = tabs[packageManager]
 
   return (
-    <div data-slot="command-block" className="not-prose bg-card overflow-x-auto rounded-lg">
+    <div
+      data-slot="command-block"
+      className="not-prose bg-card overflow-x-auto rounded-lg"
+    >
       <Tabs
         value={packageManager}
         className="gap-0"
@@ -44,7 +47,7 @@ export function CodeBlockCommand({
         }}
       >
         <div className="border-border flex items-center gap-2 border-b px-3 py-2">
-          <TabsList className="rounded-none bg-transparent p-0 h-auto">
+          <TabsList className="h-auto rounded-none bg-transparent p-0">
             {Object.entries(tabs).map(([key]) => {
               return (
                 <TabsTrigger
@@ -61,7 +64,11 @@ export function CodeBlockCommand({
         <div className="no-scrollbar overflow-x-auto bg-white dark:bg-black">
           {Object.entries(tabs).map(([key, value]) => {
             return (
-              <TabsContent key={key} value={key} className="mt-0 w-max px-4 py-3.5">
+              <TabsContent
+                key={key}
+                value={key}
+                className="mt-0 w-max px-4 py-3.5"
+              >
                 <pre>
                   <code
                     className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
@@ -75,13 +82,7 @@ export function CodeBlockCommand({
           })}
         </div>
       </Tabs>
-      {command && (
-        <CopyButton
-          value={command}
-          className="top-2"
-          forceVisible
-        />
-      )}
+      {command && <CopyButton value={command} className="top-2" forceVisible />}
     </div>
   )
 }

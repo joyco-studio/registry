@@ -34,7 +34,7 @@ export function CopyButton({
       size="icon"
       variant="ghost"
       className={cn(
-        'absolute top-[0.725rem] right-3 z-10 size-7 dark:hover:bg-accent',
+        'dark:hover:bg-accent absolute top-[0.725rem] right-3 z-10 size-7',
         forceVisible
           ? 'opacity-70 hover:opacity-100'
           : 'opacity-0 transition-opacity group-hover/code:opacity-100 hover:opacity-100 focus-visible:opacity-100',

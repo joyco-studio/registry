@@ -4,10 +4,7 @@ import { useState } from 'react'
 import { DownloadIcon } from 'lucide-react'
 import { Area, AreaChart, XAxis, YAxis } from 'recharts'
 
-import {
-  ChartConfig,
-  ChartContainer,
-} from '@/components/ui/chart'
+import { ChartConfig, ChartContainer } from '@/components/ui/chart'
 
 export interface DownloadStats {
   total: number
@@ -37,7 +34,10 @@ function formatDay(dateStr: string): string {
 }
 
 export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
-  const [hoveredData, setHoveredData] = useState<{ day: string; downloads: number } | null>(null)
+  const [hoveredData, setHoveredData] = useState<{
+    day: string
+    downloads: number
+  } | null>(null)
 
   if (!data || data.weekly.length === 0) {
     return null
@@ -64,7 +64,9 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
               <span className="text-fd-foreground text-lg font-semibold tabular-nums">
                 {formatNumber(hoveredData.downloads)}
               </span>
-              <span className="text-fd-muted-foreground text-xs">{hoveredData.day}</span>
+              <span className="text-fd-muted-foreground text-xs">
+                {hoveredData.day}
+              </span>
             </>
           ) : (
             <>
@@ -89,8 +91,16 @@ export function WeeklyDownloads({ data }: { data: DownloadStats | null }) {
           >
             <defs>
               <linearGradient id="fillDownloads" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--color-downloads)" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="var(--color-downloads)" stopOpacity={0.05} />
+                <stop
+                  offset="0%"
+                  stopColor="var(--color-downloads)"
+                  stopOpacity={0.3}
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--color-downloads)"
+                  stopOpacity={0.05}
+                />
               </linearGradient>
             </defs>
             <XAxis dataKey="day" hide />

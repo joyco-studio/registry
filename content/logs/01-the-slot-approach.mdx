@@ -17,10 +17,7 @@ export function CardLink({
   className?: string
 }) {
   return (
-    <Card
-      className={cn("hover:bg-accent/50", className)}
-      asChild
-    >
+    <Card className={cn('hover:bg-accent/50', className)} asChild>
       <Link href={href}>
         <div>
           {title}
@@ -118,7 +115,7 @@ As long as your root element has a `className` tied to it, you’ll be able to t
 This means “target all the `card-description` slots inside this `<CardLink />` scope”
 
 ```css showLineNumbers
-& [data-slot="card-description"] {
+& [data-slot='card-description'] {
   opacity: 50%;
 }
 ```

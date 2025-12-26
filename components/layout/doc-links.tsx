@@ -22,17 +22,15 @@ export function DocLinks({
     <div
       className={cn('not-prose my-0 flex flex-wrap gap-x-2 gap-y-1', className)}
     >
-      {
-        links.map((link) => (
-          <Button variant="outline" size="sm" key={link.href} asChild>
-            <Link href={link.href} target="_blank" rel="noopener noreferrer">
-              <BookOpenText className="size-4" />
-              {link.label}
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </Button>
-        ))
-      }
+      {links.map((link) => (
+        <Button variant="outline" size="sm" key={link.href} asChild>
+          <Link href={link.href} target="_blank" rel="noopener noreferrer">
+            <BookOpenText className="size-4" />
+            {link.label}
+            <ArrowUpRight className="size-3.5" />
+          </Link>
+        </Button>
+      ))}
     </div>
   )
 }

@@ -5,7 +5,11 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { GripVertical, Tablet, Smartphone } from 'lucide-react'
 import { PatternOverlay } from './pattern-overlay'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface ResizableIframeProps {
   /** The URL for the iframe */
@@ -202,12 +206,9 @@ export function ResizableIframe({
                 <Smartphone className="size-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
-              Mobile View
-            </TooltipContent>
+            <TooltipContent>Mobile View</TooltipContent>
           </Tooltip>
 
-          
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -224,9 +225,7 @@ export function ResizableIframe({
                 <Tablet className="size-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent>
-              Tablet View
-            </TooltipContent>
+            <TooltipContent>Tablet View</TooltipContent>
           </Tooltip>
         </div>
       </div>

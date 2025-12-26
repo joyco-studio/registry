@@ -326,7 +326,7 @@ export function ChatMessageAddon({
         'flex items-center gap-2',
         align === 'inline'
           ? '[grid-area:addon-inline] group-not-data-[variant=self]/message-row:ml-2 group-data-[variant=self]/message-row:mr-2'
-          : '[grid-area:addon-block] mt-2',
+          : 'mt-2 [grid-area:addon-block]',
         className
       )}
       {...props}

@@ -1,0 +1,155 @@
+---
+title: HLS Video Player
+description: A headless HLS video player component with native HLS detection and error handling.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="hls-video-player-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://registry.joyco.studio/r/hls-video-player.json
+```
+
+## Features
+
+- **Headless** - No UI included, meant to be connected to your custom controls
+- **Native HLS detection** - Automatically uses native HLS on Safari/iOS, falls back to HLS.js elsewhere
+- **Lazy loading** - HLS.js is only loaded when needed (not on native HLS browsers)
+- **Error handling** - Built-in error recovery for network and media errors
+- **Quality control** - Access to quality levels and manual switching
+- **Aspect ratio** - Maintains aspect ratio via mandatory width/height props
+
+## Usage
+
+```tsx showLineNumbers
+import {
+  HLSVideoPlayer,
+  type HLSVideoPlayerRef,
+} from '@/components/hls-video-player'
+
+function App() {
+  const playerRef = useRef<HLSVideoPlayerRef>(null)
+
+  return (
+    <HLSVideoPlayer
+      ref={playerRef}
+      src="https://example.com/stream.m3u8"
+      width={1920}
+      height={1080}
+      onReady={() => console.log('Ready to play')}
+      onHlsError={(error) => console.error(error)}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop            | Type                                  | Required | Description                                        |
+| --------------- | ------------------------------------- | -------- | -------------------------------------------------- |
+| `src`           | `string`                              | ✓        | The HLS stream URL (.m3u8) or regular video source |
+| `width`         | `number`                              | ✓        | Video width (used for aspect ratio)                |
+| `height`        | `number`                              | ✓        | Video height (used for aspect ratio)               |
+| `debug`         | `boolean`                             |          | Enable debug logging                               |
+| `onHlsError`    | `(error: HLSVideoError) => void`      |          | HLS error callback                                 |
+| `onVideoError`  | `ReactEventHandler<HTMLVideoElement>` |          | Native video error callback                        |
+| `onReady`       | `() => void`                          |          | Called when video is ready to play                 |
+| `onHlsLoaded`   | `() => void`                          |          | Called when HLS.js library is loaded               |
+| `startTime`     | `number`                              |          | Start playback at specific time (seconds)          |
+| `maxResolution` | `number`                              |          | Cap max resolution (e.g., 720, 1080)               |
+| `minResolution` | `number`                              |          | Set minimum resolution                             |
+
+Plus all standard HTML video attributes (`autoPlay`, `muted`, `loop`, `playsInline`, etc.)
+
+## Ref API
+
+Access the player ref for programmatic control:
+
+```tsx showLineNumbers
+const playerRef = useRef<HLSVideoPlayerRef>(null)
+
+// Access the underlying video element
+playerRef.current?.video?.play()
+playerRef.current?.video?.pause()
+
+// Check if using HLS.js (vs native)
+const isUsingHls = playerRef.current?.isUsingHls
+
+// Get available quality levels (HLS.js only)
+const levels = playerRef.current?.levels
+// [{ height: 1080, width: 1920, bitrate: 5000000 }, ...]
+
+// Set quality level manually (-1 for auto)
+playerRef.current?.setQuality(2) // third quality level
+playerRef.current?.setQuality(-1) // auto
+
+// Retry after error
+playerRef.current?.retry()
+```
+
+## Error Handling
+
+```tsx showLineNumbers
+import { type HLSVideoError } from '@/components/hls-video-player'
+
+function App() {
+  const handleError = (error: HLSVideoError) => {
+    // error.type: 'network' | 'media' | 'fatal' | 'other'
+    // error.message: Human readable message
+    // error.fatal: Whether playback can continue
+    // error.details: Additional error details
+
+    if (error.fatal) {
+      // Show error UI, offer retry
+    }
+  }
+
+  return (
+    <HLSVideoPlayer
+      src="..."
+      width={1920}
+      height={1080}
+      onHlsError={handleError}
+    />
+  )
+}
+```
+
+## Custom Controls Example
+
+```tsx showLineNumbers
+function VideoWithControls() {
+  const playerRef = useRef<HLSVideoPlayerRef>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  const togglePlay = () => {
+    const video = playerRef.current?.video
+    if (!video) return
+
+    if (video.paused) {
+      video.play()
+      setIsPlaying(true)
+    } else {
+      video.pause()
+      setIsPlaying(false)
+    }
+  }
+
+  return (
+    <div className="relative">
+      <HLSVideoPlayer
+        ref={playerRef}
+        src="https://example.com/stream.m3u8"
+        width={1920}
+        height={1080}
+        className="w-full"
+      />
+      <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
+    </div>
+  )
+}
+```

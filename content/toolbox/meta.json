@@ -1,8 +1,3 @@
 {
-  "pages": [
-    "quick-links",
-    "settings",
-    "tailwind",
-    "scripts"
-  ]
+  "pages": ["quick-links", "settings", "tailwind", "scripts"]
 }

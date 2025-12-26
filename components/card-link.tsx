@@ -30,7 +30,7 @@ export function CardLink({
         <CardHeader>
           <CardTitle className="flex items-center gap-1 [&>svg]:size-4 [&>svg]:stroke-3">
             {title}
-            <ArrowRightIcon className="transition-transform group-hocus/card-title:translate-x-1" />
+            <ArrowRightIcon className="group-hocus/card-title:translate-x-1 transition-transform" />
           </CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
