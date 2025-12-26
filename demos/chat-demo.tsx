@@ -13,6 +13,7 @@ import {
   ChatMessageTime,
   ChatMessageAvatar,
 } from '@/registry/joyco/blocks/chat'
+import { ArrowUpIcon, Square } from 'lucide-react'
 
 const MTPRZ_AVATAR = '/static/matiasperz.jpg'
 const JOYCO_AVATAR = '/static/joyco.jpg'
@@ -94,7 +95,7 @@ export function ChatDemo() {
     []
   )
 
-  const { stream, isStreaming } = useStreamToken(updateMessageContent)
+  const { stream, abort, isStreaming } = useStreamToken(updateMessageContent)
 
   const handleSubmit = (msg: string) => {
     if (isStreaming) return
@@ -177,7 +178,24 @@ export function ChatDemo() {
               setInput(e.target.value)
             }
           />
-          <ChatInputSubmit disabled={!input.trim()} loading={isStreaming} />
+          <ChatInputSubmit
+            onClick={(e) => {
+              if (isStreaming) {
+                e.preventDefault()
+                abort()
+              }
+            }}
+            disabled={!input.trim() && !isStreaming}
+          >
+            {isStreaming ? (
+              <Square className="size-[1em] fill-current" />
+            ) : (
+              <ArrowUpIcon className="size-[1.2em]" />
+            )}
+            <span className="sr-only">
+              {isStreaming ? 'Stop streaming' : 'Send'}
+            </span>
+          </ChatInputSubmit>
         </ChatInputArea>
       </div>
     </Chat>
@@ -217,6 +235,13 @@ function useStreamToken(
     [onUpdate, minDelay, maxDelay]
   )
 
+  const abort = React.useCallback(() => {
+    setIsStreaming(false)
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
   React.useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -225,7 +250,7 @@ function useStreamToken(
     }
   }, [])
 
-  return { stream, isStreaming }
+  return { stream, abort, isStreaming }
 }
 
 export default ChatDemo

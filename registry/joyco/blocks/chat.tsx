@@ -466,10 +466,10 @@ export function ChatInputField({
 
 export function ChatInputSubmit({
   className,
-  loading,
   disabled,
+  children,
   ...props
-}: React.ComponentProps<typeof InputGroupButton> & { loading?: boolean }) {
+}: React.ComponentProps<typeof InputGroupButton>) {
   return (
     <InputGroupAddon
       align="inline-end"
@@ -480,15 +480,15 @@ export function ChatInputSubmit({
         type="submit"
         className="size-[calc(var(--leading-normal)*1em+var(--spacing)*3)] rounded-full"
         size="icon-sm"
-        disabled={disabled || loading}
+        disabled={disabled}
         {...props}
       >
-        {loading ? (
-          <Loader2Icon className="size-[1.2em] animate-spin" />
-        ) : (
-          <ArrowUpIcon className="size-[1.2em]" />
+        {children ?? (
+          <>
+            <ArrowUpIcon className="size-[1.2em]" />
+            <span className="sr-only">Send</span>
+          </>
         )}
-        <span className="sr-only">Send</span>
       </InputGroupButton>
     </InputGroupAddon>
   )

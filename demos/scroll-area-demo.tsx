@@ -5,7 +5,7 @@ import {
   ScrollAreaContent,
 } from '@/registry/joyco/blocks/scroll-area'
 import { useState, useRef, useEffect } from 'react'
-import { Button } from '../components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Plus,
   X,

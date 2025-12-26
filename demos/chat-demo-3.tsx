@@ -88,7 +88,7 @@ export function ChatDemo() {
                 }
               />
               <ChatInputSubmit
-                className="*:[button]:bg-joyco-blue *:[button]:rounded-sm *:[button]:text-white"
+                className="*:[button]:bg-joyco-blue *:[button]:hover:bg-[color-mix(in_oklch,var(--color-joyco-blue)_90%,white)] *:[button]:rounded-sm *:[button]:text-white"
                 disabled={!input.trim()}
               />
             </ChatInputArea>
