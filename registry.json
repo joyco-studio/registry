@@ -111,7 +111,7 @@
           "type": "registry:component"
         },
         {
-          "path": "hooks/use-interruption.tsx",
+          "path": "hooks/use-interruption.ts",
           "type": "registry:hook"
         }
       ],
