@@ -78,7 +78,6 @@ export function ChatDemo() {
 
         <ChatInputArea>
           <ChatInputField
-            multiline
             placeholder="Type... or not"
             value={input}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>

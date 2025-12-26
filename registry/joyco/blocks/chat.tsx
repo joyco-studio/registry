@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ArrowUpIcon, Loader2Icon } from 'lucide-react'
+import { ArrowUpIcon } from 'lucide-react'
 import debounce from 'debounce'
 import useMeasure from 'react-use-measure'
 
@@ -366,7 +366,7 @@ export function ChatInputArea({
 
     onSubmitContext?.(message)
 
-    React.startTransition(() => {
+    requestAnimationFrame(() => {
       scrollToBottom('smooth')
     })
   }
@@ -381,6 +381,7 @@ export function ChatInputArea({
         className={cn(
           'h-auto items-end rounded-3xl text-base leading-normal md:text-sm',
           '*:data-[slot=input-group-control]:py-3 *:data-[slot=input-group-control]:pl-6 *:data-[slot=input-group-control]:[font-size:inherit] *:data-[slot=input-group-control]:leading-[inherit]',
+          '[--input-area-height:calc(--spacing(6)+var(--leading-normal)*1em)]',
           className
         )}
         ref={inputRef}
@@ -400,14 +401,23 @@ function ChatMultilineInput({
     const textarea = textareaRef.current
     if (!textarea) return
 
-    const scrollToBottom = () => {
+    const supportsFieldSizing = CSS.supports('field-sizing', 'content')
+
+    const handleInput = () => {
+      if (!supportsFieldSizing) {
+        textarea.style.height = '0'
+        textarea.style.height = `${textarea.scrollHeight}px`
+      }
+
       textarea.scrollTop = textarea.scrollHeight
     }
 
-    textarea.addEventListener('input', scrollToBottom)
+    handleInput()
+
+    textarea.addEventListener('input', handleInput)
 
     return () => {
-      textarea.removeEventListener('input', scrollToBottom)
+      textarea.removeEventListener('input', handleInput)
     }
   }, [])
 
@@ -429,11 +439,11 @@ type InputProps = Omit<
   'multiline'
 >
 
-type ChatInputProps = { multiline: boolean } & (TextareaProps | InputProps)
+type ChatInputProps = { multiline?: boolean } & (TextareaProps | InputProps)
 
 export function ChatInputField({
   className,
-  multiline,
+  multiline = false,
   ...rest
 }: ChatInputProps) {
   const handleKeyDown = (
@@ -447,17 +457,38 @@ export function ChatInputField({
 
   if (multiline) {
     return (
-      <ChatMultilineInput
-        className={cn('field-sizing-content max-h-32 min-h-[1em]', className)}
-        onKeyDown={handleKeyDown}
-        {...(rest as TextareaProps)}
-      />
+      <>
+        <style>{
+          /* css */ `
+        @layer utilities {
+          .safe-field-sizing-content {
+            height: 0;
+          }
+
+          @supports (field-sizing: content) {
+            .safe-field-sizing-content {
+              field-sizing: content;
+              height: auto;
+            }
+          }
+        }
+      `
+        }</style>
+        <ChatMultilineInput
+          className={cn(
+            'safe-field-sizing-content max-h-32 min-h-(--input-area-height)',
+            className
+          )}
+          onKeyDown={handleKeyDown}
+          {...(rest as TextareaProps)}
+        />
+      </>
     )
   }
 
   return (
     <ChatSinglelineInput
-      className={cn('h-auto min-h-[1em]', className)}
+      className={cn('h-(--input-area-height)', className)}
       onKeyDown={handleKeyDown}
       {...(rest as InputProps)}
     />
