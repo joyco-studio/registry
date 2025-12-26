@@ -237,8 +237,8 @@ export function ChatMessageRow({
       className={cn(
         'group/message-row my-4 grid items-center',
         variant === 'self'
-          ? 'grid-cols-[minmax(0,1fr)_auto] justify-items-end [grid-template-areas:"message_avatar""addon_none"]'
-          : 'grid-cols-[auto_minmax(0,1fr)] justify-items-start [grid-template-areas:"avatar_message""none_addon"]',
+          ? 'grid-cols-[1fr_auto_auto] justify-items-end [grid-template-areas:"addon-inline_message_avatar""addon-block_addon-block_none"]'
+          : 'grid-cols-[auto_auto_1fr] justify-items-start [grid-template-areas:"avatar_message_addon-inline""none_addon-block_addon-block"]',
         className
       )}
       {...props}
@@ -292,13 +292,41 @@ export function ChatMessageBubble({
   return (
     <div
       className={cn(
-        'w-fit max-w-[min(--spacing(96),100%)] min-w-0 rounded-2xl text-sm wrap-break-word whitespace-pre-wrap [grid-area:message] group-not-data-[variant=system]/message-row:px-4 group-not-data-[variant=system]/message-row:py-2',
+        'w-fit max-w-56 min-w-0 rounded-2xl text-sm wrap-break-word whitespace-pre-wrap [grid-area:message] group-not-data-[variant=system]/message-row:px-4 group-not-data-[variant=system]/message-row:py-2',
         /* Self */
         'group-data-[variant=self]/message-row:bg-primary group-data-[variant=self]/message-row:text-primary-foreground',
         /* Peer */
         'group-data-[variant=peer]/message-row:bg-primary/10 group-data-[variant=peer]/message-row:text-foreground',
         /* System */
         'group-data-[variant=system]/message-row:text-muted-foreground group-data-[variant=system]/message-row:px-1',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * ChatMessageAddon
+ * -------------------------------------------------------------------------------------------------*/
+type ChatMessageAddonProps = React.ComponentProps<'div'> & {
+  align?: 'inline' | 'block'
+}
+
+export function ChatMessageAddon({
+  className,
+  align = 'block',
+  ...props
+}: ChatMessageAddonProps) {
+  return (
+    <div
+      data-slot="chat-message-addon"
+      data-align={align}
+      className={cn(
+        'flex items-center gap-2',
+        align === 'inline'
+          ? '[grid-area:addon-inline] group-not-data-[variant=self]/message-row:ml-2 group-data-[variant=self]/message-row:mr-2'
+          : '[grid-area:addon-block] mt-2',
         className
       )}
       {...props}
@@ -319,7 +347,9 @@ export function ChatMessageTime({
   return (
     <time
       className={cn(
-        'text-muted-foreground mt-2 text-xs [grid-area:addon]',
+        'text-muted-foreground text-xs',
+        /* Only place it at addon-block position if it's not being wrapped by an addon already */
+        '[&:not([data-slot="chat-message-addon"]_*)]:mt-2 [&:not([data-slot="chat-message-addon"]_*)]:[grid-area:addon-block]',
         className
       )}
       dateTime={dateTime.toISOString()}
