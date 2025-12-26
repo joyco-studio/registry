@@ -82,7 +82,7 @@ export function ChatDemo() {
                     )}
                   </Button>
                 </ChatMessageAddon>
-                <ChatMessageAddon className="" align="block">
+                <ChatMessageAddon align="block">
                   <ChatMessageTime dateTime={message.timestamp} />
                   {message.role === 'self' &&
                     (idx < 3 ? (
@@ -99,7 +99,7 @@ export function ChatDemo() {
             <ChatInputArea className="bg-card dark:bg-card rounded-none">
               <ChatInputField
                 multiline
-                placeholder="MONKEY CHAT..."
+                placeholder="Type your secret..."
                 value={input}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   setInput(e.target.value)
