@@ -22,9 +22,10 @@ type ChatMessageVariant = 'self' | 'peer' | 'system'
  * -------------------------------------------------------------------------------------------------*/
 
 type ChatContextValue = {
+  inputRef: React.RefObject<HTMLFormElement | null>
   viewportRef: React.RefObject<HTMLDivElement | null>
   scrollToBottom: (behavior?: ScrollBehavior) => void
-  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void
+  onSubmit?: (message: string) => void
   onViewportHeightChange: (height: number) => void
 }
 
@@ -43,7 +44,7 @@ function useChatContext() {
  * -------------------------------------------------------------------------------------------------*/
 
 type ChatProps = {
-  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void
+  onSubmit?: (message: string) => void
   bottomThreshold?: number
   children: React.ReactNode
 }
@@ -52,10 +53,12 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
   const [isAtBottom, setIsAtBottom] = React.useState(true)
   const { interruptedRef, interrupt } = useUserInterruption(200)
   const viewportRef = React.useRef<HTMLDivElement>(null)
+  const inputRef = React.useRef<HTMLFormElement>(null)
 
   const isAtBottomRef = React.useRef(true)
   const isScrollingToBottomRef = React.useRef(false)
-  const prevMessageContainerHeightRef = React.useRef(0)
+  const prevViewportHeightRef = React.useRef(0)
+  const prevInputHeightRef = React.useRef(0)
 
   React.useEffect(() => {
     isAtBottomRef.current = isAtBottom
@@ -120,29 +123,42 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
     (height: number) => {
       if (!isAtBottomRef.current) return
 
-      const currentMessageContainerHeight = height || 0
+      const viewportHeightChange = height - prevViewportHeightRef.current
 
-      const messageContainerHeightChange = Math.abs(
-        currentMessageContainerHeight - prevMessageContainerHeightRef.current
-      )
-
-      if (messageContainerHeightChange > 0) {
+      if (viewportHeightChange > 0) {
         scrollToBottom()
       }
 
-      prevMessageContainerHeightRef.current = currentMessageContainerHeight
+      prevViewportHeightRef.current = height
+    },
+    [scrollToBottom]
+  )
+
+  const onInputHeightChange = React.useCallback(
+    (height: number) => {
+      if (!isAtBottomRef.current) return
+
+      const inputHeightChange = height - prevInputHeightRef.current
+
+      if (inputHeightChange > 0) {
+        scrollToBottom()
+      }
+
+      prevInputHeightRef.current = height
     },
     [scrollToBottom]
   )
 
   const contextValue = React.useMemo<ChatContextValue>(
     () => ({
+      inputRef,
       viewportRef,
       scrollToBottom,
       onSubmit,
       onViewportHeightChange,
+      onInputHeightChange,
     }),
-    [scrollToBottom, onSubmit, onViewportHeightChange]
+    [scrollToBottom, onSubmit, onViewportHeightChange, onInputHeightChange]
   )
 
   return (
@@ -170,7 +186,7 @@ export function ChatViewport({
     <div
       ref={viewportRef}
       className={cn(
-        'bg-muted/40 border-border flex overflow-y-auto rounded-lg border px-4',
+        'bg-muted/40 border-border flex overflow-y-auto rounded-xl border px-4',
         className
       )}
       {...props}
@@ -214,8 +230,10 @@ export function ChatMessageRow({
     <div
       data-variant={variant}
       className={cn(
-        'my-3 flex flex-col gap-1',
-        variant === 'self' ? 'justify-end text-right items-end' : 'justify-start items-start',
+        'my-3 flex flex-col gap-2',
+        variant === 'self'
+          ? 'items-end justify-end'
+          : 'items-start justify-start',
         className
       )}
       {...props}
@@ -282,19 +300,34 @@ export function ChatInputArea({
   children,
   ...props
 }: ChatInputAreaProps) {
-  const { onSubmit: onSubmitContext, scrollToBottom } = useChatContext()
+  const {
+    inputRef,
+    onSubmit: onSubmitContext,
+    scrollToBottom,
+  } = useChatContext()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmitContext?.(e)
-    // Defer scroll until after React re-renders with the new message
-    requestAnimationFrame(() => {
+
+    const formData = new FormData(e.currentTarget)
+    const message = formData.get('message')?.toString()
+
+    if (!message) return
+
+    onSubmitContext?.(message)
+
+    React.startTransition(() => {
       scrollToBottom('smooth')
     })
   }
 
   return (
-    <form className="contents" onSubmit={handleSubmit} {...props}>
+    <form
+      className="contents"
+      onSubmit={handleSubmit}
+      {...props}
+      ref={inputRef}
+    >
       <InputGroup className={cn('h-auto items-end rounded-3xl', className)}>
         {children}
       </InputGroup>
@@ -322,13 +355,13 @@ function ChatMultilineInput({
     }
   }, [])
 
-  return <InputGroupTextarea ref={textareaRef} {...props} />
+  return <InputGroupTextarea name="message" ref={textareaRef} {...props} />
 }
 
 function ChatSinglelineInput({
   ...props
 }: React.ComponentProps<typeof InputGroupInput>) {
-  return <InputGroupInput {...props} />
+  return <InputGroupInput name="message" {...props} />
 }
 
 type TextareaProps = Omit<

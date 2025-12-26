@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import * as React from 'react'
 import {
   ChatInputArea,
   ChatInputField,
@@ -20,17 +20,36 @@ interface Message {
   timestamp: Date
 }
 
+const initialMessages: Message[] = [
+  {
+    id: '1',
+    content: 'Hey! How can I help you today?',
+    role: 'peer',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+  },
+  {
+    id: '2',
+    content: "I'd like to learn more about this chat component.",
+    role: 'self',
+    timestamp: new Date(Date.now() - 1000 * 60 * 4),
+  },
+  {
+    id: '3',
+    content:
+      "It's a flexible chat UI built with React. It supports streaming messages, auto-scroll, and different message types like self, peer, and system.",
+    role: 'peer',
+    timestamp: new Date(Date.now() - 1000 * 60 * 3),
+  },
+]
+
 export function ChatDemo() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
+  const [messages, setMessages] = React.useState<Message[]>(initialMessages)
+  const [input, setInput] = React.useState('')
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
-
+  const handleSubmit = (msg: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: msg,
       role: 'self',
       timestamp: new Date(),
     }
@@ -38,15 +57,45 @@ export function ChatDemo() {
     setMessages((prev) => [...prev, userMessage])
     setInput('')
 
-    // Simulate assistant response
+    // Simulate assistant response with typewriter effect
+    const responseText = 'This is a simulated response from the assistant.'
+    const assistantId = (Date.now() + 1).toString()
+    const assistantTimestamp = new Date()
+
     setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'This is a simulated response from the assistant.',
-        role: 'peer',
-        timestamp: new Date(),
+      // Add empty message first
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: assistantId,
+          content: '',
+          role: 'peer',
+          timestamp: assistantTimestamp,
+        },
+      ])
+
+      // Stream tokens like LLM output
+      const tokens = responseText.split(/(\s+)/).filter(Boolean)
+      let tokenIndex = 0
+
+      const streamToken = () => {
+        if (tokenIndex >= tokens.length) return
+
+        tokenIndex++
+        const currentContent = tokens.slice(0, tokenIndex).join('')
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, content: currentContent } : m
+          )
+        )
+
+        // Random delay between 30-80ms to simulate natural token streaming
+        const delay = 30 + Math.random() * 50
+        setTimeout(streamToken, delay)
       }
-      setMessages((prev) => [...prev, assistantMessage])
+
+      streamToken()
     }, 500)
   }
 
