@@ -10,7 +10,7 @@
   "files": [
     {
       "path": "registry/joyco/blocks/file-button.tsx",
-      "content": "import { Button } from '@/components/ui/button'\nimport { useFileUpload } from '@/hooks/use-file-upload'\n\nexport interface FileInputProps {\n  onUpload: (file: File) => Promise<unknown> | void\n  inputProps?: React.InputHTMLAttributes<HTMLInputElement>\n}\n\nexport const FileInputButton = (\n  props: FileInputProps & React.ComponentProps<typeof Button>\n) => {\n  const { inputProps, onUpload, children, ...buttonProps } = props\n  const { openFileDialog, getInputProps } = useFileUpload({ onUpload })\n\n  return (\n    <Button onClick={openFileDialog} {...buttonProps}>\n      <input {...getInputProps()} {...inputProps} className=\"sr-only\" />\n      {children}\n    </Button>\n  )\n}\n",
+      "content": "'use client'\nimport { Button } from '@/components/ui/button'\nimport { useFileUpload } from '@/hooks/use-file-upload'\n\nexport interface FileInputProps {\n  onUpload: (file: File) => Promise<unknown> | void\n  inputProps?: React.InputHTMLAttributes<HTMLInputElement>\n}\n\nexport const FileInputButton = (\n  props: FileInputProps & React.ComponentProps<typeof Button>\n) => {\n  const { inputProps, onUpload, children, ...buttonProps } = props\n  const { openFileDialog, getInputProps } = useFileUpload({ onUpload })\n\n  return (\n    <Button onClick={openFileDialog} {...buttonProps}>\n      <input {...getInputProps()} {...inputProps} className=\"sr-only\" />\n      {children}\n    </Button>\n  )\n}\n",
       "type": "registry:component"
     },
     {

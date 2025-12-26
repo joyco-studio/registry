@@ -104,21 +104,23 @@
       "name": "chat",
       "type": "registry:component",
       "title": "Chat",
-      "description": "A composable chat component with multiline support and submit button.",
+      "description": "A composable chat component",
       "files": [
         {
           "path": "registry/joyco/blocks/chat.tsx",
           "type": "registry:component"
         },
         {
-          "path": "components/ui/input-group.tsx",
-          "type": "registry:ui"
+          "path": "hooks/use-interruption.tsx",
+          "type": "registry:hook"
         }
       ],
+      "dependencies": [
+        "debounce",
+        "react-use-measure"
+      ],
       "registryDependencies": [
-        "button",
-        "input",
-        "textarea"
+        "input-group"
       ]
     }
   ]

@@ -22,7 +22,7 @@ function useScrollAreaContext() {
   return ctx
 }
 
-interface ScrollAreaRootProps extends React.ComponentProps<'div'> {
+interface ScrollAreaViewportProps extends React.ComponentProps<'div'> {
   orientation?: 'vertical' | 'horizontal'
   topShadowGradient?: string
   bottomShadowGradient?: string
@@ -30,221 +30,180 @@ interface ScrollAreaRootProps extends React.ComponentProps<'div'> {
   rightShadowGradient?: string
 }
 
-/**
- * Root component for the ScrollArea component. (Basic layout that adds a wrapper and shadows handlers)
- * Supports vertical or horizontal scroll directions.
- * @example
- * ```tsx
- * import ScrollArea from '@/registry/joyco/blocks/scroll-area';
- * ```
- * @example
- * ```tsx
- * <ScrollArea.Root orientation="vertical">
- *   <ScrollArea.Content>
- *     <div>Content here</div>
- *   </ScrollArea.Content>
- * </ScrollArea.Root>
- *
- * <ScrollArea.Root orientation="horizontal">
- *   <ScrollArea.Content>
- *     <div className="flex gap-4">
- *       <div>Item 1</div>
- *       <div>Item 2</div>
- *     </div>
- *   </ScrollArea.Content>
- * </ScrollArea.Root>
- * ```
- */
-export const Root = React.forwardRef<HTMLDivElement, ScrollAreaRootProps>(
-  (
-    {
-      className,
-      children,
-      orientation = 'vertical',
-      topShadowGradient,
-      bottomShadowGradient,
-      leftShadowGradient,
-      rightShadowGradient,
-      ...props
-    },
-    ref
-  ) => {
-    const scrollRef = React.useRef<HTMLDivElement>(null)
-    const [hasScrollTop, setHasScrollTop] = React.useState(false)
-    const [hasScrollBottom, setHasScrollBottom] = React.useState(false)
-    const [hasScrollLeft, setHasScrollLeft] = React.useState(false)
-    const [hasScrollRight, setHasScrollRight] = React.useState(false)
+export function ScrollAreaViewport({
+  className,
+  children,
+  orientation = 'vertical',
+  topShadowGradient,
+  bottomShadowGradient,
+  leftShadowGradient,
+  rightShadowGradient,
+  ref,
+  ...props
+}: ScrollAreaViewportProps) {
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const [hasScrollTop, setHasScrollTop] = React.useState(false)
+  const [hasScrollBottom, setHasScrollBottom] = React.useState(false)
+  const [hasScrollLeft, setHasScrollLeft] = React.useState(false)
+  const [hasScrollRight, setHasScrollRight] = React.useState(false)
 
-    const update = React.useCallback(() => {
-      const el = scrollRef.current
-      if (!el) return
+  const update = React.useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
 
-      if (orientation === 'vertical') {
-        // Vertical scroll detection
-        const scrollY = Math.ceil(el.scrollTop)
-        const scrollHeight = el.scrollHeight
-        const clientHeight = el.clientHeight
+    if (orientation === 'vertical') {
+      // Vertical scroll detection
+      const scrollY = Math.ceil(el.scrollTop)
+      const scrollHeight = el.scrollHeight
+      const clientHeight = el.clientHeight
 
-        const newHasScrollTop = scrollY > 0
-        const newHasScrollBottom = scrollY + clientHeight < scrollHeight
+      const newHasScrollTop = scrollY > 0
+      const newHasScrollBottom = scrollY + clientHeight < scrollHeight
 
-        setHasScrollTop(newHasScrollTop)
-        setHasScrollBottom(newHasScrollBottom)
-      } else {
-        const scrollX = Math.ceil(el.scrollLeft)
-        const scrollWidth = el.scrollWidth
-        const clientWidth = el.clientWidth
+      setHasScrollTop(newHasScrollTop)
+      setHasScrollBottom(newHasScrollBottom)
+    } else {
+      const scrollX = Math.ceil(el.scrollLeft)
+      const scrollWidth = el.scrollWidth
+      const clientWidth = el.clientWidth
 
-        const newHasScrollLeft = scrollX > 0
-        const newHasScrollRight = scrollX + clientWidth < scrollWidth
+      const newHasScrollLeft = scrollX > 0
+      const newHasScrollRight = scrollX + clientWidth < scrollWidth
 
-        setHasScrollLeft(newHasScrollLeft)
-        setHasScrollRight(newHasScrollRight)
-      }
-    }, [orientation])
+      setHasScrollLeft(newHasScrollLeft)
+      setHasScrollRight(newHasScrollRight)
+    }
+  }, [orientation])
 
-    React.useEffect(() => {
-      const el = scrollRef.current
-      if (!el) return
+  React.useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
 
-      const handleScroll = () => requestAnimationFrame(update)
-      el.addEventListener('scroll', handleScroll, { passive: true })
+    const handleScroll = () => requestAnimationFrame(update)
+    el.addEventListener('scroll', handleScroll, { passive: true })
 
-      const ro = new ResizeObserver(update)
-      ro.observe(el)
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
 
-      const mo = new MutationObserver(update)
-      mo.observe(el, { childList: true })
+    const mo = new MutationObserver(update)
+    mo.observe(el, { childList: true })
 
-      update()
+    update()
 
-      return () => {
-        el.removeEventListener('scroll', handleScroll)
-        ro.disconnect()
-        mo.disconnect()
-      }
-    }, [update])
+    return () => {
+      el.removeEventListener('scroll', handleScroll)
+      ro.disconnect()
+      mo.disconnect()
+    }
+  }, [update])
 
-    const hasScroll =
-      hasScrollTop || hasScrollBottom || hasScrollLeft || hasScrollRight
+  const hasScroll =
+    hasScrollTop || hasScrollBottom || hasScrollLeft || hasScrollRight
 
-    const ctxValue = React.useMemo(
-      () => ({
-        scrollRef,
-        hasScroll,
-        orientation,
-      }),
-      [hasScroll, orientation]
-    )
+  const ctxValue = React.useMemo(
+    () => ({
+      scrollRef,
+      hasScroll,
+      orientation,
+    }),
+    [hasScroll, orientation]
+  )
 
-    const shadowBaseClasses =
-      'pointer-events-none absolute z-20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300 ease-out'
+  const shadowBaseClasses =
+    'pointer-events-none absolute z-20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300 ease-out'
 
-    const shadows =
-      orientation === 'vertical'
-        ? [
-            {
-              present: hasScrollTop,
-              position: 'left-0 top-0 right-2 h-8',
-              slide:
-                'data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2',
-              gradient:
-                topShadowGradient ||
-                'bg-linear-to-b from-background to-transparent',
-            },
-            {
-              present: hasScrollBottom,
-              position: 'left-0 bottom-0 right-2 h-8',
-              slide:
-                'data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2',
-              gradient:
-                bottomShadowGradient ||
-                'bg-linear-to-t from-background to-transparent',
-            },
-          ]
-        : [
-            {
-              present: hasScrollLeft,
-              position: 'inset-y-0 left-0 bottom-2 w-8',
-              slide:
-                'data-[state=closed]:slide-out-to-left-2 data-[state=open]:slide-in-from-left-2',
-              gradient:
-                leftShadowGradient ||
-                'bg-linear-to-r from-background to-transparent',
-            },
-            {
-              present: hasScrollRight,
-              position: 'inset-y-0 right-0 bottom-2 w-8',
-              slide:
-                'data-[state=closed]:slide-out-to-right-2 data-[state=open]:slide-in-from-right-2',
-              gradient:
-                rightShadowGradient ||
-                'bg-linear-to-l from-background to-transparent',
-            },
-          ]
+  const shadows =
+    orientation === 'vertical'
+      ? [
+          {
+            present: hasScrollTop,
+            position: 'left-0 top-0 right-2 h-8',
+            slide:
+              'data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2',
+            gradient:
+              topShadowGradient ||
+              'bg-linear-to-b from-background to-transparent',
+          },
+          {
+            present: hasScrollBottom,
+            position: 'left-0 bottom-0 right-2 h-8',
+            slide:
+              'data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2',
+            gradient:
+              bottomShadowGradient ||
+              'bg-linear-to-t from-background to-transparent',
+          },
+        ]
+      : [
+          {
+            present: hasScrollLeft,
+            position: 'inset-y-0 left-0 bottom-2 w-8',
+            slide:
+              'data-[state=closed]:slide-out-to-left-2 data-[state=open]:slide-in-from-left-2',
+            gradient:
+              leftShadowGradient ||
+              'bg-linear-to-r from-background to-transparent',
+          },
+          {
+            present: hasScrollRight,
+            position: 'inset-y-0 right-0 bottom-2 w-8',
+            slide:
+              'data-[state=closed]:slide-out-to-right-2 data-[state=open]:slide-in-from-right-2',
+            gradient:
+              rightShadowGradient ||
+              'bg-linear-to-l from-background to-transparent',
+          },
+        ]
 
-    const dataAttributes =
-      orientation === 'vertical'
-        ? {
-            'data-scroll-top': hasScrollTop,
-            'data-scroll-bottom': hasScrollBottom,
-          }
-        : {
-            'data-scroll-left': hasScrollLeft,
-            'data-scroll-right': hasScrollRight,
-          }
+  const dataAttributes =
+    orientation === 'vertical'
+      ? {
+          'data-scroll-top': hasScrollTop,
+          'data-scroll-bottom': hasScrollBottom,
+        }
+      : {
+          'data-scroll-left': hasScrollLeft,
+          'data-scroll-right': hasScrollRight,
+        }
 
-    return (
-      <ScrollAreaContext.Provider value={ctxValue}>
-        <div
-          ref={ref}
-          className={cn(
-            'group/scroll-area relative overflow-hidden',
-            className
-          )}
-          data-has-scroll={hasScroll}
-          data-orientation={orientation}
-          {...dataAttributes}
-          {...props}
-        >
-          {children}
+  return (
+    <ScrollAreaContext.Provider value={ctxValue}>
+      <div
+        ref={ref}
+        className={cn('group/scroll-area relative overflow-hidden', className)}
+        data-has-scroll={hasScroll}
+        data-orientation={orientation}
+        {...dataAttributes}
+        {...props}
+      >
+        {children}
 
-          {shadows.map((shadow, index) => (
-            <Presence key={index} present={shadow.present}>
-              <div
-                data-state={shadow.present ? 'open' : 'closed'}
-                className={cn(
-                  shadowBaseClasses,
-                  shadow.position,
-                  shadow.slide,
-                  shadow.gradient
-                )}
-              />
-            </Presence>
-          ))}
-        </div>
-      </ScrollAreaContext.Provider>
-    )
-  }
-)
-Root.displayName = 'ScrollAreaRoot'
+        {shadows.map((shadow, index) => (
+          <Presence key={index} present={shadow.present}>
+            <div
+              data-state={shadow.present ? 'open' : 'closed'}
+              className={cn(
+                shadowBaseClasses,
+                shadow.position,
+                shadow.slide,
+                shadow.gradient
+              )}
+            />
+          </Presence>
+        ))}
+      </div>
+    </ScrollAreaContext.Provider>
+  )
+}
 
 type ScrollAreaContentProps = React.ComponentProps<'div'>
 
-/**
- * Content component for the ScrollArea component. (It contains the scrollable content.)
- * @example
- * ```tsx
- * import ScrollArea from '@/registry/joyco/blocks/scroll-area';
- * ```
- * @example
- * ```tsx
- * <ScrollArea.Content>
- *   <div>Content here</div>
- * </ScrollArea.Content>
- */
-export const Content = React.forwardRef<HTMLDivElement, ScrollAreaContentProps>(
-  ({ className, children, ...props }, ref) => {
+export function ScrollAreaContent({
+  className,
+  children,
+  ref,
+  ...props
+}: ScrollAreaContentProps) {
     const { scrollRef, orientation } = useScrollAreaContext()
 
     const combinedRef = React.useCallback(
@@ -281,7 +240,4 @@ export const Content = React.forwardRef<HTMLDivElement, ScrollAreaContentProps>(
         {children}
       </div>
     )
-  }
-)
-
-Content.displayName = 'ScrollAreaContent'
+}
