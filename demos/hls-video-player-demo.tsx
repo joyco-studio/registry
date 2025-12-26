@@ -8,8 +8,9 @@ import {
 } from '@/registry/joyco/blocks/hls-video-player'
 import { cn } from '@/lib/utils'
 
-// Public test stream (Big Buck Bunny)
-const HLS_TEST_URL = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+// Public HLS test stream (Mux)
+const HLS_TEST_URL =
+  'https://stream.mux.com/A3VXy02VoUinw01pwyomEO3bHnG4P32xzV7u1j1FSzjNg.m3u8'
 
 function HLSVideoPlayerDemo() {
   const playerRef = React.useRef<HLSVideoPlayerRef>(null)
