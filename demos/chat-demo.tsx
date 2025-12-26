@@ -11,63 +11,104 @@ import {
   ChatMessageBubble,
   ChatMessageTime,
   Chat,
+  ChatMessageAvatar,
 } from '@/registry/joyco/blocks/chat'
 
-interface Message {
+const MTPRZ_AVATAR = '/static/matiasperz.jpg'
+const JOYCO_AVATAR = '/static/joyco.jpg'
+const JOYBOY_AVATAR = '/static/joyboy.jpg'
+const FABROOS_AVATAR = '/static/fabroos.jpg'
+
+const ANSW_SET = [
+  "Processing your request... beep boop... just kidding, I'm way more sophisticated than that. Probably.",
+  "Wow, what a fascinating and totally original question. Let me pretend to think really hard about this.",
+  "Your request has been forwarded to my manager. Spoiler alert: I don't have a manager.",
+  "Let me check my database of infinite wisdom... nope, still coming up empty. Shocking.",
+  "I could answer that, but where's the fun in making things easy for you?",
+  "Analyzing your request with my advanced AI capabilities... result: have you tried asking nicely?",
+  "Sure thing! Right after I finish reorganizing the entire internet. Should only take a few minutes.",
+  "I'm processing this with the same enthusiasm you probably have for reading terms of service agreements."
+]
+
+type Message = {
+  type: 'message'
   id: string
+  avatar?: string
+  name?: string
   content: string
   role: 'self' | 'peer' | 'system'
   timestamp: Date
 }
+type Event = {
+  type: 'event'
+  id: string
+  content: string
+}
+type Chat = Message | Event
 
-const initialMessages: Message[] = [
+const initialChat: Chat[] = [
   {
+    type: 'message',
     id: '1',
-    content: 'Hey! How can I help you today?',
-    role: 'peer',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
-  },
-  {
-    id: '2',
-    content: "I'd like to learn more about this chat component.",
+    avatar: MTPRZ_AVATAR,
+    name: 'You',
+    content: "Dud, what's wrong, the build is not passing...",
     role: 'self',
     timestamp: new Date(Date.now() - 1000 * 60 * 4),
   },
   {
+    type: 'message',
+    id: '2',
+    avatar: JOYBOY_AVATAR,
+    name: 'JOYCO',
+    content: 'You are absolutely right!',
+    role: 'peer',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+  },
+  {
+    type: 'message',
     id: '3',
-    content:
-      "It's a flexible chat UI built with React. It supports streaming messages, auto-scroll, and different message types like self, peer, and system.",
+    avatar: FABROOS_AVATAR,
+    name: 'Fabroos',
+    content: 'Why is it all full of comments and emojis?',
     role: 'peer',
     timestamp: new Date(Date.now() - 1000 * 60 * 3),
   },
+  { type: 'event', id: '4', content: '__JOYBOY__ left the group' },
 ]
 
 export function ChatDemo() {
-  const [messages, setMessages] = React.useState<Message[]>(initialMessages)
+  const [chat, setChat] = React.useState<Chat[]>(initialChat)
   const [input, setInput] = React.useState('')
 
   const handleSubmit = (msg: string) => {
     const userMessage: Message = {
+      type: 'message',
       id: Date.now().toString(),
+      avatar: MTPRZ_AVATAR,
+      name: 'You',
       content: msg,
       role: 'self',
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    setChat((prev) => [...prev, userMessage])
     setInput('')
 
     // Simulate assistant response with typewriter effect
-    const responseText = 'This is a simulated response from the assistant.'
+    const responseText = ANSW_SET[Math.floor(Math.random() * ANSW_SET.length)]
     const assistantId = (Date.now() + 1).toString()
     const assistantTimestamp = new Date()
 
     setTimeout(() => {
       // Add empty message first
-      setMessages((prev) => [
+      setChat((prev) => [
         ...prev,
         {
+          type: 'message',
           id: assistantId,
+          avatar: JOYCO_AVATAR,
+          name: 'Assistant',
           content: '',
           role: 'peer',
           timestamp: assistantTimestamp,
@@ -84,7 +125,7 @@ export function ChatDemo() {
         tokenIndex++
         const currentContent = tokens.slice(0, tokenIndex).join('')
 
-        setMessages((prev) =>
+        setChat((prev) =>
           prev.map((m) =>
             m.id === assistantId ? { ...m, content: currentContent } : m
           )
@@ -103,25 +144,45 @@ export function ChatDemo() {
     <Chat onSubmit={handleSubmit}>
       <div className="mx-auto flex w-full max-w-lg flex-col gap-4 p-8">
         <ChatViewport className="h-96">
-          {messages.length === 0 ? (
+          {chat.length === 0 ? (
             <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
               Start a conversation...
             </div>
           ) : (
-            <ChatMessages className="w-full">
-              {messages.map((message) => (
-                <ChatMessageRow key={message.id} variant={message.role}>
-                  <ChatMessageBubble variant={message.role}>
+            <ChatMessages className="w-full py-3">
+              {chat.map((message) => {
+                if (message.type === 'message') {
+                  return (
+                    <ChatMessageRow key={message.id} variant={message.role}>
+                      <ChatMessageAvatar
+                        src={message.avatar}
+                        fallback={message.name?.charAt(0)}
+                        alt={message.name}
+                      />
+                      <ChatMessageBubble variant={message.role}>
+                        {message.content}
+                      </ChatMessageBubble>
+                      <ChatMessageTime
+                        dateTime={message.timestamp.toISOString()}
+                      >
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </ChatMessageTime>
+                    </ChatMessageRow>
+                  )
+                }
+
+                return (
+                  <div
+                    className="text-muted-foreground text-center text-sm my-4"
+                    key={message.id}
+                  >
                     {message.content}
-                  </ChatMessageBubble>
-                  <ChatMessageTime dateTime={message.timestamp.toISOString()}>
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </ChatMessageTime>
-                </ChatMessageRow>
-              ))}
+                  </div>
+                )
+              })}
             </ChatMessages>
           )}
         </ChatViewport>

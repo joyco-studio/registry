@@ -13,6 +13,7 @@ import {
   InputGroupInput,
   InputGroupTextarea,
 } from '@/components/ui/input-group'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useUserInterruption } from '@/hooks/use-interruption'
 
 type ChatMessageVariant = 'self' | 'peer' | 'system'
@@ -22,11 +23,11 @@ type ChatMessageVariant = 'self' | 'peer' | 'system'
  * -------------------------------------------------------------------------------------------------*/
 
 type ChatContextValue = {
-  inputRef: React.RefObject<HTMLFormElement | null>
   viewportRef: React.RefObject<HTMLDivElement | null>
   scrollToBottom: (behavior?: ScrollBehavior) => void
   onSubmit?: (message: string) => void
   onViewportHeightChange: (height: number) => void
+  onInputHeightChange: (height: number) => void
 }
 
 const ChatContext = React.createContext<ChatContextValue | null>(null)
@@ -151,7 +152,6 @@ export function Chat({ onSubmit, bottomThreshold = 24, children }: ChatProps) {
 
   const contextValue = React.useMemo<ChatContextValue>(
     () => ({
-      inputRef,
       viewportRef,
       scrollToBottom,
       onSubmit,
@@ -230,14 +230,47 @@ export function ChatMessageRow({
     <div
       data-variant={variant}
       className={cn(
-        'my-3 flex flex-col gap-2',
+        'group/message-bubble my-3 grid gap-y-1',
         variant === 'self'
-          ? 'items-end justify-end'
-          : 'items-start justify-start',
+          ? 'grid-cols-[minmax(0,1fr)_auto] justify-items-end [grid-template-areas:"message_avatar""datetime_none"]'
+          : 'grid-cols-[auto_minmax(0,1fr)] justify-items-start [grid-template-areas:"avatar_message""none_datetime"]',
         className
       )}
       {...props}
     />
+  )
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * ChatMessageAvatar
+ * -------------------------------------------------------------------------------------------------*/
+
+type ChatMessageAvatarProps = React.ComponentProps<typeof Avatar> & {
+  src?: string
+  alt?: string
+  fallback?: React.ReactNode
+}
+
+export function ChatMessageAvatar({
+  className,
+  src,
+  alt,
+  fallback,
+  children,
+  ...props
+}: ChatMessageAvatarProps) {
+  return (
+    <Avatar
+      className={cn(
+        'size-8 shrink-0 self-end [grid-area:avatar] group-data-variant/message-bubble:group-not-data-[variant=self]/message-bubble:mr-2 group-data-[variant=self]/message-bubble:ml-2',
+        className
+      )}
+      title={alt}
+      {...props}
+    >
+      {src && <AvatarImage src={src} alt={alt} />}
+      <AvatarFallback>{fallback ?? children}</AvatarFallback>
+    </Avatar>
   )
 }
 
@@ -258,7 +291,7 @@ export function ChatMessageBubble({
     <div
       data-variant={variant}
       className={cn(
-        'w-max max-w-[80%] rounded-2xl px-4 py-2 text-sm wrap-break-word whitespace-pre-wrap',
+        'w-fit max-w-full min-w-0 rounded-2xl px-4 py-2 text-sm wrap-break-word whitespace-pre-wrap [grid-area:message]',
         variant === 'self'
           ? 'bg-primary text-primary-foreground'
           : 'bg-muted text-foreground',
@@ -279,7 +312,10 @@ export function ChatMessageTime({
 }: React.ComponentProps<'time'>) {
   return (
     <time
-      className={cn('text-muted-foreground text-xs', className)}
+      className={cn(
+        'text-muted-foreground text-xs [grid-area:datetime]',
+        className
+      )}
       {...props}
     />
   )
@@ -301,10 +337,11 @@ export function ChatInputArea({
   ...props
 }: ChatInputAreaProps) {
   const {
-    inputRef,
     onSubmit: onSubmitContext,
     scrollToBottom,
+    onInputHeightChange,
   } = useChatContext()
+  const [inputRef, { height }] = useMeasure()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -321,14 +358,16 @@ export function ChatInputArea({
     })
   }
 
+  React.useEffect(() => {
+    onInputHeightChange(height)
+  }, [height, onInputHeightChange])
+
   return (
-    <form
-      className="contents"
-      onSubmit={handleSubmit}
-      {...props}
-      ref={inputRef}
-    >
-      <InputGroup className={cn('h-auto items-end rounded-3xl', className)}>
+    <form className="contents" onSubmit={handleSubmit} {...props}>
+      <InputGroup
+        className={cn('h-auto items-end rounded-3xl', className)}
+        ref={inputRef}
+      >
         {children}
       </InputGroup>
     </form>
