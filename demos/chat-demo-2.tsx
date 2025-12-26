@@ -27,21 +27,21 @@ const initialChat: Message[] = [
     id: '1',
     content: 'There are no avatars in this chat.',
     role: 'self',
-    timestamp: new Date("2025-12-26T02:00:00.000Z"),
+    timestamp: new Date('2025-12-26T02:00:00.000Z'),
   },
   {
     type: 'message',
     id: '2',
     content: 'So no one knows am I?',
     role: 'peer',
-    timestamp: new Date("2025-12-26T02:01:00.000Z"),
+    timestamp: new Date('2025-12-26T02:01:00.000Z'),
   },
   {
     type: 'message',
     id: '3',
     content: 'I do.',
     role: 'self',
-    timestamp: new Date("2025-12-26T02:03:00.000Z"),
+    timestamp: new Date('2025-12-26T02:03:00.000Z'),
   },
 ]
 
@@ -86,7 +86,10 @@ export function ChatDemo() {
               setInput(e.target.value)
             }
           />
-          <ChatInputSubmit disabled={!input.trim()} />
+          <ChatInputSubmit
+            className="*:[button]:bg-mint-green"
+            disabled={!input.trim()}
+          />
         </ChatInputArea>
       </div>
     </Chat>
