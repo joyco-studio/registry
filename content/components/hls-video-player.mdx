@@ -1,0 +1,89 @@
+---
+title: HLS Video Player
+description: A headless HLS video player component with native HLS detection and error handling.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="hls-video-player-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://registry.joyco.studio/r/hls-video-player.json
+```
+
+## Usage
+
+```tsx showLineNumbers
+import {
+  HLSVideoPlayer,
+  type HLSVideoPlayerRef,
+} from '@/components/hls-video-player'
+
+function App() {
+  const playerRef = useRef<HLSVideoPlayerRef>(null)
+
+  return (
+    <HLSVideoPlayer
+      ref={playerRef}
+      src="https://example.com/stream.m3u8"
+      width={1920}
+      height={1080}
+      onReady={() => console.log('Ready to play')}
+      onHlsError={(error) => console.error(error)}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop            | Type                                  | Description                                        |
+| --------------- | ------------------------------------- | -------------------------------------------------- |
+| `src`           | `string`                              | The HLS stream URL (.m3u8) or regular video source |
+| `width`         | `number`                              | Video width (used for aspect ratio)                |
+| `height`        | `number`                              | Video height (used for aspect ratio)               |
+| `debug`         | `boolean`                             | Enable debug logging                               |
+| `onHlsError`    | `(error: HLSVideoError) => void`      | HLS error callback                                 |
+| `onVideoError`  | `ReactEventHandler<HTMLVideoElement>` | Native video error callback                        |
+| `onReady`       | `() => void`                          | Called when video is ready to play                 |
+| `onHlsLoaded`   | `() => void`                          | Called when HLS.js library is loaded               |
+| `startTime`     | `number`                              | Start playback at specific time (seconds)          |
+| `maxResolution` | `number`                              | Cap max resolution (e.g., 720, 1080)               |
+| `minResolution` | `number`                              | Set minimum resolution                             |
+
+## With Media Player Controls
+
+Combine with the [Media Player](/components/media-player) component for a full-featured video player UI:
+
+<ComponentPreview name="hls-video-player-with-controls-demo" />
+
+## Error Handling
+
+```tsx showLineNumbers
+import { type HLSVideoError } from '@/components/hls-video-player'
+
+function App() {
+  const handleError = (error: HLSVideoError) => {
+    // error.type: 'network' | 'media' | 'fatal' | 'other'
+    // error.message: Human readable message
+    // error.fatal: Whether playback can continue
+    // error.details: Additional error details
+
+    if (error.fatal) {
+      // Show error UI, offer retry
+    }
+  }
+
+  return (
+    <HLSVideoPlayer
+      src="..."
+      width={1920}
+      height={1080}
+      onHlsError={handleError}
+    />
+  )
+}
+```

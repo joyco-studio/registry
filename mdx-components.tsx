@@ -14,8 +14,12 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     CodeTabs: CodeTabs,
     FileCodeblock: FileCodeblock,
-    Image: ({ className, alt, ...props }: React.ComponentProps<typeof Image>) => (
-      <Image className={cn("rounded-lg", className)} alt={alt} {...props} />
+    Image: ({
+      className,
+      alt,
+      ...props
+    }: React.ComponentProps<typeof Image>) => (
+      <Image className={cn('rounded-lg', className)} alt={alt} {...props} />
     ),
     Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => {
       return <Tabs className={cn('relative w-full', className)} {...props} />
@@ -103,13 +107,13 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
 
       return (
         <>
-          <code className='not-prose' {...props} />
+          <code className="not-prose" {...props} />
           {__raw__ && <CopyButton value={__raw__} />}
         </>
       )
     },
     figure: ({ className, ...props }: React.ComponentProps<'figure'>) => {
-      return <figure className={cn("not-prose", className)} {...props} />
+      return <figure className={cn('not-prose', className)} {...props} />
     },
     pre: ({ className, ...props }: React.ComponentProps<'pre'>) => {
       return <pre className={cn(codeClasses.pre, className)} {...props} />

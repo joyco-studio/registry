@@ -26,9 +26,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@joycostudio/marquee"
-      ]
+      "dependencies": ["@joycostudio/marquee"]
     },
     {
       "name": "file-button",
@@ -45,9 +43,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "file-dropzone",
@@ -64,9 +60,7 @@
           "type": "registry:hook"
         }
       ],
-      "registryDependencies": [
-        "button"
-      ]
+      "registryDependencies": ["button"]
     },
     {
       "name": "mobile-menu",
@@ -96,9 +90,7 @@
           "type": "registry:component"
         }
       ],
-      "dependencies": [
-        "@radix-ui/react-presence"
-      ]
+      "dependencies": ["@radix-ui/react-presence"]
     },
     {
       "name": "chat",
@@ -115,14 +107,25 @@
           "type": "registry:hook"
         }
       ],
-      "dependencies": [
-        "debounce",
-        "react-use-measure"
+      "dependencies": ["debounce", "react-use-measure"],
+      "registryDependencies": ["input-group", "avatar"]
+    },
+    {
+      "name": "hls-video-player",
+      "type": "registry:component",
+      "title": "HLS Video Player",
+      "description": "A headless HLS video player with native HLS detection and error handling.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/hls-video-player.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "lib/compose-refs.ts",
+          "type": "registry:lib"
+        }
       ],
-      "registryDependencies": [
-        "input-group",
-        "avatar"
-      ]
+      "dependencies": ["hls.js"]
     }
   ]
 }

@@ -34,11 +34,10 @@ export async function FileCodeblock({
   const displayTitle = title ?? fileName
 
   return (
-    <div className='relative'>
-
-      <div className='absolute top-2 right-12 z-10 flex gap-2 items-center'>
+    <div className="relative">
+      <div className="absolute top-2 right-12 z-10 flex items-center gap-2">
         <DownloadFileButton value={content} fileName={displayTitle} />
-        <Separator className='h-5!' orientation='vertical' />
+        <Separator className="h-5!" orientation="vertical" />
       </div>
 
       <CodeBlock
@@ -50,4 +49,3 @@ export async function FileCodeblock({
     </div>
   )
 }
-

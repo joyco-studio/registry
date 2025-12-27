@@ -78,10 +78,10 @@ export const transformers = [
 ] as ShikiTransformer[]
 
 export const codeClasses = {
-  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0"
+  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-3 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0",
 }
 
-export async function highlightCode(code: string, language: string = "tsx") {
+export async function highlightCode(code: string, language: string = 'tsx') {
   const html = await codeToHtml(code, {
     lang: language,
     themes: {
@@ -91,13 +91,16 @@ export async function highlightCode(code: string, language: string = "tsx") {
     transformers: [
       {
         pre(node) {
-          node.properties["class"] = cn(codeClasses.pre, node.properties["class"]?.toString())
+          node.properties['class'] = cn(
+            codeClasses.pre,
+            node.properties['class']?.toString()
+          )
         },
         code(node) {
-          node.properties["data-line-numbers"] = ""
+          node.properties['data-line-numbers'] = ''
         },
         line(node) {
-          node.properties["data-line"] = ""
+          node.properties['data-line'] = ''
         },
       },
     ],
