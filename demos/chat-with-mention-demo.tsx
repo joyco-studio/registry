@@ -3,9 +3,6 @@
 import * as React from 'react'
 import {
   Chat,
-  ChatInputArea,
-  ChatInputField,
-  ChatInputSubmit,
   ChatViewport,
   ChatMessages,
   ChatMessageRow,
@@ -24,13 +21,11 @@ import {
 import { ArrowUpIcon } from 'lucide-react'
 
 const MTPRZ_AVATAR = '/static/matiasperz.jpg'
-const JOYCO_AVATAR = '/static/joyco.jpg'
 const JOYBOY_AVATAR = '/static/joyboy.jpg'
 const FABROOS_AVATAR = '/static/fabroos.jpg'
 
 const USERS = [
   { id: '1', name: 'Matias Perez', username: 'matiasperz', avatar: MTPRZ_AVATAR },
-  { id: '2', name: 'Joyco', username: 'joyco', avatar: JOYCO_AVATAR },
   { id: '3', name: 'Joyboy', username: 'joyboy', avatar: JOYBOY_AVATAR },
   { id: '4', name: 'Fabroos', username: 'fabroos', avatar: FABROOS_AVATAR },
 ]
@@ -67,14 +62,15 @@ export function ChatWithMentionDemo() {
   const [messages, setMessages] = React.useState<Message[]>(initialMessages)
   const [input, setInput] = React.useState('')
 
-  const handleSubmit = (msg: string) => {
-    if (!msg.trim()) return
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim()) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       avatar: MTPRZ_AVATAR,
       name: 'You',
-      content: msg,
+      content: input,
       role: 'self',
       timestamp: new Date(),
     }
@@ -84,7 +80,7 @@ export function ChatWithMentionDemo() {
   }
 
   return (
-    <Chat onSubmit={handleSubmit}>
+    <Chat>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
         <ChatViewport className="h-80">
           <ChatMessages className="w-full py-3">
@@ -108,66 +104,59 @@ export function ChatWithMentionDemo() {
           </ChatMessages>
         </ChatViewport>
 
-        <Mention
-          value={input}
-          onValueChange={setInput}
-          trigger="@"
-        >
-          <ChatInputArea>
-            <div className="relative flex-1">
-              {/* Highlight overlay - matches InputGroupTextarea: px-3 py-3 */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 whitespace-pre-wrap break-words px-3 py-3 text-base md:text-sm"
-              >
-                <MentionHighlight
-                  mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+        <form onSubmit={handleSubmit}>
+          <Mention value={input} onValueChange={setInput} trigger="@">
+            <div className="border-input bg-background flex items-center gap-2 rounded-xl border p-1.5 pl-4">
+              <div className="relative flex-1">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 flex items-center text-sm"
                 >
-                  {input}
-                </MentionHighlight>
-              </div>
-              {/* Actual input */}
-              <MentionInput asChild>
-                <ChatInputField
-                  multiline
-                  placeholder="Type @ to mention someone..."
-                  value={input}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setInput(e.target.value)
-                  }
-                  className="text-transparent caret-foreground"
-                />
-              </MentionInput>
-            </div>
-            <ChatInputSubmit disabled={!input.trim()}>
-              <ArrowUpIcon className="size-[1.2em]" />
-              <span className="sr-only">Send</span>
-            </ChatInputSubmit>
-          </ChatInputArea>
-          <MentionList className="bg-popover text-popover-foreground absolute bottom-full left-0 z-50 mb-2 max-h-48 w-64 overflow-auto rounded-md border p-1 shadow-md">
-            {USERS.map((user) => (
-              <MentionItem
-                key={user.id}
-                value={user.username}
-                className="hover:bg-accent hover:text-accent-foreground relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-              >
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="h-6 w-6 rounded-full"
-                />
-                <div className="flex flex-col">
-                  <MentionItemText className="font-medium">
-                    {user.name}
-                  </MentionItemText>
-                  <span className="text-muted-foreground text-xs">
-                    @{user.username}
-                  </span>
+                  <MentionHighlight
+                    mentionClassName="bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded px-0.5 font-medium"
+                  >
+                    {input}
+                  </MentionHighlight>
                 </div>
-              </MentionItem>
-            ))}
-          </MentionList>
-        </Mention>
+                <MentionInput
+                  placeholder="Type @ to mention someone..."
+                  className="w-full bg-transparent text-sm text-transparent caret-foreground outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={!input.trim()}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg disabled:opacity-50"
+              >
+                <ArrowUpIcon className="h-4 w-4" />
+                <span className="sr-only">Send</span>
+              </button>
+            </div>
+            <MentionList className="bg-popover text-popover-foreground absolute bottom-full left-0 z-50 mb-2 max-h-48 w-64 overflow-auto rounded-md border p-1 shadow-md">
+              {USERS.map((user) => (
+                <MentionItem
+                  key={user.id}
+                  value={user.username}
+                  className="hover:bg-accent hover:text-accent-foreground relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                >
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="h-6 w-6 rounded-full"
+                  />
+                  <div className="flex flex-col">
+                    <MentionItemText className="font-medium">
+                      {user.name}
+                    </MentionItemText>
+                    <span className="text-muted-foreground text-xs">
+                      @{user.username}
+                    </span>
+                  </div>
+                </MentionItem>
+              ))}
+            </MentionList>
+          </Mention>
+        </form>
       </div>
     </Chat>
   )
