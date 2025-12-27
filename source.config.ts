@@ -32,6 +32,8 @@ export const docs = defineDocs({
           name: z.string(),
           /** URL to the component on the external registry */
           url: z.string(),
+          /** URL to the registry JSON file for shadcn installation */
+          registryUrl: z.string(),
         })
         .optional(),
     }),
