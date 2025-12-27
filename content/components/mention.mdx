@@ -1,0 +1,24 @@
+---
+title: Mention
+description: A text input component that triggers suggestions when typing a specified character, enabling inline mentions of users or items.
+externalRegistry:
+  name: Dice UI
+  url: https://www.diceui.com/docs/components/mention
+  registryUrl: https://www.diceui.com/r/mention.json
+---
+
+import { ExternalRegistryBanner } from '@/components/external-registry-banner'
+import { Dice4 } from 'lucide-react'
+
+<ExternalRegistryBanner
+  name="Dice UI"
+  icon={<Dice4 />}
+  registryUrl="https://www.diceui.com/"
+  componentUrl="https://www.diceui.com/docs/components/mention"
+/>
+
+## Installation
+
+```bash
+npx shadcn@latest add https://www.diceui.com/r/mention.json
+```
