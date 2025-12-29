@@ -6,7 +6,9 @@ import { getLanguageFromExtension, stripFrontmatter } from '@/lib/shiki'
  * Validates that a path is within the project directory to prevent path traversal attacks
  */
 function isPathWithinProject(filePath: string, baseDir: string): boolean {
-  const resolvedPath = path.resolve(baseDir, filePath)
+  // Strip leading slash to ensure path is treated as relative
+  const relativePath = filePath.startsWith('/') ? filePath.slice(1) : filePath
+  const resolvedPath = path.resolve(baseDir, relativePath)
   const normalizedBase = path.resolve(baseDir)
   return resolvedPath.startsWith(normalizedBase + path.sep)
 }
