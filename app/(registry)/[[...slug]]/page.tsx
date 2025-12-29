@@ -36,7 +36,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     : null
   const docLinks = page.data.docLinks
   const llmText = await getLLMText(page)
-  const llmUrl = `/llm/${page.slugs.join('/')}`
+  const llmUrl = `/${page.slugs.join('/')}.md`
 
   return (
     <DocsPage
