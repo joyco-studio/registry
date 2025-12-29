@@ -1,0 +1,54 @@
+---
+title: Mention
+description: A text input component that triggers suggestions when typing a specified character, enabling inline mentions of users or items.
+externalRegistry:
+  name: Dice UI
+  url: https://www.diceui.com/docs/components/mention
+  registryUrl: https://www.diceui.com/r/mention.json
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+import { ExternalRegistryBanner } from '@/components/external-registry-banner'
+import { Dice4 } from 'lucide-react'
+
+<ExternalRegistryBanner
+  name="Dice UI"
+  icon={<Dice4 />}
+  registryUrl="https://www.diceui.com/"
+  componentUrl="https://www.diceui.com/docs/components/mention"
+/>
+
+<ComponentPreview name="mention-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://registry.joyco.studio/r/mention.json
+```
+
+## Usage
+
+```tsx
+import {
+  Mention,
+  MentionInput,
+  MentionList,
+  MentionItem,
+  MentionItemText,
+} from '@/components/ui/mention'
+
+<Mention>
+  <MentionInput />
+  <MentionList>
+    <MentionItem>
+      <MentionItemText />
+    </MentionItem>
+  </MentionList>
+</Mention>
+```
+
+## With Chat Component
+
+Combine with the [Chat](/components/chat) component to enable mentions in a chat interface:
+
+<ComponentPreview name="chat-with-mention-demo" />
