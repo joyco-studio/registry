@@ -29,6 +29,23 @@ const nextConfig: NextConfig = {
   async redirects() {
     return getExternalComponentRedirects()
   },
+  async rewrites() {
+    return [
+      // Serve .md versions of content pages (e.g., /components/chat.md -> /llm/components/chat)
+      {
+        source: '/components/:path*.md',
+        destination: '/llm/components/:path*',
+      },
+      {
+        source: '/toolbox/:path*.md',
+        destination: '/llm/toolbox/:path*',
+      },
+      {
+        source: '/logs/:path*.md',
+        destination: '/llm/logs/:path*',
+      },
+    ]
+  },
 }
 
 export default withMDX(nextConfig)
