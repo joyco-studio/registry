@@ -5,6 +5,11 @@ import { CodeBlock } from '@/components/code-block'
 import { DownloadFileButton } from './download-button'
 import { Separator } from './ui/separator'
 
+function stripFrontmatter(content: string): string {
+  const frontmatterRegex = /^---\n[\s\S]*?\n---\n*/
+  return content.replace(frontmatterRegex, '')
+}
+
 export async function FileCodeblock({
   filePath,
   title,
@@ -17,9 +22,14 @@ export async function FileCodeblock({
   let content: string
   const publicPath = path.join(process.cwd(), filePath)
   const fileName = path.basename(filePath)
+  const isGuideline = filePath.includes('/public/guidelines')
 
   try {
     content = await fs.readFile(publicPath, 'utf-8')
+
+    if (isGuideline) {
+      content = stripFrontmatter(content)
+    }
   } catch {
     return (
       <div className="text-destructive rounded-lg border border-red-500/20 bg-red-500/10 p-4">

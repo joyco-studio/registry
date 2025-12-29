@@ -1,3 +1,7 @@
+---
+reference: https://registry.joyco.studio/toolbox/pr-guidelines#code-duplication
+---
+
 # Code Duplication
 
 ### What
