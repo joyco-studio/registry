@@ -33,26 +33,18 @@ export function PageActions({
   }, [llmUrl])
 
   return (
-    <div className={cn('not-prose flex gap-x-1', className)}>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={copyToClipboard}
-        title="Copy page as Markdown"
-      >
+    <div className={cn('not-prose flex flex-wrap gap-x-2 gap-y-1', className)}>
+      <Button variant="outline" size="sm" onClick={copyToClipboard}>
         {hasCopied ? (
           <Check className="size-4" />
         ) : (
           <Copy className="size-4" />
         )}
+        {hasCopied ? 'Copied!' : 'Copy Page'}
       </Button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={openMarkdown}
-        title="View as Markdown"
-      >
+      <Button variant="outline" size="sm" onClick={openMarkdown}>
         <ExternalLink className="size-4" />
+        View as Markdown
       </Button>
     </div>
   )
