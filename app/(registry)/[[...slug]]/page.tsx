@@ -59,7 +59,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       }}
     >
       <div className="flex items-center justify-between gap-4">
-        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsTitle className="leading-tight">{page.data.title}</DocsTitle>
         <PageActions
           className="max-sm:hidden"
           content={llmText}
@@ -69,13 +69,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       <DocsDescription className="mb-1">
         {page.data.description}
       </DocsDescription>
-      <div className="flex items-center justify-between gap-8 mb-4">
+      <div className="mb-4 flex items-center justify-between gap-8">
         <DocLinks links={docLinks} />
-        <PageActions
-          className="sm:hidden"
-          content={llmText}
-          llmUrl={llmUrl}
-        />
+        <PageActions className="sm:hidden" content={llmText} llmUrl={llmUrl} />
       </div>
       <DocsBody>
         <MDX
