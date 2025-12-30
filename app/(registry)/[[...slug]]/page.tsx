@@ -60,12 +60,23 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     >
       <div className="flex items-center justify-between gap-4">
         <DocsTitle>{page.data.title}</DocsTitle>
-        <PageActions content={llmText} llmUrl={llmUrl} />
+        <PageActions
+          className="max-sm:hidden"
+          content={llmText}
+          llmUrl={llmUrl}
+        />
       </div>
       <DocsDescription className="mb-1">
         {page.data.description}
       </DocsDescription>
-      <DocLinks links={docLinks} className="mb-4" />
+      <div className="flex items-center justify-between gap-8 mb-4">
+        <DocLinks links={docLinks} />
+        <PageActions
+          className="sm:hidden"
+          content={llmText}
+          llmUrl={llmUrl}
+        />
+      </div>
       <DocsBody>
         <MDX
           components={getMDXComponents({
