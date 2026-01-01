@@ -16,10 +16,10 @@ import {
 } from '@/registry/joyco/blocks/chat'
 import { ArrowUpIcon, Square } from 'lucide-react'
 
-const MTPRZ_AVATAR = '/static/matiasperz.jpg'
-const JOYCO_AVATAR = '/static/joyco.jpg'
-const JOYBOY_AVATAR = '/static/joyboy.jpg'
-const FABROOS_AVATAR = '/static/fabroos.jpg'
+const MTPRZ_AVATAR = '/static/c/matiasperz.webp'
+const JOYCO_AVATAR = '/static/c/joyco.webp'
+const JOYBOY_AVATAR = '/static/c/joyboy.webp'
+const FABROOS_AVATAR = '/static/c/fabroos.webp'
 
 const ANSW_SET = [
   "Processing your request... beep boop... just kidding, I'm way more sophisticated than that. Probably.",
