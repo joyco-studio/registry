@@ -2,6 +2,9 @@
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import CubeIcon from '@/components/icons/3d-cube'
+import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
+import FileIcon from '@/components/icons/file'
 
 export type SearchResult = {
   id: string
@@ -13,6 +16,21 @@ export type SearchResult = {
 type SearchResultsProps = {
   results: SearchResult[]
   query: string
+}
+
+const sectionIcons: Record<
+  string,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
+  components: CubeIcon,
+  toolbox: TerminalWithCursorIcon,
+  logs: FileIcon,
+}
+
+const sectionLabels: Record<string, string> = {
+  components: 'Components',
+  toolbox: 'Toolbox',
+  logs: 'Logs',
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -50,50 +68,82 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
 export function SearchResults({ results, query }: SearchResultsProps) {
   if (results.length === 0) return null
 
-  // Group results by page URL
-  const groupedResults = results.reduce(
+  // Group results by section (first part of URL path)
+  const groupedBySection = results.reduce(
     (acc, result) => {
       const pageUrl = result.url.split('#')[0]
-      if (!acc[pageUrl]) {
-        acc[pageUrl] = []
+      // Extract section from URL like /components/button -> components
+      const section = pageUrl.split('/')[1] || 'other'
+
+      if (!acc[section]) {
+        acc[section] = {}
       }
-      acc[pageUrl].push(result)
+      if (!acc[section][pageUrl]) {
+        acc[section][pageUrl] = []
+      }
+      acc[section][pageUrl].push(result)
       return acc
     },
-    {} as Record<string, SearchResult[]>
+    {} as Record<string, Record<string, SearchResult[]>>
   )
 
   return (
-    <div className="flex flex-col">
-      {Object.entries(groupedResults).map(([pageUrl, pageResults]) => {
-        const pageResult = pageResults.find((r) => r.type === 'page')
-        const title = pageResult?.content ?? pageResults[0]?.content ?? pageUrl
-        const contentPreview = pageResults
-          .filter((r) => r.type !== 'page')
-          .map((r) => r.content)
-          .join(' ')
-          .trim()
+    <nav className="bg-accent/70 fancy-scroll flex flex-col overflow-y-auto">
+      {Object.entries(groupedBySection).map(([section, pages]) => {
+        const Icon = sectionIcons[section] ?? CubeIcon
+        const label = sectionLabels[section] ?? section
 
         return (
-          <Link
-            key={pageUrl}
-            href={pageUrl}
-            className={cn(
-              'flex flex-col gap-1 px-4 py-2.5 transition-colors',
-              'hover:bg-accent'
-            )}
-          >
-            <span className="text-foreground font-mono text-sm font-medium tracking-wide uppercase">
-              <HighlightedText text={title} query={query} />
-            </span>
-            {contentPreview && (
-              <span className="text-muted-foreground line-clamp-2 text-xs normal-case">
-                <HighlightedText text={contentPreview} query={query} />
+          <div key={section} className="flex flex-col">
+            {/* Section header */}
+            <div
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 text-left',
+                'text-foreground'
+              )}
+            >
+              <Icon className="size-4" />
+              <span className="font-mono text-sm font-medium tracking-wide uppercase">
+                {label}
               </span>
-            )}
-          </Link>
+            </div>
+
+            {/* Nested results */}
+            <div className="border-border ml-4 flex flex-col border-l">
+              {Object.entries(pages).map(([pageUrl, pageResults]) => {
+                const pageResult = pageResults.find((r) => r.type === 'page')
+                const title =
+                  pageResult?.content ?? pageResults[0]?.content ?? pageUrl
+                const contentPreview = pageResults
+                  .filter((r) => r.type !== 'page')
+                  .map((r) => r.content)
+                  .join(' ')
+                  .trim()
+
+                return (
+                  <Link
+                    key={pageUrl}
+                    href={pageUrl}
+                    className={cn(
+                      'flex flex-col gap-0.5 py-1.5 pr-4 pl-4 transition-colors',
+                      'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <span className="font-mono text-sm tracking-wide uppercase">
+                      <HighlightedText text={title} query={query} />
+                    </span>
+                    {contentPreview && (
+                      <span className="text-muted-foreground/70 line-clamp-2 text-xs normal-case">
+                        <HighlightedText text={contentPreview} query={query} />
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         )
       })}
-    </div>
+    </nav>
   )
 }

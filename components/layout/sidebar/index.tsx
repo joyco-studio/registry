@@ -88,31 +88,33 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
       return <NoResults query={query} />
     }
     // Show folders when not searching
-    return folders.map((folder, index) => {
-      const folderName =
-        typeof folder.name === 'string' ? folder.name : String(folder.name)
-      const sectionId =
-        folder.$id?.split(':')[1]?.toLowerCase() ?? folderName.toLowerCase()
-      const isCurrentSection = pathname.startsWith(`/${sectionId}`)
+    return (
+      <nav className="bg-accent/70 fancy-scroll flex flex-col overflow-y-auto">
+        {folders.map((folder, index) => {
+          const folderName =
+            typeof folder.name === 'string' ? folder.name : String(folder.name)
+          const sectionId =
+            folder.$id?.split(':')[1]?.toLowerCase() ?? folderName.toLowerCase()
+          const isCurrentSection = pathname.startsWith(`/${sectionId}`)
 
-      return (
-        <SidebarSection
-          key={folder.$id ?? index}
-          folder={folder}
-          defaultOpen={isCurrentSection || index === 0}
-          meta={itemMeta}
-        />
-      )
-    })
+          return (
+            <SidebarSection
+              key={folder.$id ?? index}
+              folder={folder}
+              defaultOpen={isCurrentSection || index === 0}
+              meta={itemMeta}
+            />
+          )
+        })}
+      </nav>
+    )
   }
 
   return (
     <div className="registry-sidebar flex h-full w-full flex-col gap-1 text-sm">
       <SidebarSearch query={query} setQuery={setQuery} />
 
-      <nav className="bg-accent/70 fancy-scroll overflow-y-auto">
-        {renderContent()}
-      </nav>
+      {renderContent()}
 
       <div className="bg-muted flex-1" />
 

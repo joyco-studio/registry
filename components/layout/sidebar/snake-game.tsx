@@ -218,7 +218,8 @@ export function SnakeGame() {
         {gameOver ? (
           <div className="flex w-full items-center gap-1 pl-2">
             <span className="flex-1 uppercase">
-              <span className="font-bold">Game over!</span> Score: {score}{' '}
+              <span className="font-bold">F*ck!</span> Score:{' '}
+              <span className="text-foreground font-bold">{score}</span>{' '}
             </span>
             <Button size="sm" onClick={resetGame} className="uppercase">
               Play again
