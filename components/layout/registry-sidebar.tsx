@@ -231,7 +231,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
       <SearchTrigger />
 
       {/* Sections */}
-      <nav className="bg-accent fancy-scroll overflow-y-auto py-2">
+      <nav className="bg-accent/70 fancy-scroll overflow-y-auto py-2">
         {folders.map((folder, index) => {
           const folderName =
             typeof folder.name === 'string' ? folder.name : String(folder.name)
