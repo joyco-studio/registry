@@ -1,7 +1,7 @@
 import { source } from '@/lib/source'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { baseOptions } from '@/lib/layout.shared'
-import { RegistrySidebar } from '@/components/layout/registry-sidebar'
+import { RegistrySidebar } from '@/components/layout/sidebar'
 
 // Optional: Define item metadata for badges/dots
 const itemMeta: Record<
