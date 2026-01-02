@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       <body className="relative grid grid-cols-[var(--aside-width,4rem)_auto] gap-1">
         <RootProvider
           theme={{
-            themes: ['light', 'dark', 'radio'],
+            themes: ['light', 'dark', 'radio', 'terminal'],
             defaultTheme: 'dark',
           }}
         >

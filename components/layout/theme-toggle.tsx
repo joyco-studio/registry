@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import { useTheme } from 'next-themes'
-import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
+import { AsideButton } from './nav-aside'
 
 /* -------------------------------------------------------------------------------------------------
  * Theme configuration
@@ -18,10 +18,12 @@ const themes: ThemeConfig[] = [
   { name: 'light', label: 'Light' },
   { name: 'dark', label: 'Dark' },
   { name: 'radio', label: 'Radio' },
+  { name: 'terminal', label: 'Terminal' },
 ]
 
 /* -------------------------------------------------------------------------------------------------
  * ThemePreview - Shows a visual representation of theme colors
+ * Uses CSS variables so it works on server and shows current theme automatically
  * -------------------------------------------------------------------------------------------------*/
 
 type ThemePreviewProps = {
@@ -31,13 +33,16 @@ type ThemePreviewProps = {
 
 export const ThemePreview = ({ themeClass, className }: ThemePreviewProps) => (
   <div
-    className={cn('flex flex-col items-center gap-px', themeClass, className)}
+    className={cn('grid rotate-45 grid-cols-2 gap-0.5', themeClass, className)}
   >
-    <div className="bg-primary ring-border/5 size-3 rounded-full ring" />
-    <div className="flex gap-px">
-      <div className="bg-foreground ring-border/5 size-3 rounded-full ring" />
-      <div className="bg-background ring-border/5 size-3 rounded-full ring" />
-    </div>
+    {['bg-primary', 'bg-secondary', 'bg-foreground', 'bg-background'].map(
+      (cls) => (
+        <div
+          key={cls}
+          className={cn(cls, 'ring-border/30 size-2.5 rounded-full ring')}
+        />
+      )
+    )}
   </div>
 )
 
@@ -46,12 +51,8 @@ export const ThemePreview = ({ themeClass, className }: ThemePreviewProps) => (
  * -------------------------------------------------------------------------------------------------*/
 
 export const ThemeToggle = () => {
-  const [mounted, setMounted] = React.useState(false)
   const [isOpen, setIsOpen] = React.useState(false)
-  const { theme, setTheme } = useTheme()
   const containerRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => setMounted(true), [])
 
   // Close on click outside
   React.useEffect(() => {
@@ -70,58 +71,56 @@ export const ThemeToggle = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen])
 
-  if (!mounted) {
-    return (
-      <Button
-        variant="muted"
-        size="icon"
-        className="bg-muted size-aside-width"
-        disabled
-      />
-    )
-  }
-
-  const currentTheme = themes.find((t) => t.name === theme) ?? themes[0]
-
   return (
     <div ref={containerRef} className="relative flex flex-col gap-1">
       {/* Theme options - shown when open */}
-      {isOpen && (
-        <div className="flex flex-col gap-1">
-          {themes
-            .filter((t) => t.name !== theme)
-            .map((t) => (
-              <Button
-                key={t.name}
-                variant="muted"
-                size="icon"
-                className="bg-muted size-aside-width hover:brightness-95"
-                onClick={() => {
-                  setTheme(t.name)
-                  setIsOpen(false)
-                }}
-              >
-                <ThemePreview themeClass={t.name} />
-                <span className="sr-only">{t.label}</span>
-              </Button>
-            ))}
-        </div>
-      )}
+      {isOpen && <ThemeOptions onSelect={() => setIsOpen(false)} />}
 
-      {/* Current theme toggle button */}
-      <Button
-        variant="muted"
-        size="icon"
-        className="bg-muted size-aside-width hover:brightness-95"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      {/* Current theme toggle button - no hydration needed */}
+      <AsideButton onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? (
           <span className="font-mono text-xs uppercase">Close</span>
         ) : (
-          <ThemePreview themeClass={currentTheme.name} />
+          <ThemePreview />
         )}
-        {!isOpen && <span className="sr-only">{currentTheme.label}</span>}
-      </Button>
+        {!isOpen && <span className="sr-only">Theme</span>}
+      </AsideButton>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * ThemeOptions - Client-only theme selection buttons
+ * -------------------------------------------------------------------------------------------------*/
+
+function ThemeOptions({ onSelect }: { onSelect: () => void }) {
+  const [mounted, setMounted] = React.useState(false)
+  const { theme, setTheme } = useTheme()
+
+  React.useEffect(() => setMounted(true), [])
+
+  // Show placeholder buttons while hydrating
+  const availableThemes = mounted
+    ? themes.filter((t) => t.name !== theme)
+    : themes.slice(0, 3) // Show 3 placeholders during SSR
+
+  return (
+    <div className="flex flex-col gap-1">
+      {availableThemes.map((t) => (
+        <AsideButton
+          key={t.name}
+          onClick={() => {
+            if (mounted) {
+              setTheme(t.name)
+              onSelect()
+            }
+          }}
+          disabled={!mounted}
+        >
+          <ThemePreview themeClass={t.name} />
+          <span className="sr-only">{t.label}</span>
+        </AsideButton>
+      ))}
     </div>
   )
 }

@@ -39,8 +39,8 @@ export type AsideButtonProps = Omit<
   React.ComponentProps<typeof Button>,
   'variant' | 'size'
 > & {
-  icon: React.ComponentType<SVGProps<SVGSVGElement>>
-  label: string
+  icon?: React.ComponentType<SVGProps<SVGSVGElement>>
+  label?: string
   active?: boolean
 }
 
@@ -53,20 +53,24 @@ export const AsideButton = ({
   asChild,
   ...props
 }: AsideButtonProps) => {
-  const content = (
-    <>
-      <Icon className={cn('size-5', active && 'rotate-90')} />
-      <span className={cn('text-sm 2xl:text-base', !active && 'sr-only')}>
-        {label}
-      </span>
-    </>
-  )
+  // If icon/label provided, use structured content; otherwise use children directly
+  const content =
+    Icon && label ? (
+      <>
+        <Icon className={cn('size-5', active && 'rotate-90')} />
+        <span className={cn('text-sm 2xl:text-base', !active && 'sr-only')}>
+          {label}
+        </span>
+      </>
+    ) : (
+      children
+    )
 
   const buttonClassName = cn(
     'bg-muted w-aside-width flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-none',
     active
-      ? 'bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
-      : 'h-aside-width size-aside-width hover:brightness-95',
+      ? 'bg-accent hover:bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
+      : 'h-aside-width size-aside-width',
     className
   )
 
@@ -75,7 +79,7 @@ export const AsideButton = ({
       <Slot className={buttonClassName} {...props}>
         {React.cloneElement(
           children as React.ReactElement<{ children?: React.ReactNode }>,
-          { children: content }
+          { children: Icon && label ? content : undefined }
         )}
       </Slot>
     )
