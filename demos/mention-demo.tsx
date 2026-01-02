@@ -9,10 +9,10 @@ import {
   MentionLabel,
 } from '@/components/ui/mention'
 
-const MTPRZ_AVATAR = '/static/matiasperz.jpg'
-const JOYCO_AVATAR = '/static/joyco.jpg'
-const JOYBOY_AVATAR = '/static/joyboy.jpg'
-const FABROOS_AVATAR = '/static/fabroos.jpg'
+const MTPRZ_AVATAR = '/static/c/matiasperz.webp'
+const JOYCO_AVATAR = '/static/c/joyco.webp'
+const JOYBOY_AVATAR = '/static/c/joyboy.webp'
+const FABROOS_AVATAR = '/static/c/fabroos.webp'
 
 const users = [
   {
@@ -55,6 +55,6 @@ export function MentionDemo() {
       </Mention>
     </Mention>
   )
-} 
+}
 
 export default MentionDemo
