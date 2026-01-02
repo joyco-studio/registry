@@ -94,15 +94,10 @@ export const ThemeToggle = () => {
  * -------------------------------------------------------------------------------------------------*/
 
 function ThemeOptions({ onSelect }: { onSelect: () => void }) {
-  const [mounted, setMounted] = React.useState(false)
   const { theme, setTheme } = useTheme()
 
-  React.useEffect(() => setMounted(true), [])
-
-  // Show placeholder buttons while hydrating
-  const availableThemes = mounted
-    ? themes.filter((t) => t.name !== theme)
-    : themes.slice(0, 3) // Show 3 placeholders during SSR
+  // Filter out current theme - menu only opens after hydration (user click)
+  const availableThemes = themes.filter((t) => t.name !== theme)
 
   return (
     <div className="flex flex-col gap-1">
@@ -110,12 +105,9 @@ function ThemeOptions({ onSelect }: { onSelect: () => void }) {
         <AsideButton
           key={t.name}
           onClick={() => {
-            if (mounted) {
-              setTheme(t.name)
-              onSelect()
-            }
+            setTheme(t.name)
+            onSelect()
           }}
-          disabled={!mounted}
         >
           <ThemePreview themeClass={t.name} />
           <span className="sr-only">{t.label}</span>
