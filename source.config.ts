@@ -1,5 +1,6 @@
 import lastModified from 'fumadocs-mdx/plugins/last-modified'
 import rehypePrettyCode from 'rehype-pretty-code'
+import type { Element } from 'hast'
 import { z } from 'zod'
 import {
   defineConfig,
@@ -59,7 +60,7 @@ export default defineConfig({
             light: 'github-light-default',
           },
           transformers,
-          onVisitTitle(node: { properties: { [key: string]: string } }) {
+          onVisitTitle(node: Element) {
             node.properties['class'] = cn(
               'not-prose',
               node.properties['class']?.toString()
