@@ -1,23 +1,30 @@
 import { CircleDotDashed } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-export function Maintainers({ maintainers }: { maintainers: string[] }) {
+type MaintainersProps = {
+  maintainers: string[]
+  lastModified?: Date
+}
+
+export function Maintainers({ maintainers, lastModified }: MaintainersProps) {
   if (maintainers.length === 0) return null
 
   return (
-    <div className="flex flex-col">
-      <h3 className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-sm">
-        <CircleDotDashed className="size-4" />
-        Maintainers
-      </h3>
-      <div className="flex flex-wrap gap-2 py-3">
+    <div className="bg-muted flex flex-col pl-2">
+      <div className="text-fd-foreground flex items-center gap-2 py-2">
+        <CircleDotDashed className="size-3" />
+        <span className="font-mono text-xs font-medium tracking-wide uppercase">
+          Maintainers
+        </span>
+      </div>
+      <div className="border-fd-border ml-1 flex flex-col border-l-2">
         {maintainers.map((maintainer) => (
           <a
             key={maintainer}
             href={`https://github.com/${maintainer}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-fd-card text-fd-foreground hover:bg-fd-accent inline-flex items-center gap-2 rounded-full border py-1 pr-2 pl-1 text-sm transition-colors"
+            className="ext-fd-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-2 px-2 py-1.5 font-mono text-sm uppercase transition-colors"
           >
             <Avatar className="size-5">
               <AvatarImage
@@ -34,6 +41,16 @@ export function Maintainers({ maintainers }: { maintainers: string[] }) {
           </a>
         ))}
       </div>
+
+      {lastModified && (
+        <span className="text-muted-foreground/60 my-1 py-1 font-mono text-xs">
+          {lastModified.toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+          })}
+        </span>
+      )}
     </div>
   )
 }

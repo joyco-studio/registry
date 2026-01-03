@@ -3,7 +3,6 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-  PageLastUpdate,
 } from 'fumadocs-ui/page'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -14,6 +13,7 @@ import { getDownloadStats } from '@/lib/stats'
 import { getMDXComponents } from '@/mdx-components'
 import { Maintainers } from '@/components/layout/maintainers'
 import { WeeklyDownloads } from '@/components/layout/weekly-downloads'
+import { TOC } from '@/components/layout/toc'
 import { InferPageType } from 'fumadocs-core/source'
 import { DocLinks } from '@/components/layout/doc-links'
 import { PageActions } from '@/components/layout/page-actions'
@@ -43,44 +43,55 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       toc={page.data.toc}
       full={page.data.full}
       tableOfContent={{
-        style: 'clerk',
-        footer: (
-          <div className="flex flex-col gap-4 py-2">
-            <Maintainers maintainers={page.data.maintainers} />
-            {downloadStats && <WeeklyDownloads data={downloadStats} />}
-            {page.data.lastModified && (
-              <PageLastUpdate
-                className="opacity-50"
-                date={new Date(page.data.lastModified)}
-              />
-            )}
-          </div>
+        enabled: true,
+        component: (
+          <TOC
+            footer={
+              <>
+                <Maintainers
+                  maintainers={page.data.maintainers}
+                  lastModified={
+                    page.data.lastModified
+                      ? new Date(page.data.lastModified)
+                      : undefined
+                  }
+                />
+                {downloadStats && <WeeklyDownloads data={downloadStats} />}
+              </>
+            }
+          />
         ),
       }}
     >
-      <div className="flex items-center justify-between gap-4">
-        <DocsTitle className="leading-tight">{page.data.title}</DocsTitle>
-        <PageActions
-          className="max-sm:hidden"
-          content={llmText}
-          llmUrl={llmUrl}
-        />
+      <div className="mx-auto max-w-2xl 2xl:max-w-3xl">
+        <div className="flex items-center justify-between gap-4">
+          <DocsTitle className="leading-tight">{page.data.title}</DocsTitle>
+          <PageActions
+            className="max-sm:hidden"
+            content={llmText}
+            llmUrl={llmUrl}
+          />
+        </div>
+        <DocsDescription className="mb-1">
+          {page.data.description}
+        </DocsDescription>
+        <div className="mb-4 flex items-center justify-between gap-8">
+          <DocLinks links={docLinks} />
+          <PageActions
+            className="sm:hidden"
+            content={llmText}
+            llmUrl={llmUrl}
+          />
+        </div>
+        <DocsBody>
+          <MDX
+            components={getMDXComponents({
+              // this allows you to link to other pages with relative file paths
+              a: createRelativeLink(source, page),
+            })}
+          />
+        </DocsBody>
       </div>
-      <DocsDescription className="mb-1">
-        {page.data.description}
-      </DocsDescription>
-      <div className="mb-4 flex items-center justify-between gap-8">
-        <DocLinks links={docLinks} />
-        <PageActions className="sm:hidden" content={llmText} llmUrl={llmUrl} />
-      </div>
-      <DocsBody>
-        <MDX
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-          })}
-        />
-      </DocsBody>
     </DocsPage>
   )
 }
