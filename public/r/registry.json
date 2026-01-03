@@ -111,6 +111,34 @@
       "registryDependencies": ["input-group", "avatar"]
     },
     {
+      "name": "rich-textarea",
+      "type": "registry:component",
+      "title": "Rich Textarea",
+      "description": "A TipTap-powered chat textarea with mentions and feature slots.",
+      "files": [
+        {
+          "path": "registry/joyco/blocks/rich-textarea.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "registry/joyco/blocks/rich-textarea-mentions.tsx",
+          "type": "registry:lib"
+        }
+      ],
+      "dependencies": [
+        "@tiptap/core",
+        "@tiptap/extension-document",
+        "@tiptap/extension-hard-break",
+        "@tiptap/extension-mention",
+        "@tiptap/extension-paragraph",
+        "@tiptap/extension-placeholder",
+        "@tiptap/extension-text",
+        "@tiptap/react",
+        "@tiptap/suggestion",
+        "@tiptap/pm"
+      ]
+    },
+    {
       "name": "hls-video-player",
       "type": "registry:component",
       "title": "HLS Video Player",

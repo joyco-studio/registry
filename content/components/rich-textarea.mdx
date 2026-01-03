@@ -1,0 +1,69 @@
+---
+title: Rich Textarea
+description: A TipTap-powered chat textarea with a small core and feature slots for mentions, emoji, and more.
+maintainers: ['matiasperz']
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+<ComponentPreview name="rich-textarea-demo" />
+
+## Installation
+
+```bash
+npx shadcn@latest add https://r.joyco.studio/rich-textarea.json
+```
+
+## Usage
+
+```tsx
+import { RichTextarea } from '@/components/rich-textarea'
+
+<RichTextarea
+  value={value}
+  onChange={setValue}
+  onSubmit={handleSubmit}
+  placeholder="Type a message"
+/>
+```
+
+## Mentions feature
+
+Mentions are an opt-in feature. Keep the core lean, then plug in behavior via `features`.
+
+<ComponentPreview name="rich-textarea-mentions-demo" />
+
+```tsx
+import {
+  DefaultMentionMenu,
+  useMentionsFeature,
+} from '@/components/rich-textarea-mentions'
+
+const people = [
+  { id: 'u_01', label: 'Matias' },
+  { id: 'u_02', label: 'Joyboy' },
+]
+
+const mentionFeature = useMentionsFeature({
+  getItems: (query) =>
+    people.filter((person) =>
+      person.label.toLowerCase().includes(query.toLowerCase())
+    ),
+  MenuComponent: DefaultMentionMenu,
+})
+
+<RichTextarea
+  value={value}
+  onChange={setValue}
+  onSubmit={handleSubmit}
+  features={[mentionFeature]}
+/>
+```
+
+### Mention transport format
+
+Mentions serialize as tokens so the value stays a single string:
+
+```text
+hey @{u_01|Matias} whats up
+```
