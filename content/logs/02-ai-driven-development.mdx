@@ -49,9 +49,13 @@ When I want simpler trivial stuff like "Integrate Vercel Analytics" or "Add this
   />
 </ImageCols>
 
+## Global guidelines (AGENTS.md)
+
+We maintain a comprehensive set of global guidelines that shape how our agents behave. These guidelines are stored in a markdown file that gets loaded into the agent's context. You can explore the complete [AGENTS.md](/toolbox/agents) for more details.
+
 ## About reviews
 
-As a studio we agree on a set of [guidelines](https://registry.joyco.studio/toolbox/pr-guidelines) to maintain code quality. These are not stuff that a linter could catch, these involve logic, data management, and even file-naming. In the past, I used to review these myself, occupying my "**main attention thread**", but now we have better tools like [Greptile](https://www.greptile.com/), we load a set of guidelines that the model can load to find specific violations on the PR diff. This applies to both human code and agent code, like new PR from the "Cursor Cloud Agent". We collaborate as a team on augmenting these guidelines to refine what we ship while delegating most of these to specialized agents.
+As a studio we agree on a set of [PR Guidelines](/toolbox/pr-guidelines) to maintain code quality. These are not stuff that a linter could catch, these involve stuff like logic and data management. In the past, I used to review these myself, occupying my "**main attention thread**", but now we have better tools like [Greptile](https://www.greptile.com/), we load a set of guidelines that the model can load to find specific violations on the PR diff. This applies to both human code and agent code, like new PR from the "Cursor Cloud Agent". We collaborate as a team on augmenting these guidelines to refine what we ship while delegating most of these to specialized agents.
 
 ![Greptile review](/static/c/greptile-review.webp)
 
