@@ -1,0 +1,53 @@
+'use client'
+
+import { type ReactNode, type ComponentProps } from 'react'
+import { Text } from 'lucide-react'
+import { TOCScrollArea } from 'fumadocs-ui/components/toc/index'
+import { TOCItems } from 'fumadocs-ui/components/toc/clerk'
+import { cn } from '@/lib/utils'
+
+export interface ClerkTOCProps {
+  /**
+   * Custom content before the TOC title
+   */
+  header?: ReactNode
+  /**
+   * Custom content after the TOC items
+   */
+  footer?: ReactNode
+  /**
+   * Additional className for the root container
+   */
+  className?: string
+}
+
+export function TOC({ header, footer, className }: ClerkTOCProps) {
+  return (
+    <div
+      id="nd-toc"
+      className={cn(
+        'sticky top-0 flex h-screen w-[calc(var(--sidebar-width)+var(--aside-width)+var(--spacing))] gap-1 [grid-area:toc] max-xl:hidden',
+        className
+      )}
+    >
+      <div className="flex h-full w-(--fd-toc-width) flex-col gap-1">
+        <div className="bg-muted p-3 font-mono uppercase">
+          {header}
+          <h3
+            id="toc-title"
+            className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-xs"
+          >
+            <Text className="size-4" />
+            <span>On this page</span>
+          </h3>
+          <TOCScrollArea>
+            <TOCItems className="[&_a]:text-xs" />
+          </TOCScrollArea>
+        </div>
+        {footer}
+        <div className="bg-muted flex-1" />
+      </div>
+      <div className="bg-muted flex-1" />
+    </div>
+  )
+}
