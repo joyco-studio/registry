@@ -9,16 +9,19 @@ export function CodeBlock({
   title,
   rawCode,
   maxHeight,
+  wrap,
 }: {
   highlightedCode: string
   language: string
   title?: string
   rawCode?: string
   maxHeight?: number
+  wrap?: boolean
 }) {
   return (
     <figure
       data-rehype-pretty-code-figure=""
+      data-wrap={wrap}
       className="not-prose group/code"
       data-slot="code-block"
     >
@@ -35,7 +38,9 @@ export function CodeBlock({
             '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
           } as React.CSSProperties
         }
-        className={cn('[&>pre]:max-h-(--pre-max-height)')}
+        className={cn(
+          '[&>pre]:max-h-(--pre-max-height)'
+        )}
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </figure>
