@@ -13,6 +13,7 @@ export async function FileCodeblock({
   filePath,
   title,
   language,
+  ...rest
 }: {
   filePath: string
 } & Omit<
@@ -55,6 +56,7 @@ export async function FileCodeblock({
         language={lang}
         highlightedCode={highlightedCode}
         title={displayTitle}
+        {...rest}
       />
     </div>
   )
