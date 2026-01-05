@@ -64,15 +64,12 @@ export function LayoutToggle() {
 
   return (
     <AsideButton onClick={toggleLayout} className="max-2xl:hidden">
-      {layout === 'fixed' ? (
-        <FixedLayoutIcon />
-      ) : (
-        <FullLayoutIcon />
-      )}
+      {layout === 'fixed' ? <FixedLayoutIcon /> : <FullLayoutIcon />}
       <span className="sr-only">
-        {layout === 'fixed' ? 'Switch to full width' : 'Switch to contained width'}
+        {layout === 'fixed'
+          ? 'Switch to full width'
+          : 'Switch to contained width'}
       </span>
     </AsideButton>
   )
 }
-

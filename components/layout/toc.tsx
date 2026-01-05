@@ -26,7 +26,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
     <div
       id="nd-toc"
       className={cn(
-        'sticky top-0 flex h-screen w-[calc(var(--sidebar-width)+var(--aside-width)+var(--spacing))] gap-1 [grid-area:toc] max-xl:hidden',
+        'sticky top-0 flex h-screen gap-1 [grid-area:toc] max-xl:hidden',
         className
       )}
     >
@@ -47,7 +47,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
         {footer}
         <div className="bg-muted flex-1" />
       </div>
-      <div className="bg-muted flex-1" />
+      <div className="bg-muted min-w-aside-width flex-1" />
     </div>
   )
 }

@@ -11,6 +11,8 @@ import { NoResults } from './no-results'
 import { SidebarSection, type SidebarItemMeta } from './section'
 import { SocialLinks } from './social-links'
 import { NavAside } from '../nav-aside'
+import { useLayout } from '@/hooks/use-layout'
+import { cn } from '@/lib/utils'
 
 export type { SidebarItemMeta }
 
@@ -27,6 +29,8 @@ const MIN_QUERY_LENGTH = 2
 
 export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
   const pathname = usePathname()
+  const { layout } = useLayout()
+
   const [query, setQuery] = React.useState('')
   const [displayedResults, setDisplayedResults] = React.useState<
     SearchResult[]
@@ -118,6 +122,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
   return (
     <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex md:justify-end">
       {/* NavAside - category navigation */}
+      <div className={cn('bg-muted flex-1', layout === 'full' && 'hidden')} />
       <NavAside />
 
       {/* Sidebar content */}
