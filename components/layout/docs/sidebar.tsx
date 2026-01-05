@@ -1,11 +1,11 @@
-'use client';
-import * as Base from '../sidebar/base';
-import { cn } from '../../../lib/cn';
-import { type ComponentProps, useRef } from 'react';
-import { cva } from 'class-variance-authority';
-import { createPageTreeRenderer } from '../sidebar/page-tree';
-import { createLinkItemRenderer } from '../sidebar/link-item';
-import { mergeRefs } from '../../../lib/merge-refs';
+'use client'
+import * as Base from '../sidebar/base'
+import { cn } from '../../../lib/cn'
+import { type ComponentProps, useRef } from 'react'
+import { cva } from 'class-variance-authority'
+import { createPageTreeRenderer } from '../sidebar/page-tree'
+import { createLinkItemRenderer } from '../sidebar/link-item'
+import { mergeRefs } from '../../../lib/merge-refs'
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -20,11 +20,11 @@ const itemVariants = cva(
         true: "data-[active=true]:before:content-[''] data-[active=true]:before:bg-fd-primary data-[active=true]:before:absolute data-[active=true]:before:w-px data-[active=true]:before:inset-y-2.5 data-[active=true]:before:start-2.5",
       },
     },
-  },
-);
+  }
+)
 
 function getItemOffset(depth: number) {
-  return `calc(${2 + 3 * depth} * var(--spacing))`;
+  return `calc(${2 + 3 * depth} * var(--spacing))`
 }
 
 export {
@@ -33,7 +33,7 @@ export {
   SidebarCollapseTrigger,
   SidebarViewport,
   SidebarTrigger,
-} from '../sidebar/base';
+} from '../sidebar/base'
 
 export function SidebarContent({
   ref: refProp,
@@ -41,21 +41,18 @@ export function SidebarContent({
   children,
   ...props
 }: ComponentProps<'aside'>) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLElement>(null)
 
   return (
     <aside
       id="nd-sidebar"
       ref={mergeRefs(ref, refProp)}
-      className={cn(
-        'flex flex-col w-full h-full text-sm',
-        className,
-      )}
+      className={cn('flex h-full w-full flex-col text-sm', className)}
       {...props}
     >
       {children}
     </aside>
-  );
+  )
 }
 
 export function SidebarDrawer({
@@ -65,22 +62,27 @@ export function SidebarDrawer({
 }: ComponentProps<typeof Base.SidebarDrawerContent>) {
   return (
     <>
-      <Base.SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
+      <Base.SidebarDrawerOverlay className="data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out fixed inset-0 z-40 backdrop-blur-xs" />
       <Base.SidebarDrawerContent
         className={cn(
-          'fixed text-[0.9375rem] flex flex-col shadow-lg border-s end-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
-          className,
+          'bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out fixed inset-y-0 end-0 z-40 flex w-[85%] max-w-[380px] flex-col border-s text-[0.9375rem] shadow-lg',
+          className
         )}
         {...props}
       >
         {children}
       </Base.SidebarDrawerContent>
     </>
-  );
+  )
 }
 
-export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
-  const depth = Base.useFolderDepth();
+export function SidebarSeparator({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<'p'>) {
+  const depth = Base.useFolderDepth()
 
   return (
     <Base.SidebarSeparator
@@ -93,7 +95,7 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
     >
       {children}
     </Base.SidebarSeparator>
-  );
+  )
 }
 
 export function SidebarItem({
@@ -102,11 +104,14 @@ export function SidebarItem({
   children,
   ...props
 }: ComponentProps<typeof Base.SidebarItem>) {
-  const depth = Base.useFolderDepth();
+  const depth = Base.useFolderDepth()
 
   return (
     <Base.SidebarItem
-      className={cn(itemVariants({ variant: 'link', highlight: depth >= 1 }), className)}
+      className={cn(
+        itemVariants({ variant: 'link', highlight: depth >= 1 }),
+        className
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,
@@ -115,7 +120,7 @@ export function SidebarItem({
     >
       {children}
     </Base.SidebarItem>
-  );
+  )
 }
 
 export function SidebarFolderTrigger({
@@ -123,11 +128,15 @@ export function SidebarFolderTrigger({
   style,
   ...props
 }: ComponentProps<typeof Base.SidebarFolderTrigger>) {
-  const { depth, collapsible } = Base.useFolder()!;
+  const { depth, collapsible } = Base.useFolder()!
 
   return (
     <Base.SidebarFolderTrigger
-      className={cn(itemVariants({ variant: collapsible ? 'button' : null }), 'w-full', className)}
+      className={cn(
+        itemVariants({ variant: collapsible ? 'button' : null }),
+        'w-full',
+        className
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,
@@ -136,7 +145,7 @@ export function SidebarFolderTrigger({
     >
       {props.children}
     </Base.SidebarFolderTrigger>
-  );
+  )
 }
 
 export function SidebarFolderLink({
@@ -144,11 +153,15 @@ export function SidebarFolderLink({
   style,
   ...props
 }: ComponentProps<typeof Base.SidebarFolderLink>) {
-  const depth = Base.useFolderDepth();
+  const depth = Base.useFolderDepth()
 
   return (
     <Base.SidebarFolderLink
-      className={cn(itemVariants({ variant: 'link', highlight: depth > 1 }), 'w-full', className)}
+      className={cn(
+        itemVariants({ variant: 'link', highlight: depth > 1 }),
+        'w-full',
+        className
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,
@@ -157,7 +170,7 @@ export function SidebarFolderLink({
     >
       {props.children}
     </Base.SidebarFolderLink>
-  );
+  )
 }
 
 export function SidebarFolderContent({
@@ -165,21 +178,21 @@ export function SidebarFolderContent({
   children,
   ...props
 }: ComponentProps<typeof Base.SidebarFolderContent>) {
-  const depth = Base.useFolderDepth();
+  const depth = Base.useFolderDepth()
 
   return (
     <Base.SidebarFolderContent
       className={cn(
         'relative',
         depth === 1 &&
-          "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
-        className,
+          "before:bg-fd-border before:absolute before:inset-y-1 before:start-2.5 before:w-px before:content-['']",
+        className
       )}
       {...props}
     >
       {children}
     </Base.SidebarFolderContent>
-  );
+  )
 }
 
 export const SidebarPageTree = createPageTreeRenderer({
@@ -189,7 +202,7 @@ export const SidebarPageTree = createPageTreeRenderer({
   SidebarFolderTrigger,
   SidebarItem,
   SidebarSeparator,
-});
+})
 
 export const SidebarLinkItem = createLinkItemRenderer({
   SidebarFolder: Base.SidebarFolder,
@@ -197,4 +210,4 @@ export const SidebarLinkItem = createLinkItemRenderer({
   SidebarFolderLink,
   SidebarFolderTrigger,
   SidebarItem,
-});
+})

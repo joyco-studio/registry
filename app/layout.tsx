@@ -45,6 +45,19 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       className={cn(publicSans.variable, robotoMono.variable)}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.layout) {
+                  document.documentElement.classList.add('layout-' + localStorage.layout)
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
       <body>
         <RootProvider
           theme={{

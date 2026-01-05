@@ -1,10 +1,11 @@
+import type { CSSProperties } from 'react'
 import { source } from '@/lib/source'
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
 import {
   LayoutContextProvider,
   LayoutBody,
 } from '@/components/layout/docs/client'
-import { Sidebar } from '@/components/layout/docs/sidebar'
+import { LayoutProvider } from '@/hooks/use-layout'
 import { RegistrySidebar } from '@/components/layout/sidebar'
 
 // Optional: Define item metadata for badges/dots
@@ -19,15 +20,22 @@ const itemMeta: Record<
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <TreeContextProvider tree={source.pageTree}>
-      <LayoutContextProvider>
-        <Sidebar>
-          <LayoutBody>
+    <LayoutProvider defaultLayout="fixed" storageKey="layout">
+      <TreeContextProvider tree={source.pageTree}>
+        <LayoutContextProvider>
+          <LayoutBody
+            style={
+              {
+                '--fd-sidebar-width':
+                  'calc(var(--aside-width) + var(--sidebar-width))',
+              } as CSSProperties
+            }
+          >
             <RegistrySidebar tree={source.pageTree} itemMeta={itemMeta} />
             {children}
           </LayoutBody>
-        </Sidebar>
-      </LayoutContextProvider>
-    </TreeContextProvider>
+        </LayoutContextProvider>
+      </TreeContextProvider>
+    </LayoutProvider>
   )
 }

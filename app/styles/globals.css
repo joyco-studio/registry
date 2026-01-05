@@ -334,6 +334,15 @@ html {
   overscroll-behavior: none;
 }
 
+/* Layout width toggle - default is fixed (contained) */
+html {
+  --fd-layout-width: 97rem;
+}
+
+html.layout-full {
+  --fd-layout-width: 100%;
+}
+
 html.dark .shiki,
 html.dark .shiki span {
   color: var(--shiki-dark) !important;

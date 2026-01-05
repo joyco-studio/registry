@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import type { CSSProperties } from 'react'
 import { usePathname } from 'next/navigation'
 import type * as PageTree from 'fumadocs-core/page-tree'
 import { useDocsSearch } from 'fumadocs-core/search/client'
@@ -117,15 +116,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
   }
 
   return (
-    <div
-      className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex md:justify-end"
-      style={
-        {
-          '--fd-sidebar-width':
-            'calc(var(--aside-width) + var(--sidebar-width))',
-        } as CSSProperties
-      }
-    >
+    <div className="sticky top-0 hidden h-screen shrink-0 gap-1 [grid-area:sidebar] md:flex md:justify-end">
       {/* NavAside - category navigation */}
       <NavAside />
 
