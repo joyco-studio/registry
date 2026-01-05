@@ -1,9 +1,9 @@
 'use client'
 
-import { type ReactNode, type ComponentProps } from 'react'
+import { type ReactNode } from 'react'
 import { Text } from 'lucide-react'
-import { TOCScrollArea } from 'fumadocs-ui/components/toc/index'
-import { TOCItems } from 'fumadocs-ui/components/toc/clerk'
+import { TOCScrollArea } from '@/components/toc'
+import { TOCItems } from '@/components/toc/clerk'
 import { cn } from '@/lib/utils'
 
 export interface ClerkTOCProps {

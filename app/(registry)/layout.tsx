@@ -1,6 +1,10 @@
 import { source } from '@/lib/source'
-import { DocsLayout } from 'fumadocs-ui/layouts/docs'
-import { baseOptions } from '@/lib/layout.shared'
+import { TreeContextProvider } from 'fumadocs-ui/contexts/tree'
+import {
+  LayoutContextProvider,
+  LayoutBody,
+} from '@/components/layout/docs/client'
+import { Sidebar } from '@/components/layout/docs/sidebar'
 import { RegistrySidebar } from '@/components/layout/sidebar'
 
 // Optional: Define item metadata for badges/dots
@@ -13,27 +17,17 @@ const itemMeta: Record<
   // '/components/infinite-list': { badge: 'updated' },
 }
 
-// Empty tree to prevent fumadocs from rendering its default sidebar tree
-const emptyTree = { name: '', children: [] }
-
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <div className="flex min-h-screen">
-      {/* Custom sidebar - fully controlled */}
-      <aside className="w-sidebar-width sticky top-0 hidden h-screen shrink-0 flex-col md:flex">
-        <RegistrySidebar tree={source.pageTree} itemMeta={itemMeta} />
-      </aside>
-
-      {/* Main content area using DocsLayout for DocsPage context */}
-      <DocsLayout
-        {...baseOptions()}
-        tree={emptyTree}
-        sidebar={{ enabled: false }}
-        nav={{ enabled: false }}
-        containerProps={{ className: 'flex-1' }}
-      >
-        {children}
-      </DocsLayout>
-    </div>
+    <TreeContextProvider tree={source.pageTree}>
+      <LayoutContextProvider>
+        <Sidebar>
+          <LayoutBody>
+            <RegistrySidebar tree={source.pageTree} itemMeta={itemMeta} />
+            {children}
+          </LayoutBody>
+        </Sidebar>
+      </LayoutContextProvider>
+    </TreeContextProvider>
   )
 }
