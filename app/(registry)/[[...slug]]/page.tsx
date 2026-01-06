@@ -20,11 +20,22 @@ import {
 } from '@/components/layout/docs/page/client'
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/cn'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
   return page.slugs[page.slugs.length - 1]
+}
+
+const getCategoryLabel = (slugs: string[]) => {
+  const category = slugs[0]
+  const labels: Record<string, string> = {
+    components: 'Component',
+    toolbox: 'Toolbox',
+    logs: 'Log',
+  }
+  return labels[category] || category
 }
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -68,7 +79,13 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
         )}
       >
         <div className="mx-auto w-full max-w-2xl 2xl:max-w-3xl">
-          <div className="flex items-center justify-between gap-4">
+          {/* Category badge */}
+          <Badge variant="muted" className="mb-4">
+            {getCategoryLabel(page.slugs)}
+          </Badge>
+
+          {/* Title and actions row */}
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
             <h1 className="text-[1.75em] leading-tight font-semibold">
               {page.data.title}
             </h1>
@@ -78,12 +95,19 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               llmUrl={llmUrl}
             />
           </div>
+
+          {/* Description */}
           {page.data.description && (
-            <p className="text-fd-muted-foreground mb-1 text-lg">
+            <p className="text-fd-muted-foreground mb-4 text-lg">
               {page.data.description}
             </p>
           )}
-          <div className="mb-4 flex items-center justify-between gap-8">
+
+          {/* Separator */}
+          <div className="bg-border mb-4 h-px w-full" />
+
+          {/* Doc links */}
+          <div className="mb-6 flex items-center justify-between gap-8">
             <DocLinks links={docLinks} />
             <PageActions
               className="sm:hidden"
@@ -91,6 +115,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               llmUrl={llmUrl}
             />
           </div>
+
           <div className="prose flex-1">
             <MDX
               components={getMDXComponents({

@@ -37,10 +37,7 @@ export const ThemePreview = ({ themeClass, className }: ThemePreviewProps) => (
   >
     {['bg-primary', 'bg-secondary', 'bg-foreground', 'bg-background'].map(
       (cls) => (
-        <div
-          key={cls}
-          className={cn(cls, 'ring-border/30 size-2.5 rounded-full ring')}
-        />
+        <div key={cls} className={cn(cls, 'ring-border/30 size-2.5 ring')} />
       )
     )}
   </div>

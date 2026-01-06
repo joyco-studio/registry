@@ -27,6 +27,7 @@ export function CopyButton({
   value,
   className,
   forceVisible = false,
+  absolute = true,
   children,
   variant = 'ghost',
   size = 'icon',
@@ -34,6 +35,8 @@ export function CopyButton({
 }: {
   value: string
   forceVisible?: boolean
+  /** Whether to use absolute positioning (default: true for code blocks) */
+  absolute?: boolean
   children?: (hasCopied: boolean) => React.ReactNode
 } & Omit<React.ComponentProps<typeof Button>, 'children'>) {
   const { hasCopied, copy } = useCopyToClipboard()
@@ -44,8 +47,10 @@ export function CopyButton({
       size={size}
       variant={variant}
       className={cn(
+        size === 'icon' && absolute && 'size-7',
         size === 'icon' &&
-          'dark:hover:bg-accent absolute top-[0.725rem] right-3 z-10 size-7',
+          absolute &&
+          'absolute top-[0.725rem] right-3 z-10',
         size === 'icon' &&
           (forceVisible
             ? 'opacity-70 hover:opacity-100'

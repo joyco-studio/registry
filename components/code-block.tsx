@@ -18,16 +18,23 @@ export function CodeBlock({
 }) {
   return (
     <figure
-      data-rehype-pretty-code-figure=""
-      className="not-prose group/code"
+      className={cn(
+        'not-prose group/code relative mt-6 overflow-hidden text-sm outline-none',
+        title && '*:data-[slot=copy-button]:top-2'
+      )}
       data-slot="code-block"
     >
       {title && (
-        <figcaption data-rehype-pretty-code-title="" data-language={language}>
+        <figcaption
+          className="text-muted-foreground/50 overflow-hidden px-4 py-2.5 pr-40 font-mono text-sm leading-relaxed text-ellipsis whitespace-nowrap"
+          data-language={language}
+        >
           <span>{title}</span>
         </figcaption>
       )}
-      {rawCode && <CopyButton forceVisible={!!title} value={rawCode} />}
+      {rawCode && (
+        <CopyButton forceVisible={!!title} value={rawCode} className="size-9" />
+      )}
 
       <div
         style={
@@ -35,7 +42,7 @@ export function CodeBlock({
             '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
           } as React.CSSProperties
         }
-        className={cn('[&>pre]:max-h-(--pre-max-height)')}
+        className="[&>pre]:text-code-foreground bg-muted [&>pre]:max-h-(--pre-max-height) [&>pre]:text-sm"
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </figure>

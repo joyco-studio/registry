@@ -34,11 +34,10 @@ export function CodeBlockCommand({
   return (
     <div
       data-slot="command-block"
-      className="not-prose bg-card overflow-x-auto rounded-lg"
+      className="not-prose relative flex flex-col overflow-hidden"
     >
       <Tabs
         value={packageManager}
-        className="gap-0"
         onValueChange={(value) => {
           setConfig({
             ...config,
@@ -46,43 +45,45 @@ export function CodeBlockCommand({
           })
         }}
       >
-        <div className="border-border flex items-center gap-2 border-b px-3 py-2">
-          <TabsList className="h-auto rounded-none bg-transparent p-0">
-            {Object.entries(tabs).map(([key]) => {
-              return (
-                <TabsTrigger
-                  key={key}
-                  value={key}
-                  className="data-[state=active]:bg-accent data-[state=active]:border-border h-7 border border-transparent pt-0.5 data-[state=active]:shadow-none"
-                >
-                  {key}
-                </TabsTrigger>
-              )
-            })}
+        {/* Header row with tabs and copy button */}
+        <div className="bg-background border-background flex gap-1 border-b-4">
+          <TabsList className="bg-transparent">
+            {Object.entries(tabs).map(([key]) => (
+              <TabsTrigger key={key} value={key}>
+                {key}
+              </TabsTrigger>
+            ))}
           </TabsList>
+          {/* Flex filler */}
+          <div className="bg-muted flex-1 self-stretch" />
+          {/* Copy button */}
+          {command && (
+            <CopyButton
+              value={command}
+              variant="ghost"
+              absolute={false}
+              forceVisible
+              className="bg-muted size-9"
+            />
+          )}
         </div>
-        <div className="no-scrollbar overflow-x-auto bg-white dark:bg-black">
-          {Object.entries(tabs).map(([key, value]) => {
-            return (
-              <TabsContent
-                key={key}
-                value={key}
-                className="mt-0 w-max px-4 py-3.5"
-              >
-                <pre>
-                  <code
-                    className="relative font-mono text-sm leading-none text-green-500 dark:text-green-300"
-                    data-language="bash"
-                  >
-                    {value}
-                  </code>
-                </pre>
-              </TabsContent>
-            )
-          })}
+
+        {/* Command content */}
+        <div className="bg-accent no-scrollbar overflow-x-auto">
+          {Object.entries(tabs).map(([key, value]) => (
+            <TabsContent key={key} value={key} className="mt-0">
+              <pre className="m-0">
+                <code
+                  className="text-accent-foreground block px-4 py-3 font-mono text-sm"
+                  data-language="bash"
+                >
+                  {value}
+                </code>
+              </pre>
+            </TabsContent>
+          ))}
         </div>
       </Tabs>
-      {command && <CopyButton value={command} className="top-2" forceVisible />}
     </div>
   )
 }

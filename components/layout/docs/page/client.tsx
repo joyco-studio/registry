@@ -108,42 +108,45 @@ export function PageTOCPopoverTrigger({
   return (
     <CollapsibleTrigger
       className={cn(
-        'text-fd-muted-foreground flex h-10 w-full items-center gap-2.5 px-4 py-2.5 text-start text-xs tracking-wide uppercase focus-visible:outline-none md:px-6 [&_svg]:size-4',
+        'text-fd-muted-foreground flex h-10 w-full items-center text-start text-xs tracking-wide uppercase focus-visible:outline-none [&_svg]:size-4',
         className
       )}
       data-toc-popover-trigger=""
       {...props}
     >
-      <ProgressSquare
-        value={(selected + 1) / Math.max(1, items.length)}
-        max={1}
-        className={cn('shrink-0', open && 'text-primary')}
-      />
-      <span className="grid flex-1 *:col-start-1 *:row-start-1 *:my-auto">
-        <span
-          className={cn(
-            'truncate transition-[opacity,translate,color]',
-            open && 'text-foreground',
-            showItem && 'pointer-events-none -translate-y-full opacity-0'
-          )}
-        >
-          {path?.name ?? text.toc}
+      {/* Inner container matching page content max-width */}
+      <div className="mx-auto flex w-full max-w-[900px] items-center gap-2.5 px-4 md:px-6 xl:px-8">
+        <ProgressSquare
+          value={(selected + 1) / Math.max(1, items.length)}
+          max={1}
+          className={cn('shrink-0', open && 'text-primary')}
+        />
+        <span className="grid flex-1 *:col-start-1 *:row-start-1 *:my-auto">
+          <span
+            className={cn(
+              'truncate transition-[opacity,translate,color]',
+              open && 'text-foreground',
+              showItem && 'pointer-events-none -translate-y-full opacity-0'
+            )}
+          >
+            {path?.name ?? text.toc}
+          </span>
+          <span
+            className={cn(
+              'truncate transition-[opacity,translate]',
+              !showItem && 'pointer-events-none translate-y-full opacity-0'
+            )}
+          >
+            {items[selected]?.title}
+          </span>
         </span>
-        <span
+        <CaretDownIcon
           className={cn(
-            'truncate transition-[opacity,translate]',
-            !showItem && 'pointer-events-none translate-y-full opacity-0'
+            'mx-0.5 size-4 shrink-0 transition-transform',
+            open && 'rotate-180'
           )}
-        >
-          {items[selected]?.title}
-        </span>
-      </span>
-      <CaretDownIcon
-        className={cn(
-          'mx-0.5 size-4 shrink-0 transition-transform',
-          open && 'rotate-180'
-        )}
-      />
+        />
+      </div>
     </CollapsibleTrigger>
   )
 }
@@ -222,9 +225,12 @@ export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
     <CollapsibleContent
       data-toc-popover-content=""
       {...props}
-      className={cn('flex max-h-[50vh] flex-col px-4 md:px-6', props.className)}
+      className={cn('flex max-h-[50vh] flex-col', props.className)}
     >
-      {props.children}
+      {/* Inner container matching page content max-width */}
+      <div className="mx-auto w-full max-w-[900px] px-4 md:px-6 xl:px-8">
+        {props.children}
+      </div>
     </CollapsibleContent>
   )
 }
