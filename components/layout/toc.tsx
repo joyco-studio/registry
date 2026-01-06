@@ -53,7 +53,7 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
       {/* Filler panel - only visible at 2xl+ when in fixed layout */}
       <div
         className={cn(
-          'bg-muted min-w-aside-width hidden 2xl:block',
+          'bg-muted/50 min-w-aside-width hidden 2xl:block',
           layout === 'full' ? '' : 'flex-1'
         )}
       />

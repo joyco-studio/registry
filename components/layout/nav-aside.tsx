@@ -15,7 +15,7 @@ export const NavAside = () => {
   const pathname = usePathname()
 
   return (
-    <div className="sticky top-0 flex h-screen flex-col gap-1 self-start max-md:hidden">
+    <div className="w-aside-width flex h-screen shrink-0 flex-col gap-1 self-start max-md:hidden">
       <div className="size-aside-width bg-primary text-primary-foreground flex items-center justify-center">
         <Logo />
       </div>

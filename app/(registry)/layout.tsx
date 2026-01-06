@@ -29,7 +29,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
             style={
               {
                 '--fd-sidebar-width':
-                  'calc(var(--aside-width) + var(--sidebar-width))',
+                  'calc(var(--aside-width) + var(--spacing) + var(--sidebar-width))',
               } as CSSProperties
             }
           >

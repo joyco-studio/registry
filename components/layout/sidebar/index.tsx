@@ -124,7 +124,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
       {/* Filler panel - only visible at 2xl+ when in fixed layout */}
       <div
         className={cn(
-          'bg-muted hidden flex-1',
+          'bg-muted/50 hidden flex-1',
           layout === 'fixed' && '2xl:block'
         )}
       />
