@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '../ui/button'
 
 function GitHubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -30,17 +31,19 @@ export function DocLinks({
       className={cn('not-prose my-0 flex flex-wrap gap-x-2 gap-y-1', className)}
     >
       {links.map((link) => (
-        <Link
+        <Button
           key={link.href}
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-muted text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground inline-flex items-center gap-2 px-3 py-2 font-mono text-xs uppercase tracking-wide transition-colors"
+          asChild
+          variant="accent"
+          size="sm"
+          className="font-mono tracking-wide uppercase"
         >
-          <GitHubIcon className="size-4" />
-          {link.label}
-          <ArrowUpRight className="size-3" />
-        </Link>
+          <Link href={link.href} target="_blank" rel="noopener noreferrer">
+            <GitHubIcon className="size-4" />
+            {link.label}
+            <ArrowUpRight className="size-3" />
+          </Link>
+        </Button>
       ))}
     </div>
   )

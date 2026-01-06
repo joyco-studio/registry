@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { CopyButton } from '@/components/copy-button'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '../ui/button'
 
 export function PageActions({
   content,
@@ -18,9 +19,9 @@ export function PageActions({
     <div className={cn('not-prose flex items-center gap-1', className)}>
       <CopyButton
         value={content}
-        variant="muted"
+        variant="accent"
         size="sm"
-        className="h-auto px-3 py-2 font-mono text-xs uppercase tracking-wide"
+        className="font-mono tracking-wide uppercase"
       >
         {(hasCopied) => (
           <>
@@ -29,15 +30,17 @@ export function PageActions({
           </>
         )}
       </CopyButton>
-      <Link
-        href={llmUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bg-muted text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground inline-flex h-auto items-center gap-1.5 px-3 py-2 font-mono text-xs uppercase tracking-wide transition-colors"
+      <Button
+        asChild
+        variant="accent"
+        size="sm"
+        className="font-mono tracking-wide uppercase"
       >
-        Open in Cursor
-        <ArrowUpRight className="size-3" />
-      </Link>
+        <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
+          Open in Cursor
+          <ArrowUpRight className="size-3" />
+        </Link>
+      </Button>
     </div>
   )
 }

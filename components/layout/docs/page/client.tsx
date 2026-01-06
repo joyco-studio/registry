@@ -309,7 +309,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
     <Link
       href={item.url}
       className={cn(
-        'hover:bg-fd-accent/80 hover:text-fd-accent-foreground flex flex-col gap-2 rounded-lg border p-4 text-sm transition-colors @max-lg:col-span-full',
+        'bg-accent text-accent-foreground hover:bg-accent/80 mt-10 flex flex-col gap-2 p-4 text-sm transition-colors @max-lg:col-span-full',
         index === 1 && 'text-end'
       )}
     >

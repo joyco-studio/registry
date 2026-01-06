@@ -80,7 +80,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       >
         <div className="mx-auto w-full max-w-2xl 2xl:max-w-3xl">
           {/* Category badge */}
-          <Badge variant="muted" className="mb-4">
+          <Badge variant="accent" className="mb-4">
             {getCategoryLabel(page.slugs)}
           </Badge>
 
