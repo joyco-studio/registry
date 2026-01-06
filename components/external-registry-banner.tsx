@@ -19,7 +19,7 @@ export function ExternalRegistryBanner({
   return (
     <div
       className={cn(
-        'not-prose my-6 first:mt-0 last:mb-0 bg-muted/50 border-border mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between',
+        'not-prose bg-accent my-6 mb-6 flex flex-col gap-4 p-4 pl-2.5 first:mt-0 last:mb-0 sm:flex-row sm:items-center sm:justify-between',
         className
       )}
     >
@@ -31,10 +31,10 @@ export function ExternalRegistryBanner({
           <p className="text-foreground text-sm font-medium">
             External Component
           </p>
-          <p className="text-muted-foreground text-pretty text-sm">
+          <p className="text-muted-foreground text-sm text-pretty">
             This component is provided by{' '}
             <a
-              className="text-foreground underline font-medium"
+              className="text-foreground font-medium underline"
               href={registryUrl}
               target="_blank"
               rel="noopener noreferrer"
