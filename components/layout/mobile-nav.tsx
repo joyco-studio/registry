@@ -231,6 +231,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
           hasResults={hasResults}
           noResults={noResults}
           onClose={handleClose}
+          onSuggestedSearch={setQuery}
         />
       )}
     </div>
@@ -396,7 +397,17 @@ function MobileSearchContent({
   hasResults,
   noResults,
   onClose,
-}: MobileSearchContentProps) {
+  onSuggestedSearch,
+}: MobileSearchContentProps & { onSuggestedSearch?: (query: string) => void }) {
+  const suggestedSearches = [
+    'Chat',
+    'Scroll Area',
+    'File Upload',
+    'Marquee',
+    'Video Player',
+    'Mobile Menu',
+  ]
+
   return (
     <div className="top-mobile-header fixed inset-0 z-(--z-overlay) overflow-y-auto">
       {/* CCTV striped backdrop - clickable to close */}
@@ -412,10 +423,21 @@ function MobileSearchContent({
         )}
         {isSearching && noResults && <NoResults query={query} />}
         {!isSearching && (
-          <div className="bg-background p-4 text-center">
-            <p className="text-muted-foreground font-mono text-xs">
-              Type to search...
+          <div className="bg-background flex min-h-[50vh] flex-col p-6">
+            <p className="text-muted-foreground mb-6 font-mono text-xs tracking-wide uppercase">
+              Suggested Searches
             </p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedSearches.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => onSuggestedSearch?.(suggestion)}
+                  className="bg-muted hover:bg-accent text-foreground px-3 py-2 font-mono text-xs tracking-wide uppercase transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
