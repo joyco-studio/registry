@@ -42,7 +42,7 @@ export function CodeBlock({
             '--pre-max-height': maxHeight ? `${maxHeight}px` : 'unset',
           } as React.CSSProperties
         }
-        className="[&>pre]:text-code-foreground bg-muted [&>pre]:max-h-(--pre-max-height) [&>pre]:text-sm"
+        className="bg-muted [&>pre]:text-code-foreground [&>pre]:max-h-(--pre-max-height) [&>pre]:overflow-x-auto [&>pre]:text-sm"
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </figure>

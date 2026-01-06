@@ -107,13 +107,13 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
       const defaultFolder = folders[0]
       if (!defaultFolder) return null
       return (
-        <nav className="bg-accent/70 fancy-scroll flex flex-col overflow-y-auto">
+        <nav className="bg-accent/70 flex flex-col overflow-y-auto">
           <SidebarSection folder={defaultFolder} defaultOpen meta={itemMeta} />
         </nav>
       )
     }
     return (
-      <nav className="bg-accent/70 fancy-scroll flex flex-col overflow-y-auto">
+      <nav className="bg-accent/70 flex flex-col overflow-y-auto">
         <SidebarSection folder={currentFolder} defaultOpen meta={itemMeta} />
       </nav>
     )

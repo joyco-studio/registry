@@ -6,7 +6,7 @@ type MaintainersProps = {
   lastModified?: Date
 }
 
-export function Maintainers({ maintainers, lastModified }: MaintainersProps) {
+export function Maintainers({ maintainers }: MaintainersProps) {
   if (maintainers.length === 0) return null
 
   return (

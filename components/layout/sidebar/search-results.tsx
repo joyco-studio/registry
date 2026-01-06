@@ -88,7 +88,7 @@ export function SearchResults({ results, query }: SearchResultsProps) {
   )
 
   return (
-    <nav className="bg-accent/70 fancy-scroll flex flex-col overflow-y-auto">
+    <nav className="bg-accent/70 flex flex-col overflow-y-auto">
       {Object.entries(groupedBySection).map(([section, pages]) => {
         const Icon = sectionIcons[section] ?? CubeIcon
         const label = sectionLabels[section] ?? section
