@@ -16,9 +16,12 @@ export const NavAside = () => {
 
   return (
     <div className="w-aside-width flex h-screen shrink-0 flex-col gap-1 self-start max-md:hidden">
-      <div className="size-aside-width bg-primary text-primary-foreground flex items-center justify-center">
+      <Link
+        href="/"
+        className="size-aside-width bg-primary text-primary-foreground flex items-center justify-center"
+      >
         <Logo />
-      </div>
+      </Link>
       {sitemap.map((item) => (
         <AsideButton
           key={item.href}
