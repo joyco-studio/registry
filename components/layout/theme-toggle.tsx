@@ -120,7 +120,12 @@ function ThemeOptions({ onSelect }: { onSelect: () => void }) {
               <span className="sr-only">{t.label}</span>
             </AsideButton>
           </TooltipTrigger>
-          <TooltipContent side="right" align="center" sideOffset={10}>
+          <TooltipContent
+            side="right"
+            align="center"
+            sideOffset={6}
+            className="px-2 py-1 font-mono uppercase"
+          >
             {t.label}
           </TooltipContent>
         </Tooltip>
