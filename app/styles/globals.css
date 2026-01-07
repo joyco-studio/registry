@@ -225,15 +225,15 @@ code::-webkit-scrollbar-thumb:hover {
 
 html {
   overscroll-behavior: none;
-}
-
-/* Layout width toggle - default is fixed (contained) */
-html {
   --fd-layout-width: 97rem;
 }
 
 html.layout-full {
   --fd-layout-width: 100%;
+}
+
+body {
+  @apply bg-background;
 }
 
 /* Mobile layout adjustments for custom MobileNav */
