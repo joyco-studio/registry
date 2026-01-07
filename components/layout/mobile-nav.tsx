@@ -16,6 +16,8 @@ import FileIcon from '@/components/icons/file'
 import type { SidebarItemMeta } from './sidebar/section'
 import { SearchResults, type SearchResult } from './sidebar/search-results'
 import { NoResults } from './sidebar/no-results'
+import { ThemePreview, themes } from './theme-toggle'
+import { useTheme } from 'next-themes'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
@@ -52,6 +54,8 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     SearchResult[]
   >([])
   const [noResults, setNoResults] = React.useState(false)
+  // Track the query that we last received results for
+  const [loadedQuery, setLoadedQuery] = React.useState('')
 
   // Use fumadocs search
   const { setSearch, query: searchQuery } = useDocsSearch({
@@ -65,6 +69,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     } else {
       setDisplayedResults([])
       setNoResults(false)
+      setLoadedQuery('')
     }
   }, [query, setSearch])
 
@@ -85,6 +90,8 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
 
     setDisplayedResults(results)
     setNoResults(results.length === 0)
+    // Mark that we've loaded results for this query
+    setLoadedQuery(query)
   }, [searchQuery.data, query])
 
   // Close menu on navigation
@@ -132,6 +139,8 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
 
   const isSearching = query.length >= MIN_QUERY_LENGTH
   const hasResults = displayedResults.length > 0
+  // Only show no results if we've actually loaded results for the current query
+  const showNoResults = noResults && loadedQuery === query
 
   const handleClose = () => {
     setState('closed')
@@ -229,7 +238,7 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
           results={displayedResults}
           isSearching={isSearching}
           hasResults={hasResults}
-          noResults={noResults}
+          noResults={showNoResults}
           onClose={handleClose}
           onSuggestedSearch={setQuery}
         />
@@ -277,6 +286,9 @@ function MobileMenuContent({
             />
           ))}
         </nav>
+
+        {/* Theme toggle */}
+        <MobileThemeToggle />
       </div>
     </div>
   )
@@ -373,6 +385,45 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * MobileThemeToggle - Theme selection for mobile menu
+ * -------------------------------------------------------------------------------------------------*/
+
+function MobileThemeToggle() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <div className="bg-accent/50 pt-10">
+      <div className="bg-background">
+        <div className="py-4">
+          <p className="text-muted-foreground/80 px-4 font-mono text-xs font-medium tracking-wide uppercase">
+            Theme
+          </p>
+        </div>
+        <div className="flex gap-1">
+          <div className="bg-accent/70 w-4 self-stretch" />
+
+          {themes.map((t) => (
+            <button
+              key={t.name}
+              onClick={() => setTheme(t.name)}
+              className={cn(
+                'flex size-16 items-center justify-center',
+                theme === t.name
+                  ? 'bg-accent text-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
+              )}
+            >
+              <ThemePreview themeClass={t.name} />
+            </button>
+          ))}
+          <div className="bg-muted flex-1" />
+        </div>
+      </div>
     </div>
   )
 }

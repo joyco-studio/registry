@@ -36,6 +36,8 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
     SearchResult[]
   >([])
   const [noResults, setNoResults] = React.useState(false)
+  // Track the query that we last received results for
+  const [loadedQuery, setLoadedQuery] = React.useState('')
 
   // Use fumadocs search
   const { setSearch, query: searchQuery } = useDocsSearch({
@@ -50,6 +52,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
       // Clear everything when query is too short
       setDisplayedResults([])
       setNoResults(false)
+      setLoadedQuery('')
     }
   }, [query, setSearch])
 
@@ -73,11 +76,15 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
     // Update results - keep previous results visible until new ones arrive
     setDisplayedResults(results)
     setNoResults(results.length === 0)
+    // Mark that we've loaded results for this query
+    setLoadedQuery(query)
   }, [searchQuery.data, query])
 
   // Determine what to show
   const isSearching = query.length >= MIN_QUERY_LENGTH
   const hasResults = displayedResults.length > 0
+  // Only show no results if we've actually loaded results for the current query
+  const showNoResults = noResults && loadedQuery === query
 
   // Get all folders from the tree
   const folders = tree.children.filter(
@@ -98,7 +105,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
     if (isSearching && hasResults) {
       return <SearchResults results={displayedResults} query={query} />
     }
-    if (isSearching && noResults) {
+    if (isSearching && showNoResults) {
       return <NoResults query={query} />
     }
     // Show only the current section with collapsible behavior
