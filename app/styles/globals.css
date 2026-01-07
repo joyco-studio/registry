@@ -61,6 +61,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-code: var(--code);
   --color-code-foreground: var(--code-foreground);
+  --color-preview: var(--preview);
+  --color-preview-foreground: var(--preview-foreground);
   --color-code-highlight: var(--code-highlight);
   --color-code-number: var(--code-number);
 
@@ -179,7 +181,6 @@ pre::-webkit-scrollbar-thumb:hover,
 code::-webkit-scrollbar-thumb:hover {
   background: color-mix(in oklab, var(--accent) 80%, var(--foreground));
 }
-
 
 @layer components {
   /* CCTV striped backdrop effect */

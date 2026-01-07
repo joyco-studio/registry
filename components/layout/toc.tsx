@@ -34,11 +34,11 @@ export function TOC({ header, footer, className }: ClerkTOCProps) {
       )}
     >
       <div className="flex h-full w-(--fd-toc-width) flex-col gap-1">
-        <div className="bg-muted p-3 font-mono uppercase">
+        <div className="bg-muted px-6 py-4 font-mono uppercase">
           {header}
           <h3
             id="toc-title"
-            className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-xs"
+            className="text-fd-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium"
           >
             <Text className="size-4" />
             <span>On this page</span>
