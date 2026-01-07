@@ -187,12 +187,12 @@ code::-webkit-scrollbar-thumb:hover {
   .cctv-backdrop {
     background-image: repeating-linear-gradient(
       0deg,
-      transparent,
-      transparent 6px,
-      rgba(0, 0, 0, 0.3) 6px,
-      rgba(0, 0, 0, 0.3) 12px
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0.5) 3px,
+      rgba(0, 0, 0, 0.9) 3px,
+      rgba(0, 0, 0, 0.9) 6px
     );
-    background-size: 100% 12px;
+    background-size: 100% 6px;
   }
 
   /* Fancy scrollbar styles */
