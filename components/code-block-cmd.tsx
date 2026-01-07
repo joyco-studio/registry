@@ -76,12 +76,12 @@ export function CodeBlockCommand({
         </div>
 
         {/* Command content */}
-        <div className="bg-accent no-scrollbar overflow-x-auto">
+        <div className="bg-code no-scrollbar overflow-x-auto">
           {tabs.map((tab) => (
             <TabsContent key={tab.label} value={tab.label} className="mt-0">
               <pre className="m-0">
                 <code
-                  className="text-accent-foreground block px-4 py-3 font-mono text-sm"
+                  className="text-code-foreground block px-4 py-3 font-mono text-sm"
                   data-language="bash"
                 >
                   {tab.content}
