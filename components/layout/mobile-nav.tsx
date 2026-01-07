@@ -4,7 +4,6 @@ import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type * as PageTree from 'fumadocs-core/page-tree'
-import { useDocsSearch } from 'fumadocs-core/search/client'
 import { Minus, Plus } from 'lucide-react'
 import CaretDownIcon from '@/components/icons/caret-down'
 import { cn } from '@/lib/utils'
@@ -14,10 +13,9 @@ import CubeIcon from '@/components/icons/3d-cube'
 import TerminalWithCursorIcon from '@/components/icons/terminal-w-cursor'
 import FileIcon from '@/components/icons/file'
 import type { SidebarItemMeta } from './sidebar/section'
-import { SearchResults, type SearchResult } from './sidebar/search-results'
+import { SearchResults } from './sidebar/search-results'
 import { NoResults } from './sidebar/no-results'
-import { ThemePreview, themes } from './theme-toggle'
-import { useTheme } from 'next-themes'
+import { useSearch, type SearchResult } from '@/hooks/use-search'
 
 /* -------------------------------------------------------------------------------------------------
  * Types
@@ -39,8 +37,6 @@ const sectionIcons: Record<
   logs: FileIcon,
 }
 
-const MIN_QUERY_LENGTH = 2
-
 /* -------------------------------------------------------------------------------------------------
  * MobileNav - Main mobile navigation component
  * -------------------------------------------------------------------------------------------------*/
@@ -49,56 +45,13 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
   const pathname = usePathname()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [state, setState] = React.useState<MobileNavState>('closed')
-  const [query, setQuery] = React.useState('')
-  const [displayedResults, setDisplayedResults] = React.useState<
-    SearchResult[]
-  >([])
-  const [noResults, setNoResults] = React.useState(false)
-  // Track the query that we last received results for
-  const [loadedQuery, setLoadedQuery] = React.useState('')
-
-  // Use fumadocs search
-  const { setSearch, query: searchQuery } = useDocsSearch({
-    type: 'fetch',
-  })
-
-  // Sync query to fumadocs search
-  React.useEffect(() => {
-    if (query.length >= MIN_QUERY_LENGTH) {
-      setSearch(query)
-    } else {
-      setDisplayedResults([])
-      setNoResults(false)
-      setLoadedQuery('')
-    }
-  }, [query, setSearch])
-
-  // Update displayed results
-  React.useEffect(() => {
-    const data = searchQuery.data as unknown
-    if (!data || query.length < MIN_QUERY_LENGTH) return
-
-    let results: SearchResult[] = []
-    if (Array.isArray(data)) {
-      results = data as SearchResult[]
-    } else if (typeof data === 'object' && data !== null && 'results' in data) {
-      const obj = data as { results: unknown }
-      if (Array.isArray(obj.results)) {
-        results = obj.results as SearchResult[]
-      }
-    }
-
-    setDisplayedResults(results)
-    setNoResults(results.length === 0)
-    // Mark that we've loaded results for this query
-    setLoadedQuery(query)
-  }, [searchQuery.data, query])
+  const { query, setQuery, results, hasResults, isEmpty } = useSearch()
 
   // Close menu on navigation
   React.useEffect(() => {
     setState('closed')
     setQuery('')
-  }, [pathname])
+  }, [pathname, setQuery])
 
   // Auto-focus search input when search opens
   React.useEffect(() => {
@@ -136,11 +89,6 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
       ? currentFolder.name
       : String(currentFolder.name)
     : 'Registry'
-
-  const isSearching = query.length >= MIN_QUERY_LENGTH
-  const hasResults = displayedResults.length > 0
-  // Only show no results if we've actually loaded results for the current query
-  const showNoResults = noResults && loadedQuery === query
 
   const handleClose = () => {
     setState('closed')
@@ -235,10 +183,9 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
       {state === 'search' && (
         <MobileSearchContent
           query={query}
-          results={displayedResults}
-          isSearching={isSearching}
+          results={results}
           hasResults={hasResults}
-          noResults={showNoResults}
+          isEmpty={isEmpty}
           onClose={handleClose}
           onSuggestedSearch={setQuery}
         />
@@ -286,9 +233,6 @@ function MobileMenuContent({
             />
           ))}
         </nav>
-
-        {/* Theme toggle */}
-        <MobileThemeToggle />
       </div>
     </div>
   )
@@ -390,66 +334,26 @@ function MobileMenuSection({ folder, itemMeta = {} }: MobileMenuSectionProps) {
 }
 
 /* -------------------------------------------------------------------------------------------------
- * MobileThemeToggle - Theme selection for mobile menu
- * -------------------------------------------------------------------------------------------------*/
-
-function MobileThemeToggle() {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <div className="bg-accent/50 pt-10">
-      <div className="bg-background">
-        <div className="py-4">
-          <p className="text-muted-foreground/80 px-4 font-mono text-xs font-medium tracking-wide uppercase">
-            Theme
-          </p>
-        </div>
-        <div className="flex gap-1">
-          <div className="bg-accent/70 w-4 self-stretch" />
-
-          {themes.map((t) => (
-            <button
-              key={t.name}
-              onClick={() => setTheme(t.name)}
-              className={cn(
-                'flex size-16 items-center justify-center',
-                theme === t.name
-                  ? 'bg-accent text-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
-              )}
-            >
-              <ThemePreview themeClass={t.name} />
-            </button>
-          ))}
-          <div className="bg-muted flex-1" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* -------------------------------------------------------------------------------------------------
  * MobileSearchContent - Search results below header with CCTV backdrop
  * -------------------------------------------------------------------------------------------------*/
 
 type MobileSearchContentProps = {
   query: string
   results: SearchResult[]
-  isSearching: boolean
   hasResults: boolean
-  noResults: boolean
+  isEmpty: boolean
   onClose: () => void
+  onSuggestedSearch?: (query: string) => void
 }
 
 function MobileSearchContent({
   query,
   results,
-  isSearching,
   hasResults,
-  noResults,
+  isEmpty,
   onClose,
   onSuggestedSearch,
-}: MobileSearchContentProps & { onSuggestedSearch?: (query: string) => void }) {
+}: MobileSearchContentProps) {
   const suggestedSearches = [
     'Chat',
     'Scroll Area',
@@ -467,13 +371,11 @@ function MobileSearchContent({
         className="cctv-backdrop absolute inset-0 cursor-pointer"
       />
 
-      {/* Search content - reuse desktop components */}
+      {/* Search content */}
       <div className="bg-background relative">
-        {isSearching && hasResults && (
-          <SearchResults results={results} query={query} />
-        )}
-        {isSearching && noResults && <NoResults query={query} />}
-        {!isSearching && (
+        {hasResults && <SearchResults results={results} query={query} />}
+        {isEmpty && <NoResults query={query} />}
+        {!hasResults && !isEmpty && (
           <div className="bg-background flex min-h-[50vh] flex-col p-6">
             <p className="text-muted-foreground mb-6 font-mono text-xs tracking-wide uppercase">
               Suggested Searches
