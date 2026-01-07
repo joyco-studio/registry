@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { CopyButton } from '@/components/copy-button'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 
@@ -12,7 +12,7 @@ export function PageActions({
   className,
 }: {
   content: string
-  llmUrl: string
+  llmUrl: string | null
   className?: string
 }) {
   return (
@@ -25,22 +25,29 @@ export function PageActions({
       >
         {(hasCopied) => (
           <>
-            {hasCopied ? 'Copied!' : 'Copy Markdown'}
-            <ArrowUpRight className="size-3" />
+            {hasCopied ? (
+              'Copied!'
+            ) : (
+              <>
+                Copy Markdown <Copy className="size-3" />
+              </>
+            )}
           </>
         )}
       </CopyButton>
-      <Button
-        asChild
-        variant="accent"
-        size="sm"
-        className="font-mono tracking-wide uppercase"
-      >
-        <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
-          Open Markdown
-          <ArrowUpRight className="size-3" />
-        </Link>
-      </Button>
+      {llmUrl && (
+        <Button
+          asChild
+          variant="accent"
+          size="sm"
+          className="font-mono tracking-wide uppercase"
+        >
+          <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
+            Open Markdown
+            <ArrowUpRight className="size-3" />
+          </Link>
+        </Button>
+      )}
     </div>
   )
 }
