@@ -39,7 +39,7 @@ export function ComponentPreview({
   return (
     <div
       className={cn(
-        'group not-prose divide-border relative grid divide-y overflow-clip border',
+        'group not-prose relative grid overflow-clip',
         '*:data-[slot="code-block"]:mt-0',
         '**:data-[slot="copy-button"]:right-6',
         className
