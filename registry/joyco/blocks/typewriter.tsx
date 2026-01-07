@@ -355,7 +355,14 @@ export const Typewriter = React.forwardRef<HTMLSpanElement, TypewriterProps>(
           data-slot="typewriter-active"
           className="pointer-events-none absolute inset-0"
         >
-          <span ref={textRef} data-slot="typewriter-text" aria-hidden={false}>
+          <span
+            ref={textRef}
+            data-slot="typewriter-text"
+            aria-hidden={false}
+            style={{
+              clipPath: prefersReducedMotion ? 'none' : 'inset(0 100% 0 0)',
+            }}
+          >
             {text}
           </span>
           {caret ? (
