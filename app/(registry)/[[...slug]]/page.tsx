@@ -21,6 +21,7 @@ import {
 import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/cn'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
@@ -84,27 +85,28 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             {getCategoryLabel(page.slugs)}
           </Badge>
 
-          {/* Title and actions row */}
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-            <h1 className="text-[1.75em] leading-tight font-semibold">
-              {page.data.title}
-            </h1>
-            <PageActions
-              className="max-sm:hidden"
-              content={llmText}
-              llmUrl={llmUrl}
-            />
+          <div className="p-3">
+            {/* Title and actions row */}
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+              <h1 className="text-[1.75em] leading-tight font-semibold">
+                {page.data.title}
+              </h1>
+              <PageActions
+                className="max-sm:hidden"
+                content={llmText}
+                llmUrl={llmUrl}
+              />
+            </div>
+
+            {/* Description */}
+            {page.data.description && (
+              <p className="text-fd-muted-foreground mb-2 text-lg">
+                {page.data.description}
+              </p>
+            )}
           </div>
-
-          {/* Description */}
-          {page.data.description && (
-            <p className="text-fd-muted-foreground mb-4 text-lg">
-              {page.data.description}
-            </p>
-          )}
-
           {/* Separator */}
-          <div className="bg-border mb-4 h-px w-full" />
+          <Separator brackets align="bottom" className="mb-4" />
 
           {/* Doc links */}
           <div className="mb-4 hidden items-center justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
