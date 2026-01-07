@@ -9,12 +9,12 @@ type NoResultsProps = {
 export function NoResults({ query }: NoResultsProps) {
   return (
     <>
-      <div className="bg-accent lg:h-aside-width py-4 text-center">
+      <div className="bg-accent lg:h-aside-width flex flex-col justify-center px-5 max-lg:py-4">
         <p className="text-muted-foreground font-mono text-sm font-medium uppercase">
           No results for &ldquo;
           <span className="text-foreground font-bold">{query}</span>&rdquo;
         </p>
-        <p className="text-muted-foreground/60 mt-1 text-xs">
+        <p className="text-muted-foreground/60 mt-1 text-xs italic">
           While you&apos;re here...
         </p>
       </div>
