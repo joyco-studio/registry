@@ -19,9 +19,9 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --code: oklch(0.97 0 0);
+  --code: oklch(0.956 0 0);
   --code-foreground: var(--card-foreground);
-  --preview: oklch(1 0 0);
+  --preview: oklch(0.985 0 0);
   --preview-foreground: var(--card-foreground);
   --code-highlight: oklch(0.96 0 0);
   --code-number: oklch(0.56 0 0 / 0.5);
