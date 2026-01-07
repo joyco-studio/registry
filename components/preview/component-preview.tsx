@@ -39,7 +39,7 @@ export function ComponentPreview({
   return (
     <div
       className={cn(
-        'group not-prose relative overflow-clip',
+        'group not-prose relative grid gap-1 overflow-clip',
         '*:data-[slot="code-block"]:mt-0',
         '**:data-[slot="copy-button"]:right-6',
         className

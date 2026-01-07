@@ -91,7 +91,7 @@
 }
 
 html.terminal img {
-  filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(48deg);
+  filter: sepia(100%) saturate(200%) brightness(70%) hue-rotate(48deg);
 }
 
 /* Mobile: collapse sidebar width variables so inline style calc evaluates to 0 */
