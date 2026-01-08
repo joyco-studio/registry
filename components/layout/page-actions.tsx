@@ -112,7 +112,7 @@ export function PageActions({
               </Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={openInCursor}>
+          <DropdownMenuItem onSelect={openInCursor}>
             <svg
               className="size-4"
               viewBox="0 0 24 24"
@@ -122,7 +122,7 @@ export function PageActions({
               <path d="M3.5 20.5L20.5 12L3.5 3.5V10.5L14.5 12L3.5 13.5V20.5Z" />
             </svg>
             Open in Cursor
-            <Kbd className="ml-auto"><span>⌘</span><span>I</span></Kbd>
+            <Kbd className="ml-auto text-xs"><span>⌘</span><span>I</span></Kbd>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
