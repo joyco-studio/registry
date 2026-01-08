@@ -90,7 +90,7 @@ export function CodeBlockCommand({
               key={tab.label}
               value={tab.label}
             >
-              <pre className="bg-accent/80 no-scrollbar w-max px-4 py-3">
+              <pre className=" no-scrollbar w-max px-4 py-3">
                 <code
                   className="text-code-foreground no-scrollbar block font-mono text-sm"
                   data-language="bash"
