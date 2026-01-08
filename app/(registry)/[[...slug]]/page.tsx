@@ -119,7 +119,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           <div className="p-3">
             {/* Title and actions row */}
             <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-              <h1 className="text-[1.75em] leading-tight font-semibold">
+              <h1 className="text-3xl leading-tight font-semibold">
                 {displayTitle}
               </h1>
               <PageActions
