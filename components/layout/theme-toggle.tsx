@@ -123,6 +123,7 @@ function ThemeOptions({ onSelect }: { onSelect: () => void }) {
           <TooltipContent
             side="right"
             align="center"
+            size="lg"
             sideOffset={6}
             className="px-2 py-1 font-mono uppercase"
           >
