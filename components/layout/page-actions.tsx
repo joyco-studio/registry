@@ -23,7 +23,7 @@ function Kbd({
   return (
     <kbd
       className={cn(
-        'bg-background inline-flex items-center gap-0.5 rounded border px-2 py-1 text-[10px] font-medium',
+        'bg-background inline-flex items-center gap-0.5 rounded-md border px-1.5',
         className
       )}
     >
