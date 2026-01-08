@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useSyncExternalStore } from 'react'
+import { useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useCopyToClipboard } from '@/components/copy-button'
 import { ArrowUpRight, ChevronDown, Check } from 'lucide-react'
@@ -23,24 +23,13 @@ function Kbd({
   return (
     <kbd
       className={cn(
-        'bg-background rounded border px-2 py-1 text-[10px] font-medium',
+        'bg-background inline-flex items-center gap-0.5 rounded border px-2 py-1 text-[10px] font-medium',
         className
       )}
     >
       {children}
     </kbd>
   )
-}
-
-const emptySubscribe = () => () => {}
-const getIsMac = () =>
-  typeof navigator !== 'undefined'
-    ? navigator.platform.toUpperCase().indexOf('MAC') >= 0
-    : true
-const getServerSnapshot = () => true
-
-function useIsMac() {
-  return useSyncExternalStore(emptySubscribe, getIsMac, getServerSnapshot)
 }
 
 export function PageActions({
@@ -53,9 +42,12 @@ export function PageActions({
   className?: string
 }) {
   const { hasCopied, copy } = useCopyToClipboard()
-  const isMac = useIsMac()
 
   const cursorUrl = `https://cursor.com/link/prompt?text=${encodeURIComponent(content)}`
+
+  const openInCursor = useCallback(() => {
+    window.open(cursorUrl, '_blank')
+  }, [cursorUrl])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -71,16 +63,14 @@ export function PageActions({
       // CMD/Ctrl + I: Open in Cursor
       if (modifier && e.key === 'i') {
         e.preventDefault()
-        window.open(cursorUrl, '_blank')
+        openInCursor()
         return
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [content, copy, cursorUrl])
-
-  const modKey = isMac ? '⌘' : 'Ctrl'
+  }, [content, copy, openInCursor])
 
   return (
     <div className={cn('not-prose flex items-center gap-1', className)}>
@@ -97,7 +87,7 @@ export function PageActions({
           </>
         ) : (
           <>
-            Copy Markdown <Kbd>{modKey}U</Kbd>
+            Copy Markdown <Kbd><span>⌘</span><span>U</span></Kbd>
           </>
         )}
       </Button>
@@ -122,19 +112,17 @@ export function PageActions({
               </Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem asChild>
-            <Link href={cursorUrl} target="_blank" rel="noopener noreferrer">
-              <svg
-                className="size-4"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M3.5 20.5L20.5 12L3.5 3.5V10.5L14.5 12L3.5 13.5V20.5Z" />
-              </svg>
-              Open in Cursor
-              <Kbd className="ml-auto">{modKey}I</Kbd>
-            </Link>
+          <DropdownMenuItem onClick={openInCursor}>
+            <svg
+              className="size-4"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M3.5 20.5L20.5 12L3.5 3.5V10.5L14.5 12L3.5 13.5V20.5Z" />
+            </svg>
+            Open in Cursor
+            <Kbd className="ml-auto"><span>⌘</span><span>I</span></Kbd>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
