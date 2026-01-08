@@ -72,7 +72,7 @@ export const AsideButton = ({
     )
 
   const buttonClassName = cn(
-    'bg-muted text-muted-foreground w-aside-width flex items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-colors',
+    'bg-muted text-muted-foreground w-aside-width flex hover:text-foreground items-center justify-center gap-2 font-mono font-medium tracking-wide uppercase transition-colors',
     active
       ? 'bg-accent hover:bg-accent text-accent-foreground h-auto rotate-180 px-6 [writing-mode:vertical-rl]'
       : 'h-aside-width size-aside-width hover:bg-accent/50',

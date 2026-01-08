@@ -40,5 +40,3 @@ export function Author({ author }: AuthorProps) {
     </div>
   )
 }
-
-
