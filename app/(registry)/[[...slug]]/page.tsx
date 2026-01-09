@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createRelativeLink } from 'fumadocs-ui/mdx'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
 import { getPageImage, getLLMText, source } from '@/lib/source'
 import { getDownloadStats } from '@/lib/stats'
@@ -56,6 +58,24 @@ const stripLogPrefixFromTitle = (title: string, logNumber: string | null) => {
   return title.replace(pattern, '')
 }
 
+async function getComponentSource(
+  componentSlug: string | undefined
+): Promise<string | null> {
+  if (!componentSlug) return null
+
+  try {
+    const filePath = path.join(
+      process.cwd(),
+      'registry/joyco/blocks',
+      `${componentSlug}.tsx`
+    )
+    const source = await readFile(filePath, 'utf-8')
+    return source
+  } catch {
+    return null
+  }
+}
+
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params
   const page = source.getPage(params.slug)
@@ -81,6 +101,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const downloadStats = componentSlug
     ? await getDownloadStats(componentSlug)
     : null
+  const componentSource = await getComponentSource(componentSlug)
   const docLinks = page.data.docLinks
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
@@ -125,6 +146,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               className="max-sm:hidden"
               content={llmText}
               llmUrl={llmUrl}
+              componentSource={componentSource}
             />
           </div>
 
@@ -145,6 +167,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
             className="sm:hidden"
             content={llmText}
             llmUrl={llmUrl}
+            componentSource={componentSource}
             showShortcuts={false}
           />
         </div>
