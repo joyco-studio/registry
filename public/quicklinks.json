@@ -14,6 +14,10 @@
     "link": "https://registry.joyco.studio/"
   },
   {
+    "name": "Joyco HUB",
+    "link": "https://hub.joyco.studio/"
+  },
+  {
     "name": "Tailwind Config",
     "link": "https://tailwindcss.com/docs/theme#default-theme-variable-reference"
   },
