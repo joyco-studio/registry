@@ -3,43 +3,30 @@
 import { useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useCopyToClipboard } from '@/components/copy-button'
-import { ArrowUpRight, ChevronDown, Check } from 'lucide-react'
+import { ChevronDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '../ui/button'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu'
-
-function Kbd({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <kbd
-      className={cn(
-        'bg-background inline-flex items-center gap-0.5 rounded-md border px-1.5',
-        className
-      )}
-    >
-      {children}
-    </kbd>
-  )
-}
+} from '@/components/ui/dropdown-menu'
+import { Kbd } from '@/components/ui/kbd'
+import CursorIcon from '@/components/icons/cursor'
+import MarkdownIcon from '@/components/icons/markdown'
+import CopyIcon from '@/components/icons/copy'
 
 export function PageActions({
   content,
   llmUrl,
   className,
+  showShortcuts = true,
 }: {
   content: string
   llmUrl: string | null
   className?: string
+  showShortcuts?: boolean
 }) {
   const { hasCopied, copy } = useCopyToClipboard()
 
@@ -50,6 +37,7 @@ export function PageActions({
   }, [cursorUrl])
 
   useEffect(() => {
+    if (!showShortcuts) return
     const handleKeyDown = (e: KeyboardEvent) => {
       const modifier = e.metaKey || e.ctrlKey
 
@@ -66,11 +54,18 @@ export function PageActions({
         openInCursor()
         return
       }
+
+      // CMD/Ctrl + O: Open Markdown
+      if (modifier && e.key === 'o' && llmUrl) {
+        e.preventDefault()
+        window.open(llmUrl, '_blank')
+        return
+      }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [content, copy, openInCursor])
+  }, [content, copy, openInCursor, showShortcuts])
 
   return (
     <div className={cn('not-prose flex items-center gap-1', className)}>
@@ -78,16 +73,20 @@ export function PageActions({
       <Button
         variant="accent"
         size="sm"
-        className="font-mono tracking-wide uppercase"
+        className="gap-x-2 font-mono tracking-wide uppercase"
         onClick={() => copy(content)}
       >
+        <CopyIcon />
         {hasCopied ? (
           <>
             Copied! <Check className="size-3" />
           </>
         ) : (
           <>
-            Copy Markdown <Kbd><span>⌘</span><span>U</span></Kbd>
+            Copy Page
+            <Kbd className={cn('font-normal', { hidden: !showShortcuts })}>
+              ⌘U
+            </Kbd>
           </>
         )}
       </Button>
@@ -95,34 +94,29 @@ export function PageActions({
       {/* Dropdown for Open Markdown and Open in Cursor */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="accent"
-            size="icon-sm"
-            aria-label="More actions"
-          >
+          <Button variant="accent" size="icon-sm" aria-label="More actions">
             <ChevronDown className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent
+          className="text-medium font-mono uppercase"
+          align="end"
+        >
           {llmUrl && (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem className="text-xs" asChild>
               <Link href={llmUrl} target="_blank" rel="noopener noreferrer">
-                <ArrowUpRight className="size-4" />
+                <MarkdownIcon />
                 Open Markdown
+                <Kbd className={cn('ml-auto', { hidden: !showShortcuts })}>
+                  ⌘O
+                </Kbd>
               </Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onSelect={openInCursor}>
-            <svg
-              className="size-4"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M3.5 20.5L20.5 12L3.5 3.5V10.5L14.5 12L3.5 13.5V20.5Z" />
-            </svg>
+          <DropdownMenuItem className="text-xs" onSelect={openInCursor}>
+            <CursorIcon />
             Open in Cursor
-            <Kbd className="ml-auto text-xs"><span>⌘</span><span>I</span></Kbd>
+            <Kbd className={cn('ml-auto', { hidden: !showShortcuts })}>⌘I</Kbd>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
