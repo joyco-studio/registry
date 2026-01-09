@@ -84,10 +84,10 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     : null
   const githubUrl = getGitHubBlobUrl(`content/${page.path}`)
   const docLinks = [
-    ...page.data.docLinks,
     ...(page.data.docLinks.some((link) => link.href === githubUrl)
       ? []
       : [{ label: 'See on GitHub', href: githubUrl }]),
+    ...page.data.docLinks,
   ]
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
