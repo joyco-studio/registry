@@ -47,7 +47,7 @@ export function ComponentPreview({
     >
       <div className="relative my-0 flex w-full overflow-hidden rounded-none">
         {resizable ? (
-          <div className='w-full'>
+          <div className="w-full">
             <ResizableIframe
               src={`/view/${name}`}
               defaultWidth={defaultWidth}
@@ -57,7 +57,10 @@ export function ComponentPreview({
           </div>
         ) : (
           /* For demos, we want to override project theme to default shadcn themes to favor a consistent appearance for the cloning user */
-          <div data-slot="preview" className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio bg-preview h-full w-full">
+          <div
+            data-slot="preview"
+            className="dark:override-shadcn-default-dark radio:override-shadcn-default-light light:override-shadcn-default-light terminal:override-shadcn-default-radio bg-preview h-full w-full"
+          >
             <LazyComponent name={name} />
           </div>
         )}
