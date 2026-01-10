@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCopyToClipboard } from '@/components/copy-button'
 import {
@@ -136,6 +136,7 @@ function PageActionsDropdown({
   openInCursor: () => void
 }) {
   const { emit } = useActionHint()
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     if (!showShortcuts) return
@@ -146,12 +147,14 @@ function PageActionsDropdown({
       if (modifier && e.key === 'i') {
         e.preventDefault()
         openInCursor()
-        emit(
-          <span className="flex items-center gap-1.5">
-            <CursorIcon className="size-3" />
-            Opening in Cursor...
-          </span>
-        )
+        if (!open) {
+          emit(
+            <span className="flex items-center gap-1.5">
+              <CursorIcon className="size-3" />
+              Opening in Cursor...
+            </span>
+          )
+        }
         return
       }
 
@@ -159,12 +162,14 @@ function PageActionsDropdown({
       if (modifier && e.key === 'o' && llmUrl) {
         e.preventDefault()
         window.open(llmUrl, '_blank')
-        emit(
-          <span className="flex items-center gap-1.5">
-            <MarkdownIcon className="size-3" />
-            Opening Markdown...
-          </span>
-        )
+        if (!open) {
+          emit(
+            <span className="flex items-center gap-1.5">
+              <MarkdownIcon className="size-3" />
+              Opening Markdown...
+            </span>
+          )
+        }
         return
       }
 
@@ -173,12 +178,14 @@ function PageActionsDropdown({
         e.preventDefault()
         e.stopPropagation()
         copyComponent(componentSource)
-        emit(
-          <span className="flex items-center gap-1.5">
-            <Code className="size-3" />
-            Component Copied!
-          </span>
-        )
+        if (!open) {
+          emit(
+            <span className="flex items-center gap-1.5">
+              <Code className="size-3" />
+              Component Copied!
+            </span>
+          )
+        }
         return
       }
     }
@@ -190,12 +197,13 @@ function PageActionsDropdown({
     componentSource,
     emit,
     llmUrl,
+    open,
     openInCursor,
     showShortcuts,
   ])
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary" size="icon-sm" aria-label="More actions">
           <ChevronDown className="size-4" />
