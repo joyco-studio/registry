@@ -111,6 +111,11 @@ export function useSequence({
   const imagesRef = React.useRef<Map<number, HTMLImageElement>>(new Map())
   const loadingRef = React.useRef<Set<number>>(new Set())
   const hasStartedLoadingRef = React.useRef(false)
+  const getImagePathRef = React.useRef(getImagePath)
+
+  React.useEffect(() => {
+    getImagePathRef.current = getImagePath
+  })
 
   const [state, setState] = React.useState<SequenceState>({
     images: new Map(),
@@ -139,13 +144,22 @@ export function useSequence({
       loadingRef.current.add(frameIndex)
 
       try {
-        const url = getImagePath(frameIndex)
+        const url = getImagePathRef.current(frameIndex)
         const image = new Image()
 
         await new Promise<void>((resolve, reject) => {
-          image.onload = () => resolve()
-          image.onerror = () =>
+          const handleLoad = () => {
+            image.removeEventListener('load', handleLoad)
+            image.removeEventListener('error', handleError)
+            resolve()
+          }
+          const handleError = () => {
+            image.removeEventListener('load', handleLoad)
+            image.removeEventListener('error', handleError)
             reject(new Error(`Failed to load image: ${url}`))
+          }
+          image.addEventListener('load', handleLoad)
+          image.addEventListener('error', handleError)
           image.src = url
         })
 
@@ -178,7 +192,7 @@ export function useSequence({
         return null
       }
     },
-    [getImagePath, frameCount, onFrameLoad]
+    [frameCount, onFrameLoad]
   )
 
   // Load all frames in binary order
@@ -198,13 +212,21 @@ export function useSequence({
 
   // Start preloading on mount if enabled
   React.useEffect(() => {
-    if (preload && typeof window !== 'undefined') {
+    const loading = loadingRef.current
+    const images = imagesRef.current
+
+    if (preload) {
       loadAllFrames()
     }
 
     return () => {
-      // Cleanup: reset loading state
+      // Cleanup: reset loading state and cancel any pending loads
       hasStartedLoadingRef.current = false
+      loading.clear()
+      images.forEach((img) => {
+        img.src = ''
+      })
+      images.clear()
     }
   }, [preload, loadAllFrames])
 
@@ -498,7 +520,7 @@ export function CanvasSequence({
     timePassedRef.current = 0
     currentFrameRef.current = -1
     lastTimeRef.current = null
-  }, [frameCount, frameDuration, getImagePath])
+  }, [frameCount, frameDuration])
 
   // Reset animation when playback starts (if resetOnPlay is enabled)
   React.useEffect(() => {
