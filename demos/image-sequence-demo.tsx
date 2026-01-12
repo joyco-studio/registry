@@ -62,7 +62,7 @@ function ImageSequenceDemo() {
                     : 'border-transparent opacity-0'
                 )}
               >
-                <span className="bg-primary -translate-y-full text-primary-foreground absolute top-0 -left-0.5 px-1 py-0.5 font-mono text-xs uppercase">
+                <span className="bg-primary text-primary-foreground absolute top-0 -left-0.5 -translate-y-full px-1 py-0.5 font-mono text-xs uppercase">
                   {seq.name}
                 </span>
               </div>
