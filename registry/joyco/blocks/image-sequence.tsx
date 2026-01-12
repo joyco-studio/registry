@@ -281,8 +281,8 @@ export function useSequence({
  * -------------------------------------------------------------------------------------------------*/
 
 interface CanvasSequenceProps extends Omit<
-  React.HTMLAttributes<HTMLCanvasElement>,
-  'children'
+  React.CanvasHTMLAttributes<HTMLCanvasElement>,
+  'children' | 'width' | 'height'
 > {
   /** Total number of frames in the sequence */
   frameCount: number
@@ -298,10 +298,6 @@ interface CanvasSequenceProps extends Omit<
   loop?: boolean
   /** Whether to preload images */
   preload?: boolean
-  /** Canvas width */
-  width: number
-  /** Canvas height */
-  height: number
   /** Object fit behavior */
   objectFit?: 'contain' | 'cover' | 'fill'
   /** Callback when a frame is rendered */
@@ -314,6 +310,16 @@ interface CanvasSequenceProps extends Omit<
   devicePixelRatio?: number
   /** Reset animation to frame 0 when playback starts */
   resetOnPlay?: boolean
+  /**
+   * Optional wrapper width (in CSS px). If omitted, the component will size itself
+   * from its parent layout (recommended).
+   */
+  width?: number
+  /**
+   * Optional wrapper height (in CSS px). If omitted, the component will size itself
+   * from its parent layout (recommended).
+   */
+  height?: number
 }
 
 export function CanvasSequence({
@@ -324,18 +330,19 @@ export function CanvasSequence({
   isVisible = true,
   loop = true,
   preload = true,
-  width,
-  height,
   objectFit = 'contain',
   onFrameChange,
   onAllFramesLoaded,
   timeTransform,
   devicePixelRatio,
   resetOnPlay = false,
+  width: initialWidth,
+  height: initialHeight,
   className,
   style,
   ...props
 }: CanvasSequenceProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null)
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const ctxRef = React.useRef<CanvasRenderingContext2D | null>(null)
   const currentFrameRef = React.useRef<number>(-1)
@@ -345,6 +352,10 @@ export function CanvasSequence({
   const wasPlayingRef = React.useRef<boolean>(isPlaying)
   const onFrameChangeRef = React.useRef(onFrameChange)
   const timeTransformRef = React.useRef(timeTransform)
+  const [bounds, setBounds] = React.useState(() => ({
+    width: initialWidth ?? 0,
+    height: initialHeight ?? 0,
+  }))
 
   React.useEffect(() => {
     onFrameChangeRef.current = onFrameChange
@@ -366,10 +377,36 @@ export function CanvasSequence({
     devicePixelRatio ??
     (typeof window !== 'undefined' ? window.devicePixelRatio : 1)
 
+  // Measure wrapper bounds and keep canvas synced to those bounds.
+  React.useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const measure = () => {
+      const rect = el.getBoundingClientRect()
+      const nextWidth = Math.max(0, Math.floor(rect.width))
+      const nextHeight = Math.max(0, Math.floor(rect.height))
+
+      setBounds((prev) => {
+        if (prev.width === nextWidth && prev.height === nextHeight) return prev
+        return { width: nextWidth, height: nextHeight }
+      })
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const width = bounds.width
+  const height = bounds.height
+
   // Setup canvas context
   React.useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+    if (width <= 0 || height <= 0) return
 
     // Set canvas size accounting for device pixel ratio
     canvas.width = width * dpr
@@ -377,7 +414,8 @@ export function CanvasSequence({
 
     const ctx = canvas.getContext('2d')
     if (ctx) {
-      ctx.scale(dpr, dpr)
+      // Avoid accumulating transforms across resizes
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctxRef.current = ctx
     }
   }, [width, height, dpr])
@@ -388,6 +426,7 @@ export function CanvasSequence({
       const ctx = ctxRef.current
       const canvas = canvasRef.current
       if (!ctx || !canvas) return false
+      if (width <= 0 || height <= 0) return false
 
       const image = getFrame(frameIndex)
       if (!image) return false
@@ -552,15 +591,25 @@ export function CanvasSequence({
   }, [isPlaying, state.images, paintFrame])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={cn('block', !isVisible && 'opacity-0', className)}
+    <div
+      ref={containerRef}
+      data-slot="canvas-sequence"
+      className={cn('relative size-full', className)}
       style={{
-        width,
-        height,
+        width: initialWidth,
+        height: initialHeight,
         ...style,
       }}
-      {...props}
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        data-slot="canvas"
+        className={cn(
+          'absolute inset-0 block size-full',
+          !isVisible && 'opacity-0'
+        )}
+        {...props}
+      />
+    </div>
   )
 }

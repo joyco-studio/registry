@@ -19,13 +19,14 @@ npx shadcn@latest add https://r.joyco.studio/image-sequence.json
 ```tsx
 import { CanvasSequence } from '@/components/image-sequence'
 
-<CanvasSequence
-  frameCount={71}
-  frameDuration={33}
-  getImagePath={(idx) => `/frames/frame_${String(idx).padStart(2, '0')}.webp`}
-  width={400}
-  height={400}
-/>
+<div className="h-[400px] w-[400px]">
+  <CanvasSequence
+    frameCount={71}
+    frameDuration={33}
+    getImagePath={(idx) => `/frames/frame_${String(idx).padStart(2, '0')}.webp`}
+    className="size-full"
+  />
+</div>
 ```
 
 ## Props
@@ -37,8 +38,8 @@ import { CanvasSequence } from '@/components/image-sequence'
 | `frameCount`       | `number`                        | -           | Total number of frames in the sequence           |
 | `frameDuration`    | `number`                        | -           | Duration of each frame in milliseconds           |
 | `getImagePath`     | `(frameIndex: number) => string`| -           | Function to generate the image URL for each frame|
-| `width`            | `number`                        | -           | Canvas width in pixels                           |
-| `height`           | `number`                        | -           | Canvas height in pixels                          |
+| `width`            | `number`                        | -           | Optional wrapper width in CSS pixels             |
+| `height`           | `number`                        | -           | Optional wrapper height in CSS pixels            |
 | `isPlaying`        | `boolean`                       | `true`      | Whether the animation is playing                 |
 | `isVisible`        | `boolean`                       | `true`      | Whether the canvas is visible                    |
 | `loop`             | `boolean`                       | `true`      | Whether to loop the animation                    |

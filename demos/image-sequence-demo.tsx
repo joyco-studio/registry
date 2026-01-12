@@ -44,11 +44,11 @@ function ImageSequenceDemo() {
                 frameCount={seq.frameCount}
                 frameDuration={33}
                 getImagePath={seq.getImagePath}
-                width={200}
-                height={200}
                 objectFit="contain"
                 isPlaying={isActive}
                 resetOnPlay
+                width={200}
+                height={200}
                 className="rounded-lg transition-opacity duration-200"
                 style={{ opacity: isActive ? 1 : 0.5 }}
               />

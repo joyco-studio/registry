@@ -58,8 +58,6 @@ export function CategoryQuickLinks() {
             frameCount={sequences[1].frameCount}
             frameDuration={33}
             getImagePath={sequences[1].getImagePath}
-            width={268}
-            height={208}
             objectFit="contain"
             isPlaying={activeIndex === 0}
             resetOnPlay
@@ -86,8 +84,6 @@ export function CategoryQuickLinks() {
             frameCount={sequences[2].frameCount}
             frameDuration={33}
             getImagePath={sequences[2].getImagePath}
-            width={268}
-            height={208}
             objectFit="contain"
             isPlaying={activeIndex === 1}
             resetOnPlay
@@ -114,8 +110,6 @@ export function CategoryQuickLinks() {
             frameCount={sequences[0].frameCount}
             frameDuration={33}
             getImagePath={sequences[0].getImagePath}
-            width={268}
-            height={208}
             objectFit="contain"
             isPlaying={activeIndex === 2}
             resetOnPlay
