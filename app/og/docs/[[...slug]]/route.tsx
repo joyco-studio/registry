@@ -17,11 +17,11 @@ export async function GET(
   const pageSlug = slug ?? []
   const type = pageSlug[0]
   const page = source.getPage(pageSlug)
-
+  const isTopCategoryPage = pageSlug.length === 1
   if (!page) notFound()
 
   // Return static opengraph image for home page
-  if (pageSlug.length === 0 || !isTypeLogo(type)) {
+  if (pageSlug.length === 0 || isTopCategoryPage || !isTypeLogo(type)) {
     const imagePath = join(process.cwd(), 'public', 'opengraph-image.png')
     const imageBuffer = await readFile(imagePath)
     return new Response(imageBuffer, {
