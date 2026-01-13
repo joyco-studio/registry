@@ -30,7 +30,7 @@ export function PreviewCard({
     <Link
       href={href}
       className={cn(
-        'group border-border bg-card hover:bg-accent/50 relative flex flex-col overflow-hidden rounded-lg border transition-colors',
+        'group relative flex flex-col gap-1 overflow-hidden rounded-lg transition-[colors,scale]',
         className
       )}
       {...props}
@@ -61,7 +61,7 @@ export function PreviewCard({
       </div>
 
       {/* Footer */}
-      <div className="border-border bg-muted/50 flex items-center justify-between border-t px-4 py-3">
+      <div className="bg-card group-hover:bg-accent/50 flex items-center justify-between px-4 py-3 transition-colors">
         <span className="font-mono text-sm font-medium tracking-wide uppercase">
           {title}
         </span>
