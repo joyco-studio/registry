@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/cn'
 import { getGitHubBlobUrl } from '@/lib/github'
+import { RegistryMetaProvider } from '@/components/registry-meta'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -57,6 +58,28 @@ const stripLogPrefixFromTitle = (title: string, logNumber: string | null) => {
   if (!logNumber) return title
   const pattern = new RegExp(`^${escapeRegExp(logNumber)}\\s*[-–—]\\s+`, 'u')
   return title.replace(pattern, '')
+}
+
+type PageTreeNode = {
+  type?: string
+  $id?: string
+  children?: PageTreeNode[]
+}
+
+const countPages = (node: PageTreeNode | undefined): number => {
+  if (!node) return 0
+  if (node.type === 'page') return 1
+  return (node.children ?? []).reduce(
+    (sum, child) => sum + countPages(child),
+    0
+  )
+}
+
+const getTopLevelFolder = (segment: string) => {
+  const children = source.pageTree.children as unknown as PageTreeNode[]
+  return children.find(
+    (child) => child.type === 'folder' && child.$id?.split(':')[1] === segment
+  )
 }
 
 async function getComponentSource(
@@ -116,106 +139,113 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const toc = page.data.toc
   const hasToc = toc.length > 0
+  const counts = {
+    components: countPages(getTopLevelFolder('components')),
+    toolbox: countPages(getTopLevelFolder('toolbox')),
+    logs: countPages(getTopLevelFolder('logs')),
+  }
 
   return (
-    <TOCProvider toc={toc}>
-      {/* Mobile TOC Popover */}
-      {hasToc && (
-        <PageTOCPopover>
-          <PageTOCPopoverTrigger />
-          <PageTOCPopoverContent>
-            <TOCScrollArea>
-              <TOCItems />
-            </TOCScrollArea>
-          </PageTOCPopoverContent>
-        </PageTOCPopover>
-      )}
-
-      {/* Main article content */}
-      <article
-        id="nd-page"
-        className={cn(
-          'px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14',
-          'xl:layout:[--fd-toc-width:268px]'
+    <RegistryMetaProvider counts={counts}>
+      <TOCProvider toc={toc}>
+        {/* Mobile TOC Popover */}
+        {hasToc && (
+          <PageTOCPopover>
+            <PageTOCPopoverTrigger />
+            <PageTOCPopoverContent>
+              <TOCScrollArea>
+                <TOCItems />
+              </TOCScrollArea>
+            </PageTOCPopoverContent>
+          </PageTOCPopover>
         )}
-      >
-        {/* Category badge */}
-        <Badge variant="accent" className="mb-4">
-          {badgeLabel}
-        </Badge>
 
-        <div className="p-3">
-          {/* Title and actions row */}
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-            <h1 className="text-3xl leading-tight font-semibold">
-              {displayTitle}
-            </h1>
+        {/* Main article content */}
+        <article
+          id="nd-page"
+          className={cn(
+            'px-content-sides mx-auto w-full max-w-[900px] py-6 [grid-area:main] md:pt-8 xl:pt-14',
+            'xl:layout:[--fd-toc-width:268px]'
+          )}
+        >
+          {/* Category badge */}
+          <Badge variant="accent" className="mb-4">
+            {badgeLabel}
+          </Badge>
+
+          <div className="p-3">
+            {/* Title and actions row */}
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+              <h1 className="text-3xl leading-tight font-semibold">
+                {displayTitle}
+              </h1>
+              <PageActions
+                className="max-sm:hidden"
+                content={llmText}
+                llmUrl={llmUrl}
+                componentSource={componentSource}
+              />
+            </div>
+
+            {/* Description */}
+            {page.data.description && (
+              <p className="text-fd-muted-foreground mb-2 text-lg">
+                {page.data.description}
+              </p>
+            )}
+          </div>
+          {/* Separator */}
+          <Separator brackets align="bottom" className="mb-4" />
+
+          {/* Doc links */}
+          <div className="hidden items-start justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
+            <DocLinks links={docLinks} />
             <PageActions
-              className="max-sm:hidden"
+              className="sm:hidden"
               content={llmText}
               llmUrl={llmUrl}
               componentSource={componentSource}
+              showShortcuts={false}
             />
           </div>
 
-          {/* Description */}
-          {page.data.description && (
-            <p className="text-fd-muted-foreground mb-2 text-lg">
-              {page.data.description}
-            </p>
+          <div className="prose mt-10 flex-1">
+            <MDX
+              components={getMDXComponents({
+                a: createRelativeLink(source, page),
+              })}
+            />
+          </div>
+          {relatedItems.length > 0 && (
+            <RelatedItems
+              title={`Related ${categoryLabel}s`}
+              items={relatedItems}
+              className="mt-16"
+            />
           )}
-        </div>
-        {/* Separator */}
-        <Separator brackets align="bottom" className="mb-4" />
+        </article>
 
-        {/* Doc links */}
-        <div className="hidden items-start justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
-          <DocLinks links={docLinks} />
-          <PageActions
-            className="sm:hidden"
-            content={llmText}
-            llmUrl={llmUrl}
-            componentSource={componentSource}
-            showShortcuts={false}
-          />
-        </div>
-
-        <div className="prose mt-10 flex-1">
-          <MDX
-            components={getMDXComponents({
-              a: createRelativeLink(source, page),
-            })}
-          />
-        </div>
-        {relatedItems.length > 0 && (
-          <RelatedItems
-            title={`Related ${categoryLabel}s`}
-            items={relatedItems}
-            className="mt-16"
+        {/* Desktop TOC */}
+        {hasToc && (
+          <TOC
+            footer={
+              <>
+                {isLog && <Author author={page.data.author} />}
+                <Maintainers
+                  maintainers={page.data.maintainers}
+                  lastModified={
+                    page.data.lastModified
+                      ? new Date(page.data.lastModified)
+                      : undefined
+                  }
+                />
+                {downloadStats && <WeeklyDownloads data={downloadStats} />}
+              </>
+            }
           />
         )}
-      </article>
-
-      {/* Desktop TOC */}
-      {hasToc && (
-        <TOC
-          footer={
-            <>
-              {isLog && <Author author={page.data.author} />}
-              <Maintainers
-                maintainers={page.data.maintainers}
-                lastModified={
-                  page.data.lastModified
-                    ? new Date(page.data.lastModified)
-                    : undefined
-                }
-              />
-              {downloadStats && <WeeklyDownloads data={downloadStats} />}
-            </>
-          }
-        />
-      )}
-    </TOCProvider>
+      </TOCProvider>
+    </RegistryMetaProvider>
   )
 }
 
