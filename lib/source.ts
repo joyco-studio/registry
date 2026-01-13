@@ -71,19 +71,22 @@ export function getRelatedPages(
 
   const allPages = source.getPages()
   const sameCategoryPages = allPages.filter(
-    (page) =>
-      page.slugs[0] === category &&
-      page.url !== currentPage.url &&
-      page.slugs.length > 1
+    (page) => page.slugs[0] === category && page.slugs.length > 1
   )
 
   const currentPageIndex = sameCategoryPages.findIndex(
     (page) => page.url === currentPage.url
   )
-  const selected = sameCategoryPages.slice(
-    currentPageIndex - 1,
-    currentPageIndex + limit - 1
+
+  const before = sameCategoryPages.slice(
+    Math.max(0, currentPageIndex - 1),
+    currentPageIndex
   )
+  const after = sameCategoryPages.slice(
+    currentPageIndex + 1,
+    currentPageIndex + 1 + limit - before.length
+  )
+  const selected = [...before, ...after]
 
   return selected.map((page) => ({
     name: page.slugs[page.slugs.length - 1],
