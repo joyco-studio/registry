@@ -25,9 +25,9 @@ import { TOCScrollArea } from '@/components/toc'
 import { TOCItems } from '@/components/toc/clerk'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/cn'
-import { getGitHubBlobUrl } from '@/lib/github'
+import { cn } from '@/lib/utils'
 import { RegistryMetaProvider } from '@/components/registry-meta'
+import { PageGithubLinkButton } from '@/components/page-github-link-button'
 
 const getComponentSlug = (page: InferPageType<typeof source>) => {
   if (page.slugs[0] !== 'components') return undefined
@@ -126,6 +126,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     ? await getDownloadStats(componentSlug)
     : null
   const componentSource = await getComponentSource(componentSlug)
+<<<<<<< HEAD
   const githubUrl = getGitHubBlobUrl(`content/${page.path}`)
   const docLinks = (() => {
     if (isTopCategoryPage) return []
@@ -136,6 +137,9 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     links.push(...page.data.docLinks)
     return links
   })()
+=======
+  const docLinks = [...page.data.docLinks]
+>>>>>>> main
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)
@@ -178,21 +182,27 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
           <div className="p-3">
             {/* Title and actions row */}
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-              <h1 className="text-3xl leading-tight font-semibold">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <h1 className="min-w-0 text-3xl leading-tight font-semibold">
                 {displayTitle}
               </h1>
-              <PageActions
-                className={cn('max-sm:hidden', isTopCategoryPage && 'hidden')}
-                content={llmText}
-                llmUrl={llmUrl}
-                componentSource={componentSource}
-              />
+              <div className="flex items-center gap-2 max-sm:hidden">
+                <PageGithubLinkButton
+                  className="max-lg:hidden"
+                  path={page.path}
+                />
+                <PageActions
+                className={cn(isTopCategoryPage && 'hidden')}
+                  content={llmText}
+                  llmUrl={llmUrl}
+                  componentSource={componentSource}
+                />
+              </div>
             </div>
 
             {/* Description */}
             {page.data.description && (
-              <p className="text-fd-muted-foreground mb-2 text-lg">
+              <p className="text-foreground/70 mb-2 text-lg">
                 {page.data.description}
               </p>
             )}
@@ -201,8 +211,14 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           <Separator brackets align="bottom" className="mb-4" />
 
           {/* Doc links */}
-          <div className="hidden items-start justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
-            <DocLinks links={docLinks} />
+          <div
+            className={cn('flex items-start justify-between gap-8', {
+              'lg:hidden': docLinks.length === 0,
+            })}
+          >
+            <DocLinks links={docLinks}>
+              <PageGithubLinkButton className="lg:hidden" path={page.path} />
+            </DocLinks>
             <PageActions
               className="sm:hidden"
               content={llmText}
