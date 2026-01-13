@@ -1,23 +1,20 @@
 import { APP_BASE_URL } from '@/lib/constants'
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
+import { baseScreenshStyle, DemoConfig, getDemoConfig } from './config'
 
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID
 const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN
-
-const SCREENSHOT_WIDTH = 1200
-const SCREENSHOT_HEIGHT = 600
 
 const MAX_RETRIES = 5
 const INITIAL_BACKOFF_MS = 2000
 
 async function fetchScreenshotFromCloudflare(
   targetUrl: string,
-  width: number,
-  height: number
+  config: DemoConfig
 ): Promise<string> {
   let lastError: Error | null = null
-
+  console.log('fetchScreenshotFromCloudflare', config)
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const response = await fetch(
@@ -30,33 +27,17 @@ async function fetchScreenshotFromCloudflare(
           },
           body: JSON.stringify({
             url: targetUrl,
-            viewport: { width, height },
+            viewport: config.viewport,
             gotoOptions: {
               waitUntil: 'networkidle0',
               timeout: 30000,
             },
+            ...(config.timeout ? { waitForTimeout: config.timeout } : {}),
             addStyleTag: [
               {
                 content: `
-                  html, body {
-                    min-height: 100vh;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                    background-color: hsl(var(--background));
-                  }
-                  body * {
-                    flex-shrink: 0;
-                  }
-                  /* Hide scrollbars */
-                  ::-webkit-scrollbar {
-                    display: none;
-                  }
-                  * {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                  }
+                  ${baseScreenshStyle}
+                  ${config.styles}
                 `,
               },
             ],
@@ -97,9 +78,10 @@ async function fetchScreenshotFromCloudflare(
 
 // Demo pages must follow the `{name}-demo` naming convention (e.g., `demos/chat-demo.tsx`)
 const getCachedScreenshot = unstable_cache(
-  async (name: string, width: number, height: number) => {
+  async (name: string) => {
+    const demoConfig = getDemoConfig(name)
     const targetUrl = `${APP_BASE_URL}/view/${name}-demo`
-    return fetchScreenshotFromCloudflare(targetUrl, width, height)
+    return fetchScreenshotFromCloudflare(targetUrl, demoConfig)
   },
   ['screenshot'],
   { revalidate: false }
@@ -108,10 +90,6 @@ const getCachedScreenshot = unstable_cache(
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const name = searchParams.get('name')
-  const width = parseInt(searchParams.get('width') || String(SCREENSHOT_WIDTH))
-  const height = parseInt(
-    searchParams.get('height') || String(SCREENSHOT_HEIGHT)
-  )
 
   if (!name) {
     return NextResponse.json(
@@ -128,7 +106,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const base64Image = await getCachedScreenshot(name, width, height)
+    const base64Image = await getCachedScreenshot(name)
     const imageBuffer = Buffer.from(base64Image, 'base64')
 
     return new NextResponse(imageBuffer, {

@@ -7,6 +7,7 @@ import { useState } from 'react'
 import CubeIcon from '../icons/3d-cube'
 import TerminalWithCursorIcon from '../icons/terminal-w-cursor'
 import FileIcon from '../icons/file'
+import { getDemoConfig } from '@/app/api/screenshot/config'
 
 interface PreviewCardImageProps extends React.ComponentProps<'div'> {
   name: string
@@ -32,14 +33,14 @@ export function PreviewCardImage({
 }: PreviewCardImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
-
+  const demoConfig = getDemoConfig(name)
   const screenshotUrl = `/api/screenshot?name=${encodeURIComponent(name)}&width=1200&height=600`
   const Icon = typeIcons[type]
 
   return (
     <div
       className={cn(
-        'border-border bg-muted relative overflow-hidden rounded-md border',
+        'border-border bg-muted dark relative overflow-hidden rounded-md border',
         className
       )}
       {...props}
@@ -64,8 +65,9 @@ export function PreviewCardImage({
           style={{ width: '100%', height: '100%' }}
           unoptimized
           className={cn(
-            'h-full w-full object-cover transition-opacity duration-300',
-            isLoading ? 'opacity-0' : 'opacity-100'
+            'object-fit h-full w-full object-cover transition-opacity duration-300',
+            isLoading ? 'opacity-0' : 'opacity-100',
+            demoConfig.preview
           )}
           onLoad={() => setIsLoading(false)}
           onError={() => {
