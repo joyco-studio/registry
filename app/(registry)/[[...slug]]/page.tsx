@@ -126,20 +126,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     ? await getDownloadStats(componentSlug)
     : null
   const componentSource = await getComponentSource(componentSlug)
-<<<<<<< HEAD
-  const githubUrl = getGitHubBlobUrl(`content/${page.path}`)
-  const docLinks = (() => {
-    if (isTopCategoryPage) return []
-    const links = []
-    if (!page.data.docLinks.some((link) => link.href === githubUrl)) {
-      links.push({ label: 'See on GitHub', href: githubUrl })
-    }
-    links.push(...page.data.docLinks)
-    return links
-  })()
-=======
   const docLinks = [...page.data.docLinks]
->>>>>>> main
   const llmText = await getLLMText(page)
   const llmUrl = page.slugs.length === 0 ? null : `/${page.slugs.join('/')}.md`
   const relatedItems = getRelatedPages(page, 3)
@@ -186,13 +173,17 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
               <h1 className="min-w-0 text-3xl leading-tight font-semibold">
                 {displayTitle}
               </h1>
-              <div className="flex items-center gap-2 max-sm:hidden">
+              <div
+                className={cn(
+                  'flex items-center gap-2 max-sm:hidden',
+                  isTopCategoryPage && 'hidden'
+                )}
+              >
                 <PageGithubLinkButton
                   className="max-lg:hidden"
                   path={page.path}
                 />
                 <PageActions
-                className={cn(isTopCategoryPage && 'hidden')}
                   content={llmText}
                   llmUrl={llmUrl}
                   componentSource={componentSource}
