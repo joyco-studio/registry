@@ -11,6 +11,7 @@ interface PreviewCardProps extends React.ComponentProps<'a'> {
   title: string
   type: ItemType
   href: string
+  showBadge?: boolean
 }
 
 export function PreviewCard({
@@ -18,6 +19,7 @@ export function PreviewCard({
   title,
   type,
   href,
+  showBadge = true,
   className,
   ...props
 }: PreviewCardProps) {
@@ -36,12 +38,14 @@ export function PreviewCard({
       {/* Preview Area */}
       <div className="relative h-[200px] w-full overflow-hidden">
         {/* Type Badge */}
-        <Badge
-          variant="key"
-          className="absolute top-3 left-3 z-10 border-none shadow-none"
-        >
-          {label}
-        </Badge>
+        {showBadge && (
+          <Badge
+            variant="key"
+            className="absolute top-3 left-3 z-10 border-none shadow-none"
+          >
+            {label}
+          </Badge>
+        )}
 
         {hasPreview ? (
           <PreviewCardImage

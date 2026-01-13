@@ -44,8 +44,9 @@ async function fetchScreenshotFromCloudflare(
                     align-items: center;
                     justify-content: center;
                     overflow: hidden;
+                    background-color: hsl(var(--background));
                   }
-                  body > * {
+                  body * {
                     flex-shrink: 0;
                   }
                   /* Hide scrollbars */
