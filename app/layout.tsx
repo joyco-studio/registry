@@ -17,8 +17,8 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | JOYCO Registry',
-    default: 'JOYCO Registry',
+    template: '%s | JOYCO Hub',
+    default: 'JOYCO Hub',
   },
   icons: {
     icon: [
