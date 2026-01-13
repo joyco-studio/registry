@@ -17,12 +17,24 @@ export async function GET(
   const pageSlug = slug ?? []
   const type = pageSlug[0]
   const page = source.getPage(pageSlug)
-
+  const isTopLevelCategoryPage = pageSlug.length === 1
   if (!page) notFound()
 
-  // Return static opengraph image for home page
-  if (pageSlug.length === 0 || !isTypeLogo(type)) {
-    const imagePath = join(process.cwd(), 'public', 'opengraph-image.png')
+  // Return static opengraph image for home page and top category pages
+  if (pageSlug.length === 0 || isTopLevelCategoryPage || !isTypeLogo(type)) {
+    // Map category slugs to their specific OG images
+    const categoryOgImages: Record<string, string> = {
+      components: 'components-opengraph-image.png',
+      logs: 'logs-opengraph-image.png',
+      toolbox: 'toolbox-opengraph-image.png',
+    }
+
+    const ogImageFile =
+      isTopLevelCategoryPage && type in categoryOgImages
+        ? categoryOgImages[type]
+        : 'opengraph-image.png'
+
+    const imagePath = join(process.cwd(), 'public', ogImageFile)
     const imageBuffer = await readFile(imagePath)
     return new Response(imageBuffer, {
       headers: {
