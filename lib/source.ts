@@ -28,24 +28,6 @@ export async function getLLMText(page: InferPageType<typeof source>) {
 ${processed}`
 }
 
-export function getTopLevelPathsRedirects(source: ReturnType<typeof loader>) {
-  const topLevelPaths: [string, string][] = []
-  source.pageTree.children.forEach((child) => {
-    if (child.type === 'folder' && child.$id) {
-      const segment = child.$id.split(':')[1]
-      // if has index page, don't add it to the redirects
-      if (child.index) {
-        return
-      }
-      const firstEntry = child.children.find((child) => child.type === 'page')
-      if (segment && firstEntry) {
-        topLevelPaths.push([`/${segment}`, firstEntry.url])
-      }
-    }
-  })
-  return topLevelPaths
-}
-
 export type RelatedItem = {
   name: string
   title: string
@@ -97,6 +79,19 @@ export function getRelatedPages(
     currentPageIndex + 1 + limit - before.length
   )
   const selected = [...before, ...after]
+
+  // If we don't have enough items, wrap around to the beginning
+  if (selected.length < limit) {
+    const remaining = limit - selected.length
+    const selectedUrls = new Set([
+      ...selected.map((p) => p.url),
+      currentPage.url,
+    ])
+    const fromStart = sameCategoryPages
+      .filter((page) => !selectedUrls.has(page.url))
+      .slice(0, remaining)
+    selected.push(...fromStart)
+  }
 
   return selected.map((page) => ({
     name: page.slugs[page.slugs.length - 1],

@@ -34,7 +34,7 @@ export function PreviewCardImage({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const demoConfig = getDemoConfig(name)
-  const screenshotUrl = `/api/screenshot?name=${encodeURIComponent(name)}&width=1200&height=600`
+  const screenshotUrl = `/api/screenshot?name=${encodeURIComponent(name)}`
   const Icon = typeIcons[type]
 
   return (
@@ -59,7 +59,7 @@ export function PreviewCardImage({
         <Image
           src={screenshotUrl}
           alt={alt || `Preview of ${name}`}
-          width={600}
+          width={800}
           height={400}
           sizes="(max-width: 768px) 100vw, 600px"
           style={{ width: '100%', height: '100%' }}
