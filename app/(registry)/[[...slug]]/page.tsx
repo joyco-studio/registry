@@ -195,7 +195,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
           {/* Doc links */}
           <div className="hidden items-start justify-between gap-8 has-data-[slot=doc-links]:flex max-sm:flex">
             <DocLinks links={docLinks}>
-              <PageGithubLinkButton className="sm:hidden" path={page.path} />
+              <PageGithubLinkButton className="lg:hidden" path={page.path} />
             </DocLinks>
             <PageActions
               className="sm:hidden"
