@@ -83,8 +83,8 @@ function ChevronExample() {
     <div className="mx-auto w-full max-w-md p-10">
       <ScrollAreaViewport
         className="h-[400px] w-full"
-        topShadowGradient="bg-linear-to-b from-card to-transparent"
-        bottomShadowGradient="bg-linear-to-t from-card to-transparent"
+        topShadowGradient="bg-linear-to-b from-background to-transparent"
+        bottomShadowGradient="bg-linear-to-t from-background to-transparent"
       >
         {/* Scroll indicator arrows */}
         <div

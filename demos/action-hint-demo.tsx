@@ -93,7 +93,7 @@ function SaveButton() {
 
 function ActionHintDemo() {
   return (
-    <div className="flex min-h-32 w-full items-center justify-center p-8">
+    <div className="flex min-h-40 w-full items-center justify-center p-8">
       <div className="flex flex-wrap items-center gap-2">
         <ActionHintEmitter>
           <CopyButton />
