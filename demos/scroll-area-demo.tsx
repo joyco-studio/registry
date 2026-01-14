@@ -80,8 +80,8 @@ function ScrollAreaDemo() {
     <div className="mx-auto w-full max-w-md p-10">
       <ScrollAreaViewport
         className="h-100 w-full"
-        topShadowGradient="bg-linear-to-b from-card to-transparent"
-        bottomShadowGradient="bg-linear-to-t from-card to-transparent"
+        topShadowGradient="bg-linear-to-b from-background to-transparent"
+        bottomShadowGradient="bg-linear-to-t from-background to-transparent"
       >
         <ScrollAreaContent ref={scrollRef} className="space-y-2">
           {items.length === 0 ? (
