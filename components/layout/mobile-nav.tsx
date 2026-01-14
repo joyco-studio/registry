@@ -107,15 +107,26 @@ export function MobileNav({ tree, itemMeta = {} }: MobileNavProps) {
     [router]
   )
 
+  const handleClickMenu = () => {
+    switch (state) {
+      case 'search':
+        handleClose()
+      case 'menu':
+        setState('closed')
+        break
+      default:
+        setState('menu')
+    }
+  }
+
   return (
     <div className="contents md:hidden">
       {/* Mobile Header */}
       <header className="bg-background h-mobile-header sticky top-0 z-(--z-mobile-nav) flex w-full items-center gap-1 overflow-hidden">
         {/* Logo / Search icon button */}
         <button
-          onClick={() =>
-            state === 'search' ? handleClose() : setState('menu')
-          }
+          data-state={state}
+          onClick={handleClickMenu}
           className={cn(
             'flex aspect-square h-full shrink-0 items-center justify-center',
             state === 'search'
