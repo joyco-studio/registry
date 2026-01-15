@@ -55,7 +55,7 @@ export function PreviewCard({
           />
         ) : (
           <div className="bg-primary flex h-full w-full items-center justify-center">
-            <Icon className="text-foreground size-8" />
+            <Icon className="text-primary-foreground size-8" />
           </div>
         )}
       </div>
