@@ -9,3 +9,7 @@ Use `data-slot` attributes for inner elements and keep a single `className` on t
 ## Use max-{breakpoint} variants for responsive hiding
 
 When hiding elements below specific breakpoints, use Tailwind's max-{breakpoint} variants with the `hidden` class while keeping the default display value intact (e.g., `flex max-sm:hidden`). This approach prevents consumers from accidentally overriding the component's display behavior, as they might incorrectly assume the base state and apply conflicting classes like `hidden sm:block`.
+
+## Semantic Elements for Actions vs Navigation
+
+Use `<button>` for actions (submit, toggle, open modal) and `<a>`/`<Link>` for navigation. Never use `<button>` styled as a link for navigation, and never use `<a>` or `<div onClick>` for actions. This ensures proper keyboard behavior, accessibility, and allows users to Cmd/Ctrl+click or middle-click links to open in new tabs.
