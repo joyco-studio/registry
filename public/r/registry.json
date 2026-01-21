@@ -140,85 +140,32 @@
       ]
     },
     {
-      "name": "brick-breaker",
+      "name": "image-sequence",
       "type": "registry:component",
-      "title": "Brick Breaker",
-      "description": "A fully-featured brick breaker game with multiple levels, brick types, and proper collision physics.",
+      "title": "Image Sequence",
+      "description": "A canvas-based image sequence player with binary progressive loading for smooth playback.",
       "files": [
         {
-          "path": "registry/joyco/blocks/brick-breaker/index.ts",
+          "path": "registry/joyco/blocks/image-sequence.tsx",
           "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/brick-breaker.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/ui.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/types.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/config.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/levels.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/utils.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/brick-breaker/use-brick-breaker.ts",
-          "type": "registry:hook"
-        },
-        {
-          "path": "hooks/use-local-storage.ts",
-          "type": "registry:hook"
         }
       ]
     },
     {
-      "name": "snake-game",
+      "name": "typewriter",
       "type": "registry:component",
-      "title": "Snake Game",
-      "description": "A minimal, themeable snake game component with highscore persistence.",
+      "title": "Typewriter",
+      "description": "A lightweight typewriter text component that cycles through phrases with minimal JavaScript.",
       "files": [
         {
-          "path": "registry/joyco/blocks/snake-game/index.ts",
+          "path": "registry/joyco/blocks/typewriter.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/joyco/blocks/snake-game/snake-game.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/snake-game/types.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/snake-game/config.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/snake-game/utils.ts",
-          "type": "registry:component"
-        },
-        {
-          "path": "registry/joyco/blocks/snake-game/use-snake-game.ts",
-          "type": "registry:hook"
-        },
-        {
-          "path": "hooks/use-local-storage.ts",
+          "path": "hooks/use-typewriter.ts",
           "type": "registry:hook"
         }
-      ],
-      "registryDependencies": ["button", "kbd"]
+      ]
     }
   ]
 }

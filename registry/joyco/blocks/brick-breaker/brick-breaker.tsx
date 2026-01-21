@@ -19,7 +19,11 @@ import {
 import { DEFAULT_LEVELS } from './levels'
 import { useBrickBreaker } from './use-brick-breaker'
 import { mergeConfig, resolveCssColor } from './utils'
-import { BrickBreakerUIProvider, BrickBreakerDefaultUI, BrickBreakerCanvas } from './ui'
+import {
+  BrickBreakerUIProvider,
+  BrickBreakerDefaultUI,
+  BrickBreakerCanvas,
+} from './ui'
 
 /**
  * Draw rounded rectangle
@@ -370,6 +374,12 @@ export function BrickBreaker({
   // Keyboard controls
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // only if is focusing on the canvas
+      if (
+        !document.activeElement?.closest('[data-slot="brick-breaker-canvas"]')
+      )
+        return
+
       const code = e.code
 
       // Movement keys - switch to keyboard mode (allows taking over from pointer)
@@ -655,14 +665,18 @@ export function BrickBreaker({
     ? childArray.map((child) => {
         if (
           React.isValidElement(child) &&
-          (child.type as React.ComponentType)?.displayName === 'BrickBreakerCanvas'
+          (child.type as React.ComponentType)?.displayName ===
+            'BrickBreakerCanvas'
         ) {
           // Replace slot with canvas wrapper that takes flex-1
           return (
             <div
               key="canvas-wrapper"
               ref={canvasWrapperRef}
-              className={cn('relative flex min-h-0 flex-1 items-center justify-center', child.props.className)}
+              className={cn(
+                'relative flex min-h-0 flex-1 items-center justify-center',
+                child.props.className
+              )}
             >
               {canvasElement}
               {/* Overlay goes inside canvas wrapper for proper positioning */}
@@ -673,7 +687,8 @@ export function BrickBreaker({
         // Filter out overlays since they're rendered inside canvas wrapper
         if (
           React.isValidElement(child) &&
-          (child.type as React.ComponentType)?.displayName === 'BrickBreakerOverlay'
+          (child.type as React.ComponentType)?.displayName ===
+            'BrickBreakerOverlay'
         ) {
           return null
         }
@@ -695,7 +710,10 @@ export function BrickBreaker({
         ) : children ? (
           // User provided children but no canvas slot - canvas first, then children overlay
           <>
-            <div ref={canvasWrapperRef} className="relative flex min-h-0 flex-1 items-center justify-center">
+            <div
+              ref={canvasWrapperRef}
+              className="relative flex min-h-0 flex-1 items-center justify-center"
+            >
               {canvasElement}
               {children}
             </div>
@@ -703,7 +721,10 @@ export function BrickBreaker({
         ) : (
           // No children - use default UI
           <>
-            <div ref={canvasWrapperRef} className="relative flex min-h-0 flex-1 items-center justify-center">
+            <div
+              ref={canvasWrapperRef}
+              className="relative flex min-h-0 flex-1 items-center justify-center"
+            >
               {canvasElement}
               <BrickBreakerDefaultUI />
             </div>
