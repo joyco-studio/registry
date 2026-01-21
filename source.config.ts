@@ -20,6 +20,7 @@ export const docs = defineDocs({
     schema: frontmatterSchema.extend({
       author: z.string().optional(),
       maintainers: z.array(z.string()).default([]),
+      type: z.enum(['component', 'game']).default('component'),
       docLinks: z
         .array(
           z.object({
