@@ -675,7 +675,7 @@ export function BrickBreaker({
               ref={canvasWrapperRef}
               className={cn(
                 'relative flex min-h-0 flex-1 items-center justify-center',
-                child.props.className
+                (child.props as { className?: string }).className
               )}
             >
               {canvasElement}
