@@ -62,7 +62,7 @@ export function Typewriter({
             data-slot="caret"
             className={cn(
               'inline-block w-px bg-current',
-              !prefersReducedMotion && 'animate-caret-blink'
+              !prefersReducedMotion && 'animate-pulse opacity-0'
             )}
             style={{ height: '1em' }}
             aria-hidden="true"
