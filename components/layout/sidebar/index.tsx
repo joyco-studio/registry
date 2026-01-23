@@ -20,9 +20,10 @@ export type { SidebarItemMeta }
 type RegistrySidebarProps = {
   tree: PageTree.Root
   itemMeta?: Record<string, SidebarItemMeta>
+  gameSlugs?: string[]
 }
 
-export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
+export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { layout } = useLayout()
@@ -76,7 +77,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
 
     return (
       <nav className="bg-accent/70 flex flex-col overflow-y-auto">
-        <SidebarSection folder={folder} defaultOpen meta={itemMeta} />
+        <SidebarSection folder={folder} defaultOpen meta={itemMeta} gameSlugs={gameSlugs} />
       </nav>
     )
   }
