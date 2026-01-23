@@ -35,6 +35,16 @@ export type RelatedItem = {
   href: string
 }
 
+/**
+ * Get all game slugs based on frontmatter type: 'game'
+ */
+export function getGameSlugs(): string[] {
+  const allPages = source.getPages()
+  return allPages
+    .filter((page) => page.data.type === 'game')
+    .map((page) => page.slugs[page.slugs.length - 1])
+}
+
 export function getRelatedPages(
   currentPage: InferPageType<typeof source>,
   limit = 3
