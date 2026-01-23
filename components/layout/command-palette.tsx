@@ -173,7 +173,7 @@ export function CommandPalette() {
           </div>
           {isLoading && (
             <div className="absolute right-0 bottom-0 left-0 h-0.5 overflow-hidden">
-              <div className="bg-primary animate-loading-bar h-full w-[30%]" />
+              <div className="bg-primary h-full w-[30%] animate-loading-bar" />
             </div>
           )}
         </div>
