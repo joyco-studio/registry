@@ -166,19 +166,6 @@ export function CommandPalette() {
               ref={inputRef}
               value={query}
               onValueChange={setQuery}
-              onKeyDown={(e) => {
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                  e.preventDefault()
-                  const syntheticKey =
-                    e.key === 'ArrowLeft' ? 'ArrowUp' : 'ArrowDown'
-                  e.currentTarget.dispatchEvent(
-                    new KeyboardEvent('keydown', {
-                      key: syntheticKey,
-                      bubbles: true,
-                    })
-                  )
-                }
-              }}
               placeholder="Search"
               className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none focus-visible:outline-none"
             />
