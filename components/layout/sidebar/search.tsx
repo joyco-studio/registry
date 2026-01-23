@@ -24,7 +24,7 @@ export function SidebarSearch({
           value={query}
           onValueChange={setQuery}
           placeholder="Search"
-          className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none"
+          className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none focus-visible:outline-none"
         />
         {!query && <Kbd className="h-[2em] px-2">⌘K</Kbd>}
       </div>

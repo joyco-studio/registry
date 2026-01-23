@@ -154,14 +154,14 @@ export function SearchResults({
                     >
                       <HighlightedText text={title} query={query} />
                     </span>
-                    <span
-                      data-slot="command-item-description"
-                      className="text-muted-foreground/70 line-clamp-2 text-xs normal-case"
-                    >
-                      {contentPreview && (
+                    {contentPreview && (
+                      <span
+                        data-slot="command-item-description"
+                        className="text-muted-foreground/70 line-clamp-2 text-xs normal-case"
+                      >
                         <HighlightedText text={contentPreview} query={query} />
-                      )}
-                    </span>
+                      </span>
+                    )}
                   </Command.Item>
                 )
               })}

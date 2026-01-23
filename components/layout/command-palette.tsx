@@ -173,7 +173,7 @@ export function CommandPalette() {
                 }
               }}
               placeholder="Search"
-              className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none"
+              className="text-foreground placeholder:text-muted-foreground h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide uppercase outline-none focus-visible:outline-none"
             />
             <Kbd className="h-[2em] px-2">ESC</Kbd>
           </div>
@@ -222,7 +222,7 @@ export function CommandPalette() {
                           clearRecentItems()
                           setRecentItems([])
                         }}
-                        className="text-muted-foreground hover:text-foreground font-mono text-xs tracking-wide uppercase opacity-0 transition-opacity group-hover:opacity-100"
+                        className="text-muted-foreground hover:text-foreground focus-visible:text-foreground font-mono text-xs tracking-wide uppercase opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                       >
                         Clear
                       </button>
