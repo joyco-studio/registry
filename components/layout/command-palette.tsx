@@ -7,8 +7,17 @@ import { useSearch } from '@/hooks/use-search'
 import { SearchResults } from './sidebar/search-results'
 import { NoResults } from './sidebar/no-results'
 import SearchIcon from '@/components/icons/search'
+import HistoryIcon from '@/components/icons/history'
 import { Kbd } from '@/components/ui/kbd'
 import { cn } from '@/lib/utils'
+
+const RECENT_ITEMS_KEY = 'joyco-recent-items'
+const MAX_RECENT_ITEMS = 6
+
+type RecentItem = {
+  url: string
+  title: string
+}
 
 const suggestedSearches = [
   'Chat',
@@ -19,12 +28,49 @@ const suggestedSearches = [
   'Mobile Menu',
 ]
 
+function getRecentItems(): RecentItem[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = localStorage.getItem(RECENT_ITEMS_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function addRecentItem(item: RecentItem): void {
+  if (typeof window === 'undefined' || !item.url) return
+  try {
+    const recent = getRecentItems()
+    const filtered = recent.filter((i) => i.url !== item.url)
+    const updated = [item, ...filtered].slice(0, MAX_RECENT_ITEMS)
+    localStorage.setItem(RECENT_ITEMS_KEY, JSON.stringify(updated))
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
+function clearRecentItems(): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(RECENT_ITEMS_KEY)
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
 export function CommandPalette() {
   const router = useRouter()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [isOpen, setIsOpen] = React.useState(false)
+  const [recentItems, setRecentItems] = React.useState<RecentItem[]>([])
   const { query, setQuery, results, hasResults, isEmpty, isLoading } =
     useSearch()
+
+  // Load recent items on mount
+  React.useEffect(() => {
+    setRecentItems(getRecentItems())
+  }, [])
 
   const handleClose = React.useCallback(() => {
     setIsOpen(false)
@@ -33,10 +79,19 @@ export function CommandPalette() {
 
   const handleSelect = React.useCallback(
     (url: string) => {
+      // Find the selected result to save it
+      const selectedResult = results.find((r) => r.url.split('#')[0] === url)
+      if (selectedResult) {
+        addRecentItem({
+          url,
+          title: selectedResult.content,
+        })
+        setRecentItems(getRecentItems())
+      }
       router.push(url)
       handleClose()
     },
-    [router, handleClose]
+    [router, handleClose, results]
   )
 
   const onKeyDown = React.useEffectEvent((event: KeyboardEvent) => {
@@ -130,7 +185,8 @@ export function CommandPalette() {
         </div>
         <div
           className={cn(
-            'aspect-square h-auto max-h-[60vh] w-auto overflow-y-auto',
+            'max-h-[60vh] overflow-x-hidden overflow-y-auto',
+            isEmpty && 'aspect-square w-full',
             "**:data-[slot='snake-game-canvas']:border-border **:data-[slot='snake-game']:bg-black/40 **:data-[slot='snake-game-canvas']:border",
             "**:data-[slot='snake-game-highscores']:bg-background **:data-[slot='snake-game-highscores']:absolute **:data-[slot='snake-game-highscores']:top-0 **:data-[slot='snake-game-highscores']:left-0 **:data-[slot='snake-game-highscores']:h-full **:data-[slot='snake-game-highscores']:max-w-44 **:data-[slot='snake-game-highscores']:-translate-x-[calc(100%+1rem)]"
           )}
@@ -152,38 +208,77 @@ export function CommandPalette() {
           )}
           {isEmpty && <NoResults query={query} />}
           {!hasResults && !isEmpty && (
-            <Command.List
-              className="bg-accent/70 flex h-full flex-col p-4 outline-0"
-              onKeyDown={(e) => {
-                // Map left/right arrows to up/down for horizontal navigation
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                  e.preventDefault()
-                  const syntheticKey =
-                    e.key === 'ArrowLeft' ? 'ArrowUp' : 'ArrowDown'
-                  e.currentTarget.dispatchEvent(
-                    new KeyboardEvent('keydown', {
-                      key: syntheticKey,
-                      bubbles: true,
-                    })
-                  )
-                }
-              }}
-            >
-              <p className="text-muted-foreground mb-4 font-mono text-xs tracking-wide uppercase">
-                Suggested Searches
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {suggestedSearches.map((suggestion) => (
-                  <Command.Item
-                    key={suggestion}
-                    value={suggestion}
-                    onSelect={() => setQuery(suggestion)}
-                    className="bg-muted text-foreground data-[selected=true]:bg-accent cursor-pointer px-3 py-2 font-mono text-xs tracking-wide uppercase transition-colors"
-                  >
-                    {suggestion}
-                  </Command.Item>
-                ))}
-              </div>
+            <Command.List className="bg-accent/70 flex flex-col pt-2 pb-4 outline-0">
+              {recentItems.length > 0 ? (
+                <Command.Group
+                  heading={
+                    <div className="group flex items-center justify-between px-4 py-2">
+                      <span className="text-muted-foreground font-mono text-xs tracking-wide uppercase">
+                        Recent
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearRecentItems()
+                          setRecentItems([])
+                        }}
+                        className="text-muted-foreground hover:text-foreground font-mono text-xs tracking-wide uppercase opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  }
+                  className="[&_[cmdk-group-heading]]:p-0"
+                >
+                  {recentItems.map((item) => (
+                    <Command.Item
+                      key={item.url}
+                      value={item.title}
+                      onSelect={() => {
+                        router.push(item.url)
+                        handleClose()
+                      }}
+                      className={cn(
+                        'flex cursor-pointer items-center gap-2 py-3 pr-4 pl-4 transition-colors',
+                        'text-muted-foreground',
+                        'data-[selected=true]:text-foreground data-[selected=true]:bg-accent'
+                      )}
+                    >
+                      <HistoryIcon className="size-3.5 shrink-0 opacity-50" />
+                      <span className="font-mono text-sm tracking-wide uppercase">
+                        {item.title}
+                      </span>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              ) : (
+                <Command.Group
+                  heading={
+                    <span className="text-muted-foreground px-4 py-2 font-mono text-xs tracking-wide uppercase">
+                      Suggested Searches
+                    </span>
+                  }
+                  className="**:[cmdk-group-heading]:p-0"
+                >
+                  {suggestedSearches.map((suggestion) => (
+                    <Command.Item
+                      key={suggestion}
+                      value={suggestion}
+                      onSelect={() => setQuery(suggestion)}
+                      className={cn(
+                        'flex cursor-pointer items-center gap-2 py-3 pr-4 pl-4 transition-colors',
+                        'text-muted-foreground',
+                        'data-[selected=true]:text-foreground data-[selected=true]:bg-accent'
+                      )}
+                    >
+                      <SearchIcon className="size-3.5 shrink-0 opacity-50" />
+                      <span className="font-mono text-sm tracking-wide uppercase">
+                        {suggestion}
+                      </span>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              )}
             </Command.List>
           )}
         </div>

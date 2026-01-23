@@ -61,7 +61,18 @@ export function useSearch() {
   const hasResults = isSearching && hasLoadedResults && results.length > 0
 
   // isEmpty: only when we've confirmed no results for the CURRENT query specifically
-  const isEmpty = isSearching && resultsMatch && results.length === 0
+  const isEmptyRaw = isSearching && resultsMatch && results.length === 0
+
+  // Debounce isEmpty to prevent flicker
+  const [isEmpty, setIsEmpty] = React.useState(false)
+  React.useEffect(() => {
+    if (isEmptyRaw) {
+      const timeout = setTimeout(() => setIsEmpty(true), 150)
+      return () => clearTimeout(timeout)
+    } else {
+      setIsEmpty(false)
+    }
+  }, [isEmptyRaw])
 
   return {
     query,
