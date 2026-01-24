@@ -5,6 +5,7 @@ import { ItemType, itemTypeConfig } from '@/lib/item-types'
 import Link from 'next/link'
 import { PreviewCardImage } from './preview-card-image'
 import { Badge } from '../ui/badge'
+import { getLogNumber, stripLogPrefixFromTitle } from '@/lib/log-utils'
 
 interface PreviewCardProps extends React.ComponentProps<'a'> {
   name: string
@@ -12,7 +13,6 @@ interface PreviewCardProps extends React.ComponentProps<'a'> {
   type: ItemType
   href: string
   showBadge?: boolean
-  logNumber?: string | null
 }
 
 export function PreviewCard({
@@ -21,12 +21,15 @@ export function PreviewCard({
   type,
   href,
   showBadge = true,
-  logNumber,
   className,
   ...props
 }: PreviewCardProps) {
   const { label, Icon } = itemTypeConfig[type]
-  const badgeText = type === 'log' && logNumber ? logNumber : label
+  const logNumber =
+    type === 'log' ? getLogNumber(href?.split('/').filter(Boolean) ?? []) : null
+  const badgeText = type === 'log' ? logNumber : label
+  const displayTitle =
+    type === 'log' ? stripLogPrefixFromTitle(title, logNumber) : title
   const hasPreview = type === 'component'
 
   return (
@@ -65,8 +68,8 @@ export function PreviewCard({
 
       {/* Footer */}
       <div className="bg-card group-hover:bg-accent/50 flex flex-1 items-start justify-between px-4 py-3 transition-colors">
-        <span className="font-mono text-sm font-medium tracking-wide uppercase">
-          {title}
+        <span className="font-mono text-card-foreground text-sm font-medium tracking-wide uppercase">
+          {displayTitle}
         </span>
         <svg
           className="h-[1.25em] -rotate-45 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

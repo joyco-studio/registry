@@ -8,7 +8,6 @@ interface RelatedItem {
   title: string
   type: ItemType
   href: string
-  logNumber?: string | null
 }
 
 interface RelatedItemsProps extends React.ComponentProps<'section'> {
@@ -41,7 +40,6 @@ export function RelatedItems({
             title={item.title}
             type={item.type}
             href={item.href}
-            logNumber={item.logNumber}
           />
         ))}
       </div>

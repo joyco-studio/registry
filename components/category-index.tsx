@@ -42,7 +42,7 @@ export function CategoryIndex({
             title={page.data.title}
             type={type}
             href={page.url}
-            showBadge={false}
+            showBadge={type === 'log'}
           />
         ))}
       </div>

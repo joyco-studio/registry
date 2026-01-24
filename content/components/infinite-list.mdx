@@ -21,7 +21,7 @@ npx shadcn@latest add @joyco/infinite-list
 
 ```tsx
 import { useInfiniteList, MaskedList } from '@/components/infinite-list'
-;<MaskedList {...list}>
+<MaskedList {...list}>
   {items.map((item) => (
     <Item key={item.id} {...item} />
   ))}
