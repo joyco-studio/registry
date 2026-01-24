@@ -20,13 +20,15 @@ export type { SidebarItemMeta }
 type RegistrySidebarProps = {
   tree: PageTree.Root
   itemMeta?: Record<string, SidebarItemMeta>
+  gameSlugs?: string[]
 }
 
-export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
+export function RegistrySidebar({ tree, itemMeta = {}, gameSlugs = [] }: RegistrySidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { layout } = useLayout()
-  const { query, setQuery, results, hasResults, isEmpty } = useSearch()
+  const { query, setQuery, results, hasResults, isEmpty, isLoading } =
+    useSearch()
 
   // Get all folders from the tree
   const folders = tree.children.filter(
@@ -75,7 +77,7 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
 
     return (
       <nav className="bg-accent/70 flex flex-col overflow-y-auto">
-        <SidebarSection folder={folder} defaultOpen meta={itemMeta} />
+        <SidebarSection folder={folder} defaultOpen meta={itemMeta} gameSlugs={gameSlugs} />
       </nav>
     )
   }
@@ -94,8 +96,9 @@ export function RegistrySidebar({ tree, itemMeta = {} }: RegistrySidebarProps) {
         shouldFilter={false}
         loop
         className="w-sidebar-width flex flex-col gap-1 text-sm"
+        suppressHydrationWarning
       >
-        <SidebarSearch query={query} setQuery={setQuery} />
+        <SidebarSearch query={query} setQuery={setQuery} isLoading={isLoading} />
         {renderContent()}
         <div className="bg-muted flex-1" />
         <SocialLinks />

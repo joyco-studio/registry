@@ -1,0 +1,20 @@
+{
+  "title": "Components",
+  "pages": [
+    "action-hint",
+    "brick-breaker",
+    "chat",
+    "file-button",
+    "file-dropzone",
+    "hls-video-player",
+    "image-sequence",
+    "infinite-list",
+    "marquee",
+    "media-player",
+    "mention",
+    "mobile-menu",
+    "scroll-area",
+    "snake-game",
+    "typewriter"
+  ]
+}
