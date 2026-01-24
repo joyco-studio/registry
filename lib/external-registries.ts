@@ -10,9 +10,8 @@ export interface ExternalComponent {
   externalUrl: string
   /**
    * Full URL to the component's registry JSON file.
-   * This enables installation via your registry domain:
-   * `npx shadcn@latest add https://registry.joyco.studio/r/{slug}.json`
-   * which redirects to this URL.
+   * This enables installation via `npx shadcn@latest add @joyco/{slug}`
+   * which uses the registry alias defined in components.json.
    */
   externalRegistryUrl: string
 }
