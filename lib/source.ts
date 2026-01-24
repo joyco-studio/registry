@@ -63,6 +63,22 @@ export function getRelatedPages(
   const itemType = typeMap[category]
   if (!itemType) return []
 
+  // Helper to convert page to RelatedItem
+  const pageToRelatedItem = (page: InferPageType<typeof source>): RelatedItem => {
+    const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
+    const displayTitle = itemType === 'log' && logNumber
+      ? stripLogPrefixFromTitle(page.data.title, logNumber)
+      : page.data.title
+
+    return {
+      name: page.slugs[page.slugs.length - 1],
+      title: displayTitle,
+      type: itemType,
+      href: page.url,
+      logNumber,
+    }
+  }
+
   const allPages = source.getPages()
   const sameCategoryPages = allPages.filter(
     (page) => page.slugs[0] === category && page.slugs.length > 1
@@ -74,20 +90,7 @@ export function getRelatedPages(
 
   // If page not found, return first `limit` pages
   if (currentPageIndex === -1) {
-    return sameCategoryPages.slice(0, limit).map((page) => {
-      const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
-      const displayTitle = itemType === 'log' && logNumber
-        ? stripLogPrefixFromTitle(page.data.title, logNumber)
-        : page.data.title
-
-      return {
-        name: page.slugs[page.slugs.length - 1],
-        title: displayTitle,
-        type: itemType,
-        href: page.url,
-        logNumber,
-      }
-    })
+    return sameCategoryPages.slice(0, limit).map(pageToRelatedItem)
   }
 
   const before = sameCategoryPages.slice(
@@ -113,18 +116,5 @@ export function getRelatedPages(
     selected.push(...fromStart)
   }
 
-  return selected.map((page) => {
-    const logNumber = itemType === 'log' ? getLogNumber(page.slugs) : null
-    const displayTitle = itemType === 'log' && logNumber
-      ? stripLogPrefixFromTitle(page.data.title, logNumber)
-      : page.data.title
-
-    return {
-      name: page.slugs[page.slugs.length - 1],
-      title: displayTitle,
-      type: itemType,
-      href: page.url,
-      logNumber,
-    }
-  })
+  return selected.map(pageToRelatedItem)
 }

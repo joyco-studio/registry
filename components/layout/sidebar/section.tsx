@@ -20,9 +20,10 @@ export type SidebarItemMeta = {
 // Helper function to get display name for sidebar items
 const getDisplayName = (page: PageTree.Item, sectionId: string) => {
   if (sectionId === 'logs') {
+    const name = typeof page.name === 'string' ? page.name : String(page.name)
     const slugs = page.url.split('/').filter(Boolean)
     const logNumber = getLogNumber(slugs)
-    return stripLogPrefixFromTitle(page.name, logNumber)
+    return stripLogPrefixFromTitle(name, logNumber)
   }
   return page.name
 }
