@@ -1,3 +1,10 @@
+---
+name: joyco-engineering-guidelines
+description: Engineering guidelines for your daily agents.
+model: sonnet
+color: yellow
+---
+
 ## React Context
 
 - Use react context to share state and callbacks across deeply nested components instead of passing props through multiple layers
@@ -111,7 +118,3 @@
 
 - Buttons/links need `hover:` state (visual feedback)
 - Interactive states increase contrast: hover/active/focus more prominent than rest
-
-## Semantic Elements for Actions vs Navigation
-
-Use `<button>` for actions (submit, toggle, open modal) and `<a>`/`<Link>` for navigation. Never use `<button>` styled as a link for navigation, and never use `<a>` or `<div onClick>` for actions. This ensures proper keyboard behavior, accessibility, and allows users to Cmd/Ctrl+click or middle-click links to open in new tabs.
