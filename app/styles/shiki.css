@@ -37,8 +37,8 @@
 
 [data-rehype-pretty-code-figure] pre {
   color: var(--color-code-foreground);
-  overscroll-behavior-x: none;
-  overscroll-behavior-y: none;
+  /* overscroll-behavior-x: none;
+  overscroll-behavior-y: none; */
 }
 
 [data-rehype-pretty-code-figure] [data-slot='copy-button'] {
