@@ -1,0 +1,319 @@
+---
+title: 04 - Context Is All You Need
+author: 'matiasperz'
+---
+
+import { ComponentPreview } from '@/components/preview/component-preview'
+
+## Why Use Context At All?
+
+Most developers default to **prop drilling**, aka passing data through component props at every level. This works for simple cases, but breaks down quickly.
+
+### The Prop Drilling Problem
+
+```tsx
+// Prop drilling: every component in the chain needs the props
+function ProfilePage({ profile, currentUserId }) {
+  const isOwner = profile.id === currentUserId
+  const isAdmin = profile.role === "admin"
+  
+  return (
+    <ProfileLayout profile={profile} isOwner={isOwner} isAdmin={isAdmin}>
+      <ProfileHeader profile={profile} isOwner={isOwner} isAdmin={isAdmin} />
+      <ProfileContent profile={profile} isOwner={isOwner}>
+        <ProfileBio profile={profile} />
+        <ProfileActions isOwner={isOwner} isAdmin={isAdmin} profileId={profile.id} />
+      </ProfileContent>
+    </ProfileLayout>
+  )
+}
+```
+
+**What's wrong with this?**
+1. Every intermediate component must accept and forward props
+2. Adding a new derived value means updating every component signature
+3. Derived values (isOwner, isAdmin) recomputed or passed everywhere
+4. Refactoring is painful - change one prop, update 10 files
+
+### Context Solves This
+
+```tsx
+// With context: components grab what they need
+function ProfilePage({ profile, currentUserId }) {
+  return (
+    <ProfileProvider profile={profile} currentUserId={currentUserId}>
+      <ProfileLayout>
+        <ProfileHeader />
+        <ProfileContent>
+          <ProfileBio />
+          <ProfileActions />
+        </ProfileContent>
+      </ProfileLayout>
+    </ProfileProvider>
+  )
+}
+
+// Each component takes only what it needs
+function ProfileActions() {
+  const { isOwner, isAdmin, profile } = useProfileContext()
+  // ...
+}
+```
+
+## Now, What If We Want to Edit the Profile?
+
+The `ProfileContext` above works great for viewing. But what happens when the user wants to **update their profile**?
+
+**We need**:
+- Form state (tracking what the user is typing)
+- Change detection (has anything changed?)
+- Validation (is the input valid?)
+- Save/Reset actions
+- Navigation guards (don't lose unsaved changes)
+
+Should we add all this to `ProfileContext`? **No.** That would bloat our read-only context with concerns that only matter during editing.
+
+Instead, we create a **separate context** for mutations:
+
+| ProfileContext (Read-Only) | UpsertProfileContext (Form + Mutations) |
+| --- | --- |
+| Data from API | Form state |
+| Computed/derived values | Change tracking |
+| Permissions (isOwner, etc) | Validation |
+| Used on ALL profile pages | Save/Reset/Delete |
+| | Used for create AND edit |
+
+This separation keeps each context focused on its responsibility.
+
+## Example: ProfileContext (Read-Only)
+
+Toggle between different user roles to see how context-derived values (`isOwner`, `isAdmin`) change what's rendered. The context computes these values once, and all child components access them directly.
+
+<ComponentPreview name="profile-context-demo" />
+
+## Example: EditProfileContext (Form + Mutations)
+
+Edit the form fields to see change tracking, validation, and the save/reset flow in action. Notice how form state, validation errors, and actions are all managed through context. This same context works for creating new profiles too — the only difference is the initial data.
+
+<ComponentPreview name="edit-profile-context-demo" />
+
+
+## The Upsert Insight: Edit and Create Are the Same
+
+Here's an insight that simplifies everything: **editing and creating are the same operation**. The only difference is whether you start with data or not.
+
+```tsx
+// Edit = Upsert with initialData
+<UpsertProfileProvider initialData={existingProfile}>
+  <ProfileForm />
+</UpsertProfileProvider>
+
+// Create = Upsert with empty/default initialData
+<UpsertProfileProvider initialData={{ name: '', bio: '' }}>
+  <ProfileForm />
+</UpsertProfileProvider>
+```
+
+This means `EditProfileProvider` is really just `UpsertProfileProvider` in disguise. Let's make it explicit:
+
+```tsx
+type UpsertProfileProviderProps = {
+  children: React.ReactNode
+  initialData?: Partial<ProfileFormState> // Optional for create
+  onSubmit: (data: ProfileFormState) => Promise<void>
+}
+
+const defaultFormState: ProfileFormState = {
+  name: '',
+  bio: '',
+}
+
+function UpsertProfileProvider({ 
+  children, 
+  initialData,
+  onSubmit 
+}: UpsertProfileProviderProps) {
+  // Merge defaults with any provided initial data
+  const startingData = { ...defaultFormState, ...initialData }
+  
+  const [formState, setFormState] = useState<ProfileFormState>(startingData)
+  const [isSaving, setIsSaving] = useState(false)
+  
+  // For create: hasChanges = any field filled out
+  // For edit: hasChanges = any field different from initial
+  const hasChanges = initialData 
+    ? JSON.stringify(formState) !== JSON.stringify(startingData)
+    : formState.name !== '' || formState.bio !== ''
+  
+  // ... rest of the implementation
+}
+```
+
+Now your pages become symmetrical:
+
+```tsx
+// Create page
+function CreateProfilePage() {
+  const router = useRouter()
+  
+  const handleSubmit = async (data) => {
+    const profile = await createProfile(data)
+    router.push(`/profile/${profile.id}`)
+  }
+
+  return (
+    <UpsertProfileProvider onSubmit={handleSubmit}>
+      <ProfileForm />
+      <ProfileActions />
+    </UpsertProfileProvider>
+  )
+}
+
+// Edit page
+function EditProfilePage({ profile, currentUserId }) {
+  const router = useRouter()
+  
+  const handleSubmit = async (data) => {
+    await updateProfile(profile.id, data)
+    router.push(`/profile/${profile.id}`)
+  }
+
+  return (
+    <ProfileProvider profile={profile} currentUserId={currentUserId}>
+      <UpsertProfileProvider 
+        initialData={{ name: profile.name, bio: profile.bio }}
+        onSubmit={handleSubmit}
+      >
+        <ProfileForm />
+        <ProfileActions />
+      </UpsertProfileProvider>
+    </ProfileProvider>
+  )
+}
+```
+
+**Why this matters:**
+- One context, one form, one set of components for both create and edit
+- The `onSubmit` handler decides whether to call `createProfile` or `updateProfile`
+- Change detection adapts automatically based on whether `initialData` was provided
+- Less code to maintain, fewer bugs to fix
+
+### Example: UpsertProfileContext in Action
+
+Toggle between "Create New" and "Edit Existing" to see the same form and context handle both operations. Notice how the button labels, change detection, and reset behavior adapt automatically.
+
+<ComponentPreview name="upsert-profile-context-demo" />
+
+## The Pattern in 4 Steps
+
+### Step 1: Define your ViewContext (read-only data + derived values)
+
+```tsx
+type ProfileContextType = {
+  profile: Profile
+  isOwner: boolean
+  isAdmin: boolean
+}
+
+function ProfileProvider({ profile, currentUserId, children }) {
+  const isOwner = profile.id === currentUserId
+  const isAdmin = profile.role === 'admin'
+  
+  return (
+    <ProfileContext.Provider value={{ profile, isOwner, isAdmin }}>
+      {children}
+    </ProfileContext.Provider>
+  )
+}
+```
+
+### Step 2: Define your UpsertContext (form state + actions)
+
+```tsx
+type UpsertProfileContextType = {
+  formState: ProfileFormState
+  isCreateMode: boolean
+  hasChanges: boolean
+  isSaving: boolean
+  errors: Record<string, string>
+  onChange: (field: string, value: string) => void
+  onSave: () => void
+  onReset: () => void
+}
+
+function UpsertProfileProvider({ initialData, onSubmit, children }) {
+  const isCreateMode = !initialData
+  const startingData = { ...defaults, ...initialData }
+  
+  // hasChanges adapts to mode
+  const hasChanges = isCreateMode
+    ? formState.name !== '' || formState.bio !== ''
+    : JSON.stringify(formState) !== JSON.stringify(startingData)
+  
+  // ... form state, validation, save/reset handlers
+}
+```
+
+### Step 3: Use ViewContext for viewing pages
+
+```tsx
+<ProfileProvider profile={profile} currentUserId={currentUserId}>
+  <ProfileHeader />
+  <ProfileBio />
+  <ProfileActions />
+</ProfileProvider>
+```
+
+### Step 4: Use UpsertContext for create or edit
+
+```tsx
+// Create: UpsertProvider with no initialData
+<UpsertProfileProvider onSubmit={handleCreate}>
+  <ProfileForm />
+  <ProfileActions />
+</UpsertProfileProvider>
+
+// Edit: ViewProvider + UpsertProvider with initialData
+<ProfileProvider profile={profile} currentUserId={currentUserId}>
+  <UpsertProfileProvider 
+    initialData={{ name: profile.name, bio: profile.bio }}
+    onSubmit={handleUpdate}
+  >
+    <ProfileForm />
+    <ProfileActions />
+  </UpsertProfileProvider>
+</ProfileProvider>
+```
+
+## Summary of Benefits
+
+### Context vs Prop Drilling
+
+| Benefit | How |
+|---------|-----|
+| **No prop threading** | Components grab what they need directly |
+| **Derived values computed once** | Provider calculates, all consumers share |
+| **Easy refactoring** | Add values to provider, use anywhere |
+| **Consistent data** | Single source of truth for all components |
+
+### Read-Only vs Upsert Separation
+
+| Benefit | How |
+|---------|-----|
+| **One form for create and edit** | Same UpsertContext, different initial data |
+| **Clear boundaries** | Reading vs writing clearly separated into two contexts |
+| **Flexibility** | Components work in both create and edit modes automatically |
+
+## When to Use This Pattern
+
+**Use it when:**
+- You have shared data/permissions needed by multiple components
+- You want to avoid prop drilling through intermediate components
+- You need computed/derived values used by multiple components
+- You want clear separation between viewing and editing concerns
+- You have both create and edit flows that share the same form structure
+
+**Skip it when:**
+- Very shallow component tree (2-3 levels)
+- Data only used by a single component
+- Simple CRUD with no viewing page (just list → edit)
