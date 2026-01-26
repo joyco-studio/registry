@@ -40,26 +40,36 @@ export function processMdxForLLMs(content: string): string {
     try {
       const baseDir = process.cwd()
       const demosDir = path.join(baseDir, 'demos')
+      const demoPath = path.join(demosDir, name)
 
       // Validate path to prevent path traversal attacks
-      if (!isPathWithinProject(path.join('demos', `${name}.tsx`), baseDir)) {
+      if (!isPathWithinProject(path.join('demos', name), baseDir)) {
         console.warn(`Path traversal attempt blocked: ${name}`)
         return match
       }
 
-      const demoPath = path.join(demosDir, `${name}.tsx`)
+      // Get files: directory = all .ts/.tsx files sorted, single file = just that file
+      const isDir = fs.existsSync(demoPath) && fs.statSync(demoPath).isDirectory()
+      const files = isDir
+        ? fs.readdirSync(demoPath)
+            .filter((f) => /\.(tsx?)$/.test(f))
+            .sort((a, b) => (a.startsWith('index.') ? -1 : b.startsWith('index.') ? 1 : a.localeCompare(b)))
+            .map((f) => path.join(demoPath, f))
+        : [`${demoPath}.tsx`]
 
-      if (!fs.existsSync(demoPath)) {
-        console.warn(`Demo file not found: ${demoPath}`)
+      if (!files.length || !files.every((f) => fs.existsSync(f))) {
+        console.warn(`Demo not found: ${demoPath}`)
         return match
       }
 
-      let source = fs.readFileSync(demoPath, 'utf8')
-      source = source.replaceAll('@/registry/joyco/blocks/', '@/components/')
-
-      return `\`\`\`tsx
-${source}
-\`\`\``
+      return files
+        .map((f) => {
+          const source = fs.readFileSync(f, 'utf8').replaceAll('@/registry/joyco/blocks/', '@/components/')
+          const lang = f.endsWith('.ts') ? 'ts' : 'tsx'
+          const title = isDir ? ` title="${path.basename(f)}"` : ''
+          return `\`\`\`${lang}${title}\n${source}\n\`\`\``
+        })
+        .join('\n\n')
     } catch (error) {
       console.error(`Error processing ComponentPreview ${name}:`, error)
       return match
