@@ -31,6 +31,10 @@ export function stripFrontmatter(content: string): string {
 
 export const transformers = [
   {
+    pre(node) {
+      const raw = this.source
+      node.properties['__raw__'] = raw
+    },
     code(node) {
       if (node.tagName === 'code') {
         const raw = this.source
@@ -91,7 +95,7 @@ export const transformers = [
 ] as ShikiTransformer[]
 
 export const codeClasses = {
-  pre: "not-fumadocs-codeblock group/code relative w-full overflow-auto p-4 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0",
+  pre: "not-fumadocs-codeblock relative w-full overflow-auto p-4 has-[[data-slot='command-block']]:p-0 has-[[data-line-numbers]]:px-0",
 }
 
 export async function highlightCode(code: string, language: string = 'tsx') {
@@ -114,7 +118,7 @@ export async function highlightCode(code: string, language: string = 'tsx') {
         },
         line(node) {
           node.properties['data-line'] = ''
-        }
+        },
       }
     ]
   })

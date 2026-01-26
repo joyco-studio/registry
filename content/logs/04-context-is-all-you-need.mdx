@@ -61,14 +61,12 @@ Instead, we create a **separate context** for mutations:
 | Computed/derived values | Change tracking |
 | Permissions (isOwner, etc) | Validation |
 | Used on ALL profile pages | Save/Reset/Delete |
-| | Used for create AND edit |
 
 This separation keeps each context focused on its responsibility.
 
 Edit the form fields to see change tracking, validation, and the save/reset flow in action. Notice how form state, validation errors, and actions are all managed through context. This same context works for creating new profiles too, the only difference is the initial data.
 
 <ComponentPreview name="edit-profile-context-demo" />
-
 
 ## The upsert insight: edit and create are the same
 
