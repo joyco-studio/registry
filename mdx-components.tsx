@@ -29,6 +29,26 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     }: React.ComponentProps<typeof ImageCols>) => (
       <ImageCols className={className} {...props} />
     ),
+    Figure: ({
+      src,
+      alt,
+      caption,
+      className,
+      ...props
+    }: {
+      src: string
+      alt: string
+      caption?: string
+    } & Omit<React.ComponentProps<typeof Image>, 'src' | 'alt'>) => (
+      <figure className={cn('my-6', className)}>
+        <Image src={src} alt={alt} className="rounded-lg" {...props} />
+        {(caption || alt) && (
+          <figcaption className="text-muted-foreground mt-2 text-center text-sm">
+            {caption || alt}
+          </figcaption>
+        )}
+      </figure>
+    ),
     Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => {
       return <Tabs className={cn('relative w-full', className)} {...props} />
     },

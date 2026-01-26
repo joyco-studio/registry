@@ -47,7 +47,7 @@ export function CodeBlockTabs({
               <TabsTrigger
                 key={tab.filename}
                 value={tab.filename}
-                className="text-muted-foreground data-[state=active]:text-code-foreground rounded-none border-b-2 border-b-transparent px-3 py-1.5 text-xs data-[state=active]:border-b-current data-[state=active]:bg-code"
+                className="text-muted-foreground data-[state=active]:text-accent-foreground rounded-none border-b-2 border-b-transparent px-3 py-1.5 text-xs data-[state=active]:border-b-current data-[state=active]:bg-accent"
               >
                 {tab.filename}
               </TabsTrigger>
