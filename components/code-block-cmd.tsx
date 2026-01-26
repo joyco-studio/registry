@@ -84,13 +84,10 @@ export function CodeBlockCommand({
         </div>
 
         {/* Command content */}
-        <div className="bg-code scrollbar-none! overflow-x-auto overscroll-x-none overscroll-y-none">
+        <div className="bg-code scrollbar-none! has-touch-screen:overscroll-x-none has-touch-screen:overscroll-y-none overflow-x-auto">
           {tabs.map((tab) => (
-            <TabsContent
-              key={tab.label}
-              value={tab.label}
-            >
-              <pre className=" no-scrollbar w-max px-4 py-3">
+            <TabsContent key={tab.label} value={tab.label}>
+              <pre className="no-scrollbar w-max px-4 py-3">
                 <code
                   className="text-code-foreground no-scrollbar block font-mono text-sm"
                   data-language="bash"

@@ -22,7 +22,7 @@
 [data-slot='code-block-tabs'] [data-rehype-pretty-code-title] {
   border-bottom: none;
   height: auto;
-  padding:0;
+  padding: 0;
 }
 
 /* MDX-rendered code blocks (via rehype-pretty-code) */
@@ -37,8 +37,13 @@
 
 [data-rehype-pretty-code-figure] pre {
   color: var(--color-code-foreground);
-  /* overscroll-behavior-x: none;
-  overscroll-behavior-y: none; */
+}
+
+@media (pointer: coarse) {
+  [data-rehype-pretty-code-figure] pre {
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
+  }
 }
 
 [data-rehype-pretty-code-figure] [data-slot='copy-button'] {

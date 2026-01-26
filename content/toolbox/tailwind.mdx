@@ -38,3 +38,30 @@ Use the `in-*` variant to style an element based on an ancestor's state or class
 This targets the element when it's inside an ancestor with the `.notifs-drawer-open` class.
 
 Reference [in-* variant docs](https://tailwindcss.com/docs/hover-focus-and-other-states#implicit-groups)
+
+## Detect pointer type (mouse vs touch)
+
+Use the `pointer` media feature to style elements based on whether the user has a fine pointer (mouse) or coarse pointer (touch screen).
+
+```css title="globals.css"
+@variant has-mouse {
+  @media (pointer: fine) {
+    @slot;
+  }
+}
+
+@variant has-touch-screen {
+  @media (pointer: coarse) {
+    @slot;
+  }
+}
+```
+
+```html
+<input
+  type="checkbox"
+  class="has-mouse:size-4 has-touch-screen:size-8"
+/>
+```
+
+Reference -> [pointer media feature docs](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/pointer)

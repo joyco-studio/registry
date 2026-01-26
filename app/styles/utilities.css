@@ -1,8 +1,7 @@
-@utility overscroll-behavior-none {
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x pan-y;
-  isolation: isolate;
+@variant has-touch-screen {
+  @media (pointer: coarse) {
+    @slot;
+  }
 }
 
 @utility overscroll-x-none {
