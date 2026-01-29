@@ -167,7 +167,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       children: React.ReactNode
     }) => {
       /* Command component renders it's own pre inside tabs content */
-      if (__iscommand__) return children 
+      if (__iscommand__ === "true") return children 
       return (
         <div className={cn('group/code relative', className)}>
           {__raw__ && <CopyButton value={__raw__} />}
