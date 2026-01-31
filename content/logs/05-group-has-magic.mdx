@@ -52,7 +52,7 @@ Tailwind's `has-[*]` modifier lets you query for the existence of a state or cla
 
 But `has-[:checked]` only styles the container itself. What if you want to style a **sibling** element based on the checkbox state?
 
-## Styling distant siblings with `group-has`
+## Styling distant siblings with "group-has"
 
 This is where it gets powerful. Mark the parent as a `group`, then use `group-has-*` to style any descendant:
 
@@ -143,7 +143,7 @@ Try the interactive demo below. Enter invalid values in the form fields to see h
 
 <ComponentPreview name="form-validation-group-has-demo" />
 
-## Nested groups with `group/{name}`
+## Nested groups with "group/\{name\}"
 
 When you have nested groups, use named groups to be specific about which ancestor you're querying:
 
@@ -170,7 +170,7 @@ Think of `group-has` as asking a question:
 
 If yes, apply the styles. The power is that you can style **any element** inside the group based on **any other element's** state inside that same group.
 
-## When to use `group-has`
+## When to use "group-has"
 
 **Use it when:**
 - You need CSS-only state propagation
