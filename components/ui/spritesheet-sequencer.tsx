@@ -215,7 +215,8 @@ export function SpritesheetSequencer({
     if (oldDuration === newDuration) return
 
     // Preserve relative progress when changing speed
-    const currentProgress = (animation.currentTime ?? 0) / oldDuration
+    const currentTime = Number(animation.currentTime ?? 0)
+    const currentProgress = currentTime / oldDuration
     animation.effect.updateTiming({ duration: newDuration })
     animation.currentTime = currentProgress * newDuration
   }, [totalDuration])
@@ -230,7 +231,7 @@ export function SpritesheetSequencer({
       const animation = animationRef.current
       if (!animation) return
 
-      const currentTime = animation.currentTime ?? 0
+      const currentTime = Number(animation.currentTime ?? 0)
       const frame = Math.floor(currentTime / frameDuration) % frameCount
 
       if (frame !== currentFrameRef.current) {
