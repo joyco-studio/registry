@@ -4,7 +4,8 @@ import * as React from 'react'
 import { SpritesheetSequencer } from '@/registry/joyco/blocks/spritesheet-sequencer'
 
 // Spray can spritesheet: 4x4 grid, 16 frames
-const SPRAY_CAN_SPRITE = '/static/sprites/spray-can.png'
+const SPRAY_CAN_SPRITE =
+  'https://qfxa88yauvyse9vr.public.blob.vercel-storage.com/can-spritesheet.png'
 
 export default function SpritesheetSequencerDemo() {
   const [isPlaying, setIsPlaying] = React.useState(true)
