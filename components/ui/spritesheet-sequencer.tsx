@@ -34,28 +34,7 @@ interface SpritesheetSequencerProps extends React.ComponentProps<'div'> {
  * Helpers
  * -------------------------------------------------------------------------------------------------*/
 
-function usePrefersReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
-
-  React.useEffect(() => {
-    const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mql.matches)
-
-    const handler = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches)
-    }
-
-    mql.addEventListener('change', handler)
-    return () => mql.removeEventListener('change', handler)
-  }, [])
-
-  return prefersReducedMotion
-}
-
-function buildKeyframes(
-  frameCount: number,
-  gridSize: number
-): Keyframe[] {
+function buildKeyframes(frameCount: number, gridSize: number): Keyframe[] {
   const keyframes: Keyframe[] = []
 
   for (let i = 0; i < frameCount; i++) {
@@ -110,7 +89,6 @@ export function SpritesheetSequencer({
   const onLoadRef = React.useRef(onLoad)
 
   const [isLoaded, setIsLoaded] = React.useState(false)
-  const prefersReducedMotion = usePrefersReducedMotion()
 
   const gridSize = Math.ceil(Math.sqrt(frameCount))
   const totalDuration = frameDuration * frameCount
@@ -149,7 +127,7 @@ export function SpritesheetSequencer({
 
   // Create animation (only recreate when structure changes, not timing)
   React.useEffect(() => {
-    if (!isLoaded || !containerRef.current || prefersReducedMotion) return
+    if (!isLoaded || !containerRef.current) return
     if (frameCount <= 0) return
 
     const keyframes = buildKeyframes(frameCount, gridSize)
@@ -181,7 +159,7 @@ export function SpritesheetSequencer({
     }
     // Note: frameDuration intentionally excluded - handled by separate effect
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, frameCount, gridSize, loop, direction, prefersReducedMotion])
+  }, [isLoaded, frameCount, gridSize, loop, direction])
 
   // Handle play/pause changes
   React.useEffect(() => {
@@ -223,7 +201,7 @@ export function SpritesheetSequencer({
 
   // Track frame changes via RAF
   React.useEffect(() => {
-    if (!isPlaying || !animationRef.current || prefersReducedMotion) return
+    if (!isPlaying || !animationRef.current) return
 
     let rafId: number
 
@@ -247,28 +225,18 @@ export function SpritesheetSequencer({
     return () => {
       cancelAnimationFrame(rafId)
     }
-  }, [isPlaying, frameDuration, frameCount, prefersReducedMotion])
-
-  // For reduced motion, show static first frame
-  const staticPosition = React.useMemo(() => {
-    if (!prefersReducedMotion) return undefined
-    return {
-      backgroundPositionX: '0%',
-      backgroundPositionY: '0%',
-    }
-  }, [prefersReducedMotion])
+  }, [isPlaying, frameDuration, frameCount])
 
   return (
     <div
       ref={containerRef}
       data-slot="spritesheet-sequencer"
       data-loaded={isLoaded}
-      data-playing={isPlaying && isLoaded && !prefersReducedMotion}
+      data-playing={isPlaying && isLoaded}
       className={cn('size-full bg-no-repeat', className)}
       style={{
         backgroundImage: isLoaded ? `url(${src})` : undefined,
         backgroundSize: `${gridSize * 100}% ${gridSize * 100}%`,
-        ...staticPosition,
         ...style,
       }}
       {...props}

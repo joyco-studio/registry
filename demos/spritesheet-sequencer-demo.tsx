@@ -22,6 +22,7 @@ export default function SpritesheetSequencerDemo() {
           frameDuration={speed}
           isPlaying={isPlaying}
           onFrameChange={setFrame}
+          className="[image-rendering:pixelated]"
         />
       </div>
 
