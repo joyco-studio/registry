@@ -47,16 +47,12 @@ function buildKeyframes(frameCount: number, gridSize: number): Keyframe[] {
     const posX = gridSize > 1 ? (col / (gridSize - 1)) * 100 : 0
     const posY = gridSize > 1 ? (row / (gridSize - 1)) * 100 : 0
 
-    const keyframe = {
+    keyframes.push({
       backgroundPositionX: `${posX}%`,
       backgroundPositionY: `${posY}%`,
       offset: i / frameCount,
       easing: 'step-end',
-    }
-
-    console.log(`[buildKeyframes] frame ${i}: col=${col}, row=${row}, offset=${keyframe.offset}, posX=${keyframe.backgroundPositionX}, posY=${keyframe.backgroundPositionY}`)
-
-    keyframes.push(keyframe)
+    })
   }
 
   return keyframes
@@ -106,7 +102,6 @@ export function SpritesheetSequencer({
     const img = new Image()
 
     const handleLoad = () => {
-      console.log('[preload] Image loaded:', src)
       setIsLoaded(true)
       onLoadRef.current?.()
     }
@@ -123,7 +118,6 @@ export function SpritesheetSequencer({
       img.removeEventListener('load', handleLoad)
       img.removeEventListener('error', handleError)
       img.src = ''
-      setIsLoaded(false)
     }
   }, [src])
 
@@ -132,19 +126,7 @@ export function SpritesheetSequencer({
     if (!isLoaded || !containerRef.current) return
     if (frameCount <= 0) return
 
-    console.log('[animation] Creating animation:', {
-      frameCount,
-      gridSize,
-      frameDuration,
-      totalDuration: frameDuration * frameCount,
-      loop,
-      direction,
-      isPlaying,
-    })
-
     const keyframes = buildKeyframes(frameCount, gridSize)
-
-    console.log('[animation] Keyframes created:', keyframes.length)
 
     const animation = containerRef.current.animate(keyframes, {
       duration: frameDuration * frameCount,
@@ -152,8 +134,6 @@ export function SpritesheetSequencer({
       direction,
       fill: 'forwards',
     })
-
-    console.log('[animation] Animation created:', animation)
 
     // Start paused if not playing
     if (!isPlaying) {
@@ -204,8 +184,8 @@ export function SpritesheetSequencer({
     const oldDuration = timing.duration as number
     const newDuration = totalDuration
 
-    // Skip if duration hasn't changed
-    if (oldDuration === newDuration) return
+    // Skip if duration hasn't changed or is invalid
+    if (oldDuration === newDuration || !oldDuration || !newDuration) return
 
     // Preserve relative progress when changing speed
     const currentTime = Number(animation.currentTime ?? 0)
@@ -216,7 +196,7 @@ export function SpritesheetSequencer({
 
   // Track frame changes via RAF
   React.useEffect(() => {
-    if (!isPlaying || !animationRef.current) return
+    if (!isPlaying || !animationRef.current || !frameDuration || !frameCount) return
 
     let rafId: number
 
@@ -228,13 +208,6 @@ export function SpritesheetSequencer({
       const frame = Math.floor(currentTime / frameDuration) % frameCount
 
       if (frame !== currentFrameRef.current) {
-        console.log('[tick] Frame change:', {
-          frame,
-          currentTime,
-          frameDuration,
-          totalDuration,
-          progress: currentTime / totalDuration,
-        })
         currentFrameRef.current = frame
         onFrameChangeRef.current?.(frame)
       }
@@ -249,11 +222,10 @@ export function SpritesheetSequencer({
     }
   }, [isPlaying, frameDuration, frameCount])
 
-  console.log('[render] backgroundSize:', `${gridSize * 100}% ${gridSize * 100}%`, 'gridSize:', gridSize, 'frameCount:', frameCount)
-
   return (
     <div
       ref={containerRef}
+      role="img"
       data-slot="spritesheet-sequencer"
       data-loaded={isLoaded}
       data-playing={isPlaying && isLoaded}
