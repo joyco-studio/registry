@@ -39,7 +39,7 @@ const SPEED_MAX = 500
 
 export default function SpritesheetSequencerDemo() {
   const [isPlaying, setIsPlaying] = React.useState(true)
-  const [speed, setSpeed] = React.useState(480)
+  const [speed, setSpeed] = React.useState(400)
 
   // Invert: higher slider value = faster animation (lower frameDuration)
   const frameDuration = SPEED_MIN + SPEED_MAX - speed
