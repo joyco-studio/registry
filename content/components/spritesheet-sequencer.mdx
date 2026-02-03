@@ -33,14 +33,14 @@ import { SpritesheetSequencer } from '@/components/spritesheet-sequencer'
 
 The component expects a **squared spritesheet image** with frames arranged in a grid:
 
-```
+```text
 frameCount = 4, gridSize = ceil(sqrt(4)) = 2
 
-┌─────┬─────┐
-│  0  │  1  │
-├─────┼─────┤
-│  2  │  3  │
-└─────┴─────┘
++-----+-----+
+|  0  |  1  |
++-----+-----+
+|  2  |  3  |
++-----+-----+
 ```
 
 Frames are read left-to-right, top-to-bottom. The grid size is automatically calculated as `ceil(sqrt(frameCount))`, so partial grids are supported (e.g., 14 frames in a 4×4 grid).
