@@ -3,10 +3,6 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-/* -------------------------------------------------------------------------------------------------
- * Types
- * -------------------------------------------------------------------------------------------------*/
-
 export interface SpritesheetSequencerProps extends React.ComponentProps<'div'> {
   /** URL to the squared spritesheet image */
   src: string
@@ -29,10 +25,6 @@ export interface SpritesheetSequencerProps extends React.ComponentProps<'div'> {
   /** Callback fired when the animation completes (non-looping only) */
   onComplete?: () => void
 }
-
-/* -------------------------------------------------------------------------------------------------
- * Helpers
- * -------------------------------------------------------------------------------------------------*/
 
 function buildKeyframes(frameCount: number, gridSize: number): Keyframe[] {
   const keyframes: Keyframe[] = []
@@ -90,14 +82,12 @@ export function SpritesheetSequencer({
   const gridSize = Math.ceil(Math.sqrt(frameCount))
   const totalDuration = frameDuration * frameCount
 
-  // Keep refs in sync
   React.useEffect(() => {
     onFrameChangeRef.current = onFrameChange
     onCompleteRef.current = onComplete
     onLoadRef.current = onLoad
   })
 
-  // Preload spritesheet image
   React.useEffect(() => {
     const img = new Image()
 
@@ -121,7 +111,6 @@ export function SpritesheetSequencer({
     }
   }, [src])
 
-  // Create animation (only recreate when structure changes, not timing)
   React.useEffect(() => {
     if (!isLoaded || !containerRef.current) return
     if (frameCount <= 0) return
@@ -135,12 +124,10 @@ export function SpritesheetSequencer({
       fill: 'forwards',
     })
 
-    // Start paused if not playing
     if (!isPlaying) {
       animation.pause()
     }
 
-    // Handle animation completion (non-looping)
     animation.onfinish = () => {
       onCompleteRef.current?.()
     }
@@ -156,7 +143,6 @@ export function SpritesheetSequencer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, frameCount, gridSize, loop, direction])
 
-  // Handle play/pause changes
   React.useEffect(() => {
     const animation = animationRef.current
     if (!animation) return
@@ -175,7 +161,6 @@ export function SpritesheetSequencer({
     wasPlayingRef.current = isPlaying
   }, [isPlaying, resetOnPlay])
 
-  // Update duration dynamically without recreating animation
   React.useEffect(() => {
     const animation = animationRef.current
     if (!animation?.effect) return
@@ -184,17 +169,14 @@ export function SpritesheetSequencer({
     const oldDuration = timing.duration as number
     const newDuration = totalDuration
 
-    // Skip if duration hasn't changed or is invalid
     if (oldDuration === newDuration || !oldDuration || !newDuration) return
 
-    // Preserve relative progress when changing speed
     const currentTime = Number(animation.currentTime ?? 0)
     const currentProgress = currentTime / oldDuration
     animation.effect.updateTiming({ duration: newDuration })
     animation.currentTime = currentProgress * newDuration
   }, [totalDuration])
 
-  // Track frame changes via RAF
   React.useEffect(() => {
     if (!isPlaying || !animationRef.current || !frameDuration || !frameCount) return
 
