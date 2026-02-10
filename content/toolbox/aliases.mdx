@@ -36,6 +36,7 @@ alias gb='git branch'
 alias gco='git checkout'
 alias gd='git diff'
 alias gds='git diff --staged'
+alias go='git open'
 
 ## Package Manager
 alias prb='pnpm run build'
@@ -72,11 +73,6 @@ alias clauded="claude --dangerously-skip-permissions"
 # alias du="dust"
 # alias top="btop"
 # alias diff="delta"
-
-## Custom Folders (customize these paths for your setup)
-# alias dev="cd ~/dev && ls"
-# alias joyco="cd ~/dev/joyco && ls"
-# alias personal="cd ~/dev/personal && ls"
 ```
 
 ## Modern CLI replacements
@@ -115,7 +111,13 @@ mkdir -p ~/.zsh && touch ~/.zsh/aliases.zsh
 source ~/.zsh/aliases.zsh
 ```
 
-4. Reload your shell:
+4. Set up the `git open` alias (used by the `go` shell alias) — requires the [GitHub CLI](https://cli.github.com):
+
+```bash
+git config --global alias.open '!gh browse'
+```
+
+5. Reload your shell:
 
 ```bash
 source ~/.zshrc
