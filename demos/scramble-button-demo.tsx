@@ -8,32 +8,33 @@ function ScrambleButtonDemo() {
   const [scrambled, setScrambled] = React.useState(false)
 
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center gap-6 p-8">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex min-h-48 flex-col items-center justify-center gap-8 overflow-hidden p-8 font-mono">
+      <div className="flex flex-col items-center gap-3 sm:flex-row">
         <ScrambleButton
-          text="Get Started"
+          text="GET STARTED"
           scramble={scrambled}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-4 py-2 text-sm font-medium"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 cursor-pointer rounded-md px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors"
         />
         <ScrambleButton
-          text="Learn More"
+          text="LEARN MORE"
           scramble={scrambled}
-          scrambleDuration={0.8}
-          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 rounded-md px-4 py-2 text-sm font-medium"
+          scrambleChars="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 cursor-pointer rounded-md px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors"
         />
         <ScrambleButton
-          text="Subscribe"
+          text="SUBSCRIBE"
           scramble={scrambled}
           scrambleChars="01"
-          scrambleDuration={1}
-          className="bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md border px-4 py-2 text-sm font-medium shadow-xs"
+          className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-10 cursor-pointer rounded-md border px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors"
         />
       </div>
 
       {/* Mobile fallback: switch to trigger scramble */}
-      <label className="flex items-center gap-3 sm:hidden">
+      <label className="flex cursor-pointer items-center gap-3 sm:hidden">
         <Switch checked={scrambled} onCheckedChange={setScrambled} />
-        <span className="text-muted-foreground text-sm">Toggle scramble</span>
+        <span className="text-muted-foreground text-xs tracking-wider uppercase">
+          Toggle scramble
+        </span>
       </label>
     </div>
   )

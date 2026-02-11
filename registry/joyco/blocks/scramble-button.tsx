@@ -12,11 +12,15 @@ import '@/lib/gsap/effects/scramble'
 export interface ScrambleButtonProps extends React.ComponentPropsWithRef<'button'> {
   /** The text to display and scramble on hover */
   text: string
-  /** Character set used for scramble animation */
+  /** Character set for scramble animation. Repeated chars increase their probability. */
   scrambleChars?: string
-  /** Duration of the scramble animation in seconds */
+  /** Duration of the scramble animation in seconds. 0 = auto-scale with text length. */
   scrambleDuration?: number
-  /** Programmatically trigger the scramble animation (useful for touch devices) */
+  /** Seconds of full scramble before characters start resolving. */
+  scrambleRevealDelay?: number
+  /** How many scramble frames each character gets before resolving (higher = more chaotic). */
+  scrambleFrames?: number
+  /** Programmatically trigger the scramble animation (useful for touch devices). */
   scramble?: boolean
 }
 
@@ -27,7 +31,9 @@ export interface ScrambleButtonProps extends React.ComponentPropsWithRef<'button
 export function ScrambleButton({
   text,
   scrambleChars,
-  scrambleDuration = 0.6,
+  scrambleDuration = 0,
+  scrambleRevealDelay = 0,
+  scrambleFrames,
   scramble,
   className,
   onMouseEnter,
@@ -43,10 +49,18 @@ export function ScrambleButton({
     tweenRef.current?.kill()
     tweenRef.current = gsap.effects.scramble(textRef.current, {
       text,
-      ...(scrambleChars && { chars: scrambleChars }),
-      duration: scrambleDuration,
+      ...(scrambleChars != null && { chars: scrambleChars }),
+      ...(scrambleDuration > 0 && { duration: scrambleDuration }),
+      ...(scrambleRevealDelay > 0 && { revealDelay: scrambleRevealDelay }),
+      ...(scrambleFrames != null && { scrambleFrames }),
     })
-  }, [text, scrambleChars, scrambleDuration])
+  }, [
+    text,
+    scrambleChars,
+    scrambleDuration,
+    scrambleRevealDelay,
+    scrambleFrames,
+  ])
 
   const resetText = React.useCallback(() => {
     if (!textRef.current) return
@@ -54,19 +68,15 @@ export function ScrambleButton({
     textRef.current.textContent = text
   }, [text])
 
-  // Handle programmatic scramble prop
+  // Handle programmatic scramble prop (rising edge triggers animation)
   const prevScramble = React.useRef(scramble)
   React.useEffect(() => {
     if (scramble === undefined) return
-    if (scramble && !prevScramble.current) {
-      runScramble()
-    } else if (!scramble && prevScramble.current) {
-      resetText()
-    }
+    if (scramble && !prevScramble.current) runScramble()
+    else if (!scramble && prevScramble.current) resetText()
     prevScramble.current = scramble
   }, [scramble, runScramble, resetText])
 
-  // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       tweenRef.current?.kill()
