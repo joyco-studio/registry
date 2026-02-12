@@ -120,7 +120,7 @@ export function CartProvider({
   children: React.ReactNode
   cartPromise: Promise<Cart>
 }) {
-  return <CartContext value={cartPromise}>{children}</CartContext>
+  return <CartContext.Provider value={cartPromise}>{children}</CartContext.Provider>
 }
 
 export function useCart() {
