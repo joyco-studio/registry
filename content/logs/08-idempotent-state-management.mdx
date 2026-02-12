@@ -38,7 +38,7 @@ If your state updates aren't idempotent, every one of these scenarios is a bug w
 ```mermaid
 flowchart LR
     A(["User clicks 'Add to cart'"]) --> B["Event dispatched"]
-    B --> C{"Network\nreliable?"}
+    B --> C{"Network<br/>reliable?"}
     C -- Yes --> D["Processed once"]
     C -- No --> E["Retried 3 times"]
     D --> F["Cart: 1 item"]
@@ -100,14 +100,14 @@ flowchart TD
     subgraph nonIdem ["Non-Idempotent"]
         N1["State: 0 items"] --> N2["ADD_ITEM (shirt)"]
         N2 --> N3["State: 1 item"]
-        N3 --> N4["ADD_ITEM (shirt)\n(retry)"]
+        N3 --> N4["ADD_ITEM (shirt)<br/>(retry)"]
         N4 --> N5["State: 2 items"]
     end
 
     subgraph idem ["Idempotent"]
         I1["State: 0 items"] --> I2["SET_ITEM (shirt, id:abc)"]
         I2 --> I3["State: 1 item"]
-        I3 --> I4["SET_ITEM (shirt, id:abc)\n(retry)"]
+        I3 --> I4["SET_ITEM (shirt, id:abc)<br/>(retry)"]
         I4 --> I5["State: 1 item"]
     end
 
@@ -344,13 +344,13 @@ Every operation describes the target state. `SET_ITEM` with the same ID replaces
 
 ```mermaid
 flowchart TD
-    A["User action"] --> B{"What kind\nof update?"}
-    B --> C["Describe desired state\n(idempotent)"]
-    B --> D["Describe change from\ncurrent state\n(NOT idempotent)"]
+    A["User action"] --> B{"What kind<br/>of update?"}
+    B --> C["Describe desired state<br/>(idempotent)"]
+    B --> D["Describe change from<br/>current state<br/>(NOT idempotent)"]
     C --> E["SET_ITEM id:abc, qty:2"]
-    D --> F["ADD_ITEM shirt\nINCREMENT qty"]
-    E --> G["Safe to retry,\nreplay, deduplicate"]
-    F --> H["Breaks on retry,\nduplicates on replay"]
+    D --> F["ADD_ITEM shirt<br/>INCREMENT qty"]
+    E --> G["Safe to retry,<br/>replay, deduplicate"]
+    F --> H["Breaks on retry,<br/>duplicates on replay"]
 
     style C fill:#bbf7d0,stroke:#16a34a,color:#000
     style D fill:#fecaca,stroke:#dc2626,color:#000
