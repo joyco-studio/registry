@@ -1,0 +1,570 @@
+---
+title: 07 - Promises, PPR, and the Root Provider Pattern
+author: 'matiasperz'
+---
+
+## The root-level data problem
+
+You need feature flags available everywhere. Or a cart. Or user preferences. The classic approach: fetch the data in your root layout, `await` it, and pass the resolved value to a client context provider.
+
+```tsx
+// app/layout.tsx
+export default async function RootLayout({ children }) {
+  const cart = await getCart()       // ⏳ blocks everything
+  const flags = await getFlags()     // ⏳ blocks everything
+
+  return (
+    <html>
+      <body>
+        <CartProvider cart={cart}>
+          <FlagsProvider flags={flags}>
+            {children}
+          </FlagsProvider>
+        </CartProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+**The problem**: you're `await`-ing at the root. Nothing renders until those fetches resolve. Your entire page is held hostage by the slowest provider.
+
+```
+Request arrives
+      │
+      ▼
+┌─────────────┐
+│  await cart  │ 200ms
+└─────┬───────┘
+      │
+      ▼
+┌─────────────┐
+│  await flags │ 150ms
+└─────┬───────┘
+      │
+      ▼
+┌─────────────┐
+│  Render HTML │  Everything waits 350ms+
+└─────────────┘
+```
+
+Users stare at a blank screen for 350ms minimum. On slow connections or cold starts, this gets worse.
+
+## Don't await. Forward.
+
+React 19 introduced the `use()` hook, which can resolve promises inside client components. Combined with context, this unlocks a pattern: **start the fetch on the server, but don't wait for it. Pass the promise itself to the client.**
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  const cartPromise = getCart()      // 🚀 started, not awaited
+  const flagsPromise = getFlags()    // 🚀 started, not awaited
+
+  return (
+    <html>
+      <body>
+        <CartProvider cartPromise={cartPromise}>
+          <FlagsProvider flagsPromise={flagsPromise}>
+            {children}
+          </FlagsProvider>
+        </CartProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+The layout returns immediately. The promises are in-flight. Client components resolve them when they're ready, wrapped in `<Suspense>`.
+
+```
+Request arrives
+      │
+      ├──── getCart()  started ──────────┐
+      ├──── getFlags() started ──────────┤
+      │                                  │ (resolving in parallel)
+      ▼                                  │
+┌──────────────────────┐                 │
+│  Render HTML shell   │ immediate       │
+│  (with fallbacks)    │                 │
+└──────────┬───────────┘                 │
+           │                             │
+           ▼                             ▼
+┌──────────────────────────────────────────┐
+│  Stream resolved data as promises settle │
+└──────────────────────────────────────────┘
+```
+
+The shell renders immediately. Fetches resolve in parallel. Content streams in as each promise settles.
+
+## The cart provider
+
+Here's the full implementation. The provider stores the promise in context, and consumers use `use()` to unwrap it.
+
+### The provider
+
+```tsx showLineNumbers
+// providers/cart-provider.tsx
+'use client'
+
+import { createContext, useContext, use } from 'react'
+
+type CartItem = {
+  id: string
+  name: string
+  quantity: number
+  price: number
+}
+
+type Cart = {
+  items: CartItem[]
+  total: number
+}
+
+const CartContext = createContext<Promise<Cart> | null>(null)
+
+export function CartProvider({
+  children,
+  cartPromise,
+}: {
+  children: React.ReactNode
+  cartPromise: Promise<Cart>
+}) {
+  return <CartContext value={cartPromise}>{children}</CartContext>
+}
+
+export function useCart() {
+  const cartPromise = useContext(CartContext)
+  if (!cartPromise) throw new Error('useCart must be used within CartProvider')
+  return use(cartPromise)
+}
+```
+
+### Consuming it
+
+```tsx showLineNumbers
+// components/cart-count.tsx
+'use client'
+
+import { Suspense } from 'react'
+import { useCart } from '@/providers/cart-provider'
+
+function CartCountInner() {
+  const cart = useCart() // use() suspends until resolved
+
+  return (
+    <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs text-white">
+      {cart.items.length}
+    </span>
+  )
+}
+
+export function CartCount() {
+  return (
+    <Suspense fallback={<span className="h-5 w-5 animate-pulse rounded-full bg-gray-200" />}>
+      <CartCountInner />
+    </Suspense>
+  )
+}
+```
+
+```tsx showLineNumbers
+// components/cart-total.tsx
+'use client'
+
+import { Suspense } from 'react'
+import { useCart } from '@/providers/cart-provider'
+
+function CartTotalInner() {
+  const cart = useCart()
+
+  return <span className="font-semibold">${cart.total.toFixed(2)}</span>
+}
+
+export function CartTotal() {
+  return (
+    <Suspense fallback={<span className="h-4 w-16 animate-pulse rounded bg-gray-200" />}>
+      <CartTotalInner />
+    </Suspense>
+  )
+}
+```
+
+Notice: every component that calls `useCart()` is wrapped in its own `<Suspense>`. This is the key. Each consumer independently suspends and resolves, showing its own loading state.
+
+### Wiring it in the layout
+
+```tsx showLineNumbers
+// app/layout.tsx
+import { CartProvider } from '@/providers/cart-provider'
+import { getCart } from '@/lib/cart'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const cartPromise = getCart() // Don't await
+
+  return (
+    <html>
+      <body>
+        <CartProvider cartPromise={cartPromise}>
+          <Navbar />
+          {children}
+        </CartProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+```tsx
+// components/navbar.tsx
+import { CartCount } from './cart-count'
+import { CartTotal } from './cart-total'
+
+export function Navbar() {
+  return (
+    <nav className="flex items-center justify-between border-b px-6 py-3">
+      <span className="text-lg font-bold">Store</span>
+      <div className="flex items-center gap-4">
+        <CartTotal />
+        <div className="flex items-center gap-1">
+          🛒 <CartCount />
+        </div>
+      </div>
+    </nav>
+  )
+}
+```
+
+The navbar renders instantly with skeleton placeholders. Cart data streams in when the promise resolves.
+
+## The feature flags provider
+
+Same pattern, different domain. Feature flags are fetched on the server, forwarded as a promise, and resolved on the client. Components that depend on flags show fallback UI until they're ready.
+
+### The provider
+
+```tsx showLineNumbers
+// providers/flags-provider.tsx
+'use client'
+
+import { createContext, useContext, use } from 'react'
+
+type FeatureFlags = {
+  newCheckout: boolean
+  darkMode: boolean
+  betaBanner: boolean
+  experimentalSearch: boolean
+}
+
+const FlagsContext = createContext<Promise<FeatureFlags> | null>(null)
+
+export function FlagsProvider({
+  children,
+  flagsPromise,
+}: {
+  children: React.ReactNode
+  flagsPromise: Promise<FeatureFlags>
+}) {
+  return <FlagsContext value={flagsPromise}>{children}</FlagsContext>
+}
+
+export function useFlags() {
+  const promise = useContext(FlagsContext)
+  if (!promise) throw new Error('useFlags must be used within FlagsProvider')
+  return use(promise)
+}
+
+export function useFlag(flag: keyof FeatureFlags) {
+  const flags = useFlags()
+  return flags[flag]
+}
+```
+
+### Conditional rendering with flags
+
+```tsx showLineNumbers
+// components/checkout-button.tsx
+'use client'
+
+import { Suspense } from 'react'
+import { useFlag } from '@/providers/flags-provider'
+
+function CheckoutButtonInner() {
+  const newCheckout = useFlag('newCheckout')
+
+  if (newCheckout) {
+    return (
+      <button className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-white">
+        Checkout with Express Pay
+      </button>
+    )
+  }
+
+  return (
+    <button className="rounded-lg bg-gray-900 px-6 py-3 text-white">
+      Proceed to Checkout
+    </button>
+  )
+}
+
+export function CheckoutButton() {
+  return (
+    <Suspense
+      fallback={
+        <button disabled className="rounded-lg bg-gray-300 px-6 py-3 text-gray-500">
+          Loading...
+        </button>
+      }
+    >
+      <CheckoutButtonInner />
+    </Suspense>
+  )
+}
+```
+
+### The data fetcher
+
+```tsx showLineNumbers
+// lib/flags.ts
+import 'server-only'
+import { cache } from 'react'
+import { cookies } from 'next/headers'
+
+export const getFlags = cache(async (): Promise<FeatureFlags> => {
+  const userId = (await cookies()).get('userId')?.value
+
+  const res = await fetch(`https://flags.example.com/api/flags?user=${userId}`, {
+    next: { revalidate: 60 },
+  })
+
+  return res.json()
+})
+```
+
+Using `React.cache` here means that if `getFlags()` is called multiple times in the same request (from the layout, from a page, from a server component), the fetch is deduplicated. One request, one fetch, many consumers.
+
+## How PPR changes this
+
+Without PPR, your page is fully static or fully dynamic. Using `cookies()` in the flags fetcher forces the entire route dynamic. Every request re-renders everything from scratch.
+
+With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next.js 16, the page splits into two:
+
+1. A **static shell** prerendered at build time (the HTML around your Suspense fallbacks)
+2. **Dynamic holes** that stream at request time (the actual content inside those boundaries)
+
+```
+┌──────────────────────────────────────────────────┐
+│                  Static Shell                     │
+│  ┌────────────────────────────────────────────┐  │
+│  │  <nav>                                     │  │
+│  │    Store              [$$$] [🛒 ●]         │  │
+│  │  </nav>                ▲      ▲            │  │
+│  │                        │      │            │  │
+│  │              fallback skeletons            │  │
+│  │              (part of static shell)        │  │
+│  └────────────────────────────────────────────┘  │
+│                                                   │
+│  ┌────────────────────────────────────────────┐  │
+│  │  <main>                                    │  │
+│  │    Featured Products                       │  │  ← static
+│  │    ┌──────┐ ┌──────┐ ┌──────┐             │  │
+│  │    │ Img  │ │ Img  │ │ Img  │             │  │  ← static
+│  │    └──────┘ └──────┘ └──────┘             │  │
+│  │                                            │  │
+│  │    [  Checkout with ??? Pay  ]             │  │  ← fallback
+│  │                                            │  │
+│  └────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────┘
+
+       Built at build time. Served from CDN.
+```
+
+When a request comes in, the static shell is **instantly** served. Then the dynamic parts stream in:
+
+```
+Static shell served instantly (0ms)
+      │
+      ├──── getFlags() resolves (80ms) ─────┐
+      │                                      ▼
+      │                        ┌──────────────────────────┐
+      │                        │ CheckoutButton renders    │
+      │                        │ "Checkout with Express Pay│
+      │                        └──────────────────────────┘
+      │
+      ├──── getCart() resolves (120ms) ──────┐
+      │                                      ▼
+      │                        ┌──────────────────────────┐
+      │                        │ CartCount: "3"           │
+      │                        │ CartTotal: "$149.97"     │
+      │                        └──────────────────────────┘
+      │
+      ▼
+   Page fully interactive (~120ms)
+```
+
+Compare this to the traditional approach where nothing renders for 350ms.
+
+## Before and after
+
+### Without promise forwarding (traditional)
+
+```
+Server                          Client
+──────                          ──────
+
+1. await getCart()                 ... waiting
+2. await getFlags()               ... still waiting
+3. Render full HTML               ... still waiting
+4. Send response         ──→     5. Display everything at once
+                                  6. Hydrate
+
+Time: ████████████████████░░░░  (slow TTFB, fast render)
+```
+
+### With promise forwarding + PPR
+
+```
+Server                          Client
+──────                          ──────
+
+1. Start getCart()
+2. Start getFlags()
+3. Render static shell   ──→     4. Display shell + fallbacks instantly
+   (with fallback UI)            5. Hydrate static parts
+
+   ...promises resolve...
+
+6. Stream cart data      ──→     7. CartCount + CartTotal pop in
+8. Stream flags data     ──→     9. CheckoutButton resolves
+
+Time: ██░░░░░░░░░░░░░░░░░░░░░  (fast TTFB, progressive render)
+```
+
+## Combining both providers
+
+Here's how the root layout looks with both providers and PPR working together:
+
+```tsx showLineNumbers
+// app/layout.tsx
+import { CartProvider } from '@/providers/cart-provider'
+import { FlagsProvider } from '@/providers/flags-provider'
+import { getCart } from '@/lib/cart'
+import { getFlags } from '@/lib/flags'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Both start immediately, resolve in parallel
+  const cartPromise = getCart()
+  const flagsPromise = getFlags()
+
+  return (
+    <html>
+      <body>
+        <FlagsProvider flagsPromise={flagsPromise}>
+          <CartProvider cartPromise={cartPromise}>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+          </CartProvider>
+        </FlagsProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+Here's what the rendering timeline looks like:
+
+```
+ 0ms    50ms   100ms  150ms  200ms  250ms  300ms
+  │      │      │      │      │      │      │
+  ├──────────────────────────────────────────────
+  │ Static shell served (nav, main layout, footer)
+  ├──────────────────────────────────────────────
+  │
+  ├─── flags resolve ──┤
+  │                     └→ CheckoutButton, BetaBanner render
+  │
+  ├──────── cart resolves ─────┤
+  │                            └→ CartCount, CartTotal render
+  │
+  ▼
+  Everything visible and interactive by ~150ms
+  (vs 350ms+ with sequential awaits)
+```
+
+## The full rendering flow
+
+Here's the complete picture of how a request flows through the system with promise forwarding and PPR:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        BUILD TIME                           │
+│                                                             │
+│  Next.js prerenders the route:                              │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ Static Shell                                          │  │
+│  │  • <html>, <body>, <nav>, <main>, <footer>            │  │
+│  │  • Suspense fallbacks (skeletons, "Loading...")        │  │
+│  │  • All non-dynamic content                            │  │
+│  └───────────────────────────────────────────────────────┘  │
+│  Stored on CDN / edge cache                                 │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       REQUEST TIME                          │
+│                                                             │
+│  1. CDN serves static shell            ──→ Browser paints  │
+│                                             immediately     │
+│  2. Server executes layout:                                 │
+│     ┌─────────────────────────────┐                         │
+│     │ const cartPromise = getCart()│──→ fetch in flight      │
+│     │ const flagsPromise = getFlags()│→ fetch in flight     │
+│     └─────────────────────────────┘                         │
+│                                                             │
+│  3. Promises forwarded to client providers via RSC payload  │
+│                                                             │
+│  4. As each promise resolves, React streams the             │
+│     component tree update to replace the fallback           │
+│     ┌──────────────┐    ┌──────────────┐                    │
+│     │ flags ready   │    │ cart ready    │                   │
+│     │ → stream HTML │    │ → stream HTML │                   │
+│     └──────────────┘    └──────────────┘                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Rules of thumb
+
+| Rule | Why |
+|------|-----|
+| **Don't `await` in the layout** | Awaiting blocks the entire render tree. Forward promises instead. |
+| **Each consumer wraps itself in `<Suspense>`** | This lets each piece of dynamic content load independently with its own fallback. |
+| **Use `React.cache` for the data fetcher** | Deduplicates across server components and the forwarded promise within one request. |
+| **Use `server-only` on data fetchers** | Prevents accidental import of server code (secrets, DB access) into client bundles. |
+| **Keep providers thin** | The provider just stores the promise in context. All logic lives in the consumers. |
+| **Enable PPR** | `cacheComponents: true` in Next.js 16 gives you the static shell + streaming combo. |
+
+## When to use this pattern
+
+**Use it when:**
+- You need data available throughout the app (auth, cart, flags, theme preferences)
+- The data depends on the request (cookies, headers) making it inherently dynamic
+- You want to avoid blocking the initial render while that data loads
+- Multiple independent pieces of the page need the same data
+
+**Skip it when:**
+- Data is only used in one page or component (just fetch it there)
+- Data is static and can be fetched at build time (use `use cache` instead)
+- The component tree is shallow enough that prop drilling is clearer
+
+## Next.js 15 vs 16
+
+| Feature | Next.js 15 | Next.js 16 |
+|---------|------------|------------|
+| Promise forwarding to client | ✓ Works | ✓ Works |
+| `use()` hook | ✓ React 19 | ✓ React 19 |
+| PPR | `experimental: { ppr: 'incremental' }` | `cacheComponents: true` |
+| Per-route opt-in | `export const experimental_ppr = true` | Not needed (automatic) |
+| Cache directive | `unstable_cache` / fetch options | `'use cache'` + `cacheLife` |
+| Static shell | Requires explicit opt-in per route | Default behavior |
+
+The promise forwarding pattern works the same in both versions. The difference is how PPR is enabled and how much of the static shell optimization you get out of the box.
