@@ -37,14 +37,23 @@ export function Mermaid({ chart }: { chart: string }) {
       securityLevel: 'loose',
     })
 
+    // Render in a detached DOM node to avoid circular reference errors
+    // with block-beta diagrams (mermaid's setBlockSizes calls JSON.stringify
+    // on DOM nodes, which fails on React fiber properties).
+    const container = document.createElement('div')
+    document.body.appendChild(container)
+
     mermaid
-      .render(id, chart)
+      .render(id, chart, container)
       .then(({ svg }) => {
         el.innerHTML = svg
       })
       .catch((err) => {
         console.error('[Mermaid] Failed to render chart:', err)
         console.error('[Mermaid] Chart source:', chart)
+      })
+      .finally(() => {
+        container.remove()
       })
   }, [chart, resolvedTheme, mounted])
 
