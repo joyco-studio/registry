@@ -153,9 +153,7 @@ function PageActionsDropdown({
 }) {
   const { emit } = useActionHint()
   const [open, setOpen] = useState(false)
-  const llmPageUrl = llmUrl
-    ? `${window.location.origin}${llmUrl}`
-    : null
+  const getLlmPageUrl = () => `${window.location.origin}${llmUrl}`
 
   useEffect(() => {
     if (!showShortcuts) return
@@ -261,19 +259,21 @@ function PageActionsDropdown({
           Open in Cursor
           <Kbd className={cn('ml-auto', { hidden: !showShortcuts })}>⌘I</Kbd>
         </DropdownMenuItem>
-        {llmPageUrl && (
+        {llmUrl && (
           <DropdownMenuItem
             className="text-xs"
-            onSelect={() => window.open(getClaudeUrl(llmPageUrl), '_blank')}
+            onSelect={() => window.open(getClaudeUrl(getLlmPageUrl()), '_blank')}
           >
             <ClaudeIcon />
             Open in Claude
           </DropdownMenuItem>
         )}
-        {llmPageUrl && (
+        {llmUrl && (
           <DropdownMenuItem
             className="text-xs"
-            onSelect={() => window.open(getChatGPTUrl(llmPageUrl), '_blank')}
+            onSelect={() =>
+              window.open(getChatGPTUrl(getLlmPageUrl()), '_blank')
+            }
           >
             <ChatGPTIcon />
             Open in ChatGPT
