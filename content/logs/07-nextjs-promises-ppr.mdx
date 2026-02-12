@@ -454,29 +454,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-Here's what the rendering timeline looks like:
-
-```mermaid
-gantt
-    title Rendering Timeline — Promise Forwarding + PPR
-    dateFormat X
-    axisFormat %Lms
-
-    section Static
-    Shell served from CDN           :done, 0, 10
-
-    section Flags
-    getFlags resolves               :active, 0, 80
-    CheckoutButton + BetaBanner     :milestone, 80, 0
-
-    section Cart
-    getCart resolves                 :active, 0, 120
-    CartCount + CartTotal           :milestone, 120, 0
-
-    section Result
-    Fully interactive               :crit, 120, 150
-```
-
 ## The full rendering flow
 
 Here's the complete picture of how a request flows through the system with promise forwarding and PPR:
