@@ -180,7 +180,7 @@ export function CartTotal() {
 }
 ```
 
-Notice: every component that calls `useCart()` is wrapped in its own `<Suspense>`. This is the key. Each consumer independently suspends and resolves, showing its own loading state.
+Notice: every component that calls `useCart()` is wrapped in its own `<Suspense>`. This is the key. Each consumer independently suspends and resolves, showing its own loading state instead of blocking the entire page — suspension is handled per consumer.
 
 ### Wiring it in the layout
 
