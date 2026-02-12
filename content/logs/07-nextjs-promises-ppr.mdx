@@ -35,6 +35,10 @@ flowchart TD
     B --> C["await getFlags() — 150ms"]
     C --> D["Render HTML"]
     D --> E["Send response — 350ms+ later"]
+
+    style B fill:#fecaca,stroke:#dc2626,color:#000
+    style C fill:#fecaca,stroke:#dc2626,color:#000
+    style E fill:#fecaca,stroke:#dc2626,color:#000
 ```
 
 Users stare at a blank screen for 350ms minimum. On slow connections or cold starts, this gets worse.
@@ -74,6 +78,11 @@ flowchart TD
     B --> E["Stream resolved data<br/>as promises settle"]
     C --> E
     D --> E
+
+    style B fill:#bbf7d0,stroke:#16a34a,color:#000
+    style C fill:#bbf7d0,stroke:#16a34a,color:#000
+    style D fill:#bfdbfe,stroke:#2563eb,color:#000
+    style E fill:#bfdbfe,stroke:#2563eb,color:#000
 ```
 
 The shell renders immediately. Fetches resolve in parallel. Content streams in as each promise settles.
@@ -345,6 +354,11 @@ block-beta
         fallback["💀 Checkout button fallback"]:2
     end
 
+    style nav fill:#bfdbfe,stroke:#2563eb,color:#000
+    style main fill:#bfdbfe,stroke:#2563eb,color:#000
+    style skeleton1 fill:#fef9c3,stroke:#ca8a04,color:#000
+    style skeleton2 fill:#fef9c3,stroke:#ca8a04,color:#000
+    style fallback fill:#fef9c3,stroke:#ca8a04,color:#000
 ```
 
 When a request comes in, the static shell is **instantly** served. Then the dynamic parts stream in:
@@ -359,6 +373,13 @@ flowchart TD
 
     D --> F(["Page fully interactive ~120ms"])
     E --> F
+
+    style A fill:#bfdbfe,stroke:#2563eb,color:#000
+    style B fill:#bbf7d0,stroke:#16a34a,color:#000
+    style C fill:#bbf7d0,stroke:#16a34a,color:#000
+    style D fill:#e9d5ff,stroke:#7c3aed,color:#000
+    style E fill:#e9d5ff,stroke:#7c3aed,color:#000
+    style F fill:#bbf7d0,stroke:#16a34a,color:#000
 ```
 
 Compare this to the traditional approach where nothing renders for 350ms.
@@ -482,6 +503,13 @@ flowchart TD
 
     B3 --> R1
     B3 --> R3
+
+    style build fill:#eff6ff,stroke:#2563eb,color:#000
+    style request fill:#f0fdf4,stroke:#16a34a,color:#000
+    style B3 fill:#bfdbfe,stroke:#2563eb,color:#000
+    style R2 fill:#bbf7d0,stroke:#16a34a,color:#000
+    style R7 fill:#e9d5ff,stroke:#7c3aed,color:#000
+    style R8 fill:#e9d5ff,stroke:#7c3aed,color:#000
 ```
 
 ## Rules of thumb
