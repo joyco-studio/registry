@@ -1,22 +1,24 @@
 ---
-title: 08 - Why WebGL Scroll Sync Needs Smooth Scroll
+title: 08 - WebGL Scroll Sync
 author: 'matiasperz'
 ---
 
-## The jelly problem
+## The problem
 
-You have a WebGL canvas pinned with `position: absolute` inside the page flow. You sync its position to scroll via `requestAnimationFrame`. It works, mostly. But during fast scrolls, the canvas visibly wobbles -- content stretches and compresses like jelly, drifting a few pixels before snapping back. It's subtle on a trackpad and obvious on a mouse wheel.
+You have a full-page WebGL canvas rendering content that needs to stay aligned with DOM elements as the user scrolls. Images, text blocks, sections -- all positioned by CSS, all mirrored as textured quads on the canvas.
 
-This isn't a bug in your code. It's a fundamental timing conflict between the browser's **compositor thread** and the **JS main thread**.
+During fast scrolls, the canvas content visibly drifts from the DOM. Images separate from their placeholders, snap back, separate again. It looks like jelly.
 
-## Two threads, one scroll position
+This isn't a bug. It's an architectural constraint of how browsers handle scroll.
+
+## How browser compositing works
 
 Modern browsers split rendering into two threads:
 
 - **Main thread**: runs JavaScript, computes styles, performs layout, paints display lists
 - **Compositor thread** (Chromium calls it the "impl thread"): composites rasterized layers, handles scroll input, runs GPU-side animations
 
-When you scroll, the input event goes to the **compositor thread first**, not JavaScript. The compositor immediately shifts rasterized pixel tiles on the GPU. No layout, no style recalc, no JS. That's why scrolling stays smooth even when your main thread is busy.
+When the user scrolls, the input event goes to the **compositor first**. The compositor immediately shifts pre-rasterized pixel tiles on the GPU -- no layout, no style recalc, no JS. That's why scrolling stays smooth even when the main thread is blocked.
 
 ```mermaid
 flowchart LR
@@ -29,65 +31,11 @@ flowchart LR
     style D fill:#fecaca,stroke:#dc2626,color:#000
 ```
 
-The compositor updates what the user sees **immediately**. The main thread gets the memo **later** -- often an entire frame later.
+The compositor updates what the user sees **immediately**. The main thread gets the memo **later** -- at minimum one full frame later.
 
-## The rAF timing gap
+### The rendering pipeline
 
-Here's what happens inside a single frame when you read `window.scrollY` in a `requestAnimationFrame` callback:
-
-```mermaid
-sequenceDiagram
-    participant C as Compositor Thread
-    participant M as Main Thread
-    participant G as GPU
-
-    Note over C: Frame N begins
-    C->>G: Scroll content to Y=500<br/>(user sees this immediately)
-    C->>M: "Hey, scrollY is now 500"
-
-    Note over M: rAF fires
-    M->>M: window.scrollY → 500
-    M->>M: Apply translate3d(0, offset, 0)
-    M->>C: Updated layer tree
-
-    Note over C: Frame N+1 begins
-    C->>G: Compositor already at Y=508<br/>(scrolled 8px further)
-    C->>G: But canvas transform still says 500
-    Note over G: 8px gap = jelly
-```
-
-Between the time your rAF reads `scrollY` and the compositor draws the next frame, the compositor may have already advanced the scroll position by several more pixels. Your canvas transform is based on **stale data**.
-
-## Why [position: absolute] makes it worse
-
-A `position: absolute` element inside the page flow participates in compositor scrolling. When the compositor scrolls the page, it physically moves all elements in the scroll container -- including your absolute-positioned canvas wrapper. But here's the conflict: you're *also* applying a transform to that element via JavaScript to position it.
-
-```mermaid
-flowchart TD
-    subgraph frame ["What happens in one frame"]
-        direction TB
-        A["Compositor scrolls page to Y=500"] --> B["Your absolute container moves<br/>with the page (compositor-driven)"]
-        A --> C["rAF fires: reads scrollY=497<br/>(3px stale)"]
-        C --> D["You apply: translate3d(0, offset based on 497, 0)"]
-        B --> E["Container visual position:<br/>compositor says 500"]
-        D --> F["Transform says: 497-based offset"]
-        E --> G["3px mismatch"]
-        F --> G
-    end
-
-    G --> H["User sees: jelly wobble"]
-
-    style A fill:#bfdbfe,stroke:#2563eb,color:#000
-    style C fill:#fecaca,stroke:#dc2626,color:#000
-    style G fill:#fef9c3,stroke:#ca8a04,color:#000
-    style H fill:#fecaca,stroke:#dc2626,color:#000
-```
-
-The container is being pulled in two directions: the compositor has physically moved it to one position, but your JS-driven transform is applying an offset calculated from a slightly older scroll value. The result: the container's visual position doesn't match where the transform says it should be.
-
-## The compositor pipeline in detail
-
-To understand why the lag is unavoidable with this architecture, look at Chromium's rendering pipeline:
+When JS modifies a transform via `requestAnimationFrame`, the change has to travel through Chromium's full pipeline before it reaches the screen:
 
 ```mermaid
 flowchart TD
@@ -118,13 +66,11 @@ flowchart TD
     style impl fill:#f0fdf4,stroke:#16a34a,color:#000
 ```
 
-For compositor-driven scroll, **steps 1-3 (Style, Layout, Paint) can be entirely skipped**. The compositor just shifts rasterized tiles. But when you modify a transform via JS, the change has to go through the full pipeline: your rAF sets the value on the main thread, it gets committed to the impl thread, layerized, rasterized, activated, and finally drawn.
+For compositor-driven scroll, **Style, Layout, and Paint can be entirely skipped**. The compositor just shifts rasterized tiles. But a JS-driven transform must travel the full path: rAF sets the value on the main thread → commit to impl thread → layerize → raster → activate → draw. Minimum 1-frame latency.
 
-That pipeline has minimum 1-frame latency. The compositor's scroll position has **zero** latency. The mismatch is architectural.
+### The dual-tree model
 
-## The dual-tree model
-
-Chromium's compositor maintains two independent layer trees:
+Chromium maintains two completely isolated layer trees:
 
 ```mermaid
 flowchart LR
@@ -143,11 +89,11 @@ flowchart LR
     style impl fill:#f0fdf4,stroke:#16a34a,color:#000
 ```
 
-These two trees are **completely isolated**. The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread at all. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread notified the main thread* -- not the impl thread's current position.
+The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread synced* -- not the impl thread's current position.
 
-## Quantifying the lag
+### Quantifying the lag
 
-Firefox's APZ (Async Pan/Zoom) documentation gives the most precise frame-level breakdown:
+Firefox's APZ (Async Pan/Zoom) documentation gives the most precise breakdown:
 
 ```mermaid
 sequenceDiagram
@@ -170,97 +116,114 @@ sequenceDiagram
 
 ```
 
-Under ideal conditions the JS-driven effect is **1 frame behind** the compositor scroll. Under main-thread load (GC pauses, layout thrashing, heavy React renders), it can be 2-3 frames behind. At 60fps, that's 16-48ms of positional drift.
+Under ideal conditions, JS-driven effects are **1 frame behind** compositor scroll. Under main-thread load (GC pauses, layout thrashing, heavy React renders), 2-3 frames. At 60fps, that's 16-48ms of positional drift.
 
-## The code that causes it
+### The core tension
 
-Here's the typical pattern. It looks correct but produces jelly:
+There are three things in play: the **window** (W, the viewport), the **page** (P, the document), and the **delta** (D, the scroll offset between them).
 
-```ts showLineNumbers
-// The problematic pattern
-const container = document.querySelector('.webgl-container')
+The compositor owns the delta. JS reads it late. The question is: where does your canvas live?
 
-function animate() {
-  requestAnimationFrame(animate)
+## Approach 1: Fixed + scroll hijack
 
-  // 1. scrollY is stale (1+ frames behind compositor)
-  const y = window.scrollY
+The classic approach used by Locomotive Scroll, Lenis, GSAP ScrollSmoother, and most WebGL-heavy sites.
 
-  // 2. Transform applied based on stale value
-  container.style.transform = `translate3d(0, ${y - paddingOffset}px, 0)`
+### How it works
 
-  // 3. But the compositor has already visually moved the container further
-  // 4. Result: visual position != transform position → jelly
-}
-
-animate()
-```
-
-The same problem exists in WebGL when syncing camera position to scroll:
-
-```ts showLineNumbers
-function animate() {
-  requestAnimationFrame(animate)
-
-  // Same staleness problem -- camera position
-  // lags behind what the user actually sees
-  camera.position.y = -window.scrollY * scrollFactor
-  renderer.render(scene, camera)
-}
-```
-
-## Fixed vs absolute: two sides of the same lag
-
-Both approaches suffer from the same 1-frame compositor lag. The difference is **which side of the equation is stale**.
-
-There are three things in play: the **window** (viewport), the **page** (document), and the **delta** (scroll offset between them). The compositor owns the scroll. JS reads it late. The question is: where does your canvas live?
-
-### The fixed approach
-
-The canvas is `position: fixed` -- it lives in **window** space. It doesn't move when the page scrolls. To sync WebGL content with DOM elements, JS needs to know the delta (how far the page has scrolled) and shift the canvas content accordingly.
+The canvas is `position: fixed` -- it lives in **window** space. It doesn't participate in native scroll at all. You disable native scrolling on the content, keep the body tall for a scrollbar, and move everything yourself via JS.
 
 ```mermaid
 flowchart LR
     subgraph viewport ["Window (W)"]
         direction TB
         CANVAS["Canvas<br/>(fixed to window)"]
+        CONTENT["Content container<br/>(fixed, translated by JS)"]
     end
 
     subgraph page ["Page (P)"]
         direction TB
-        DOM["DOM elements<br/>(scroll with page)"]
+        SCROLL["Scrollbar only<br/>(body is tall,<br/>overflow hidden on content)"]
     end
 
-    viewport ---|"D (delta)<br/>= scroll offset"| page
+    viewport ---|"D (delta)<br/>JS reads scrollY,<br/>applies to both"| page
 
     style viewport fill:#bfdbfe,stroke:#2563eb,color:#000
     style page fill:#f0fdf4,stroke:#16a34a,color:#000
     style CANVAS fill:#e9d5ff,stroke:#7c3aed,color:#000
+    style CONTENT fill:#dbeafe,stroke:#3b82f6,color:#000
 ```
 
-The canvas sits on the **W** side. The compositor moves the page, but JS can't read that new delta until the next frame. So the canvas content tracks the page **one frame late**:
+JS is the **single source of truth**. You read `scrollY` and apply it to both the HTML content and the canvas in the same `rAF` callback, before either one paints. The compositor never moves your content -- you do it all yourself.
+
+```ts showLineNumbers
+// The scroll hijack pattern
+document.body.style.overflow = 'hidden'
+document.body.style.height = `${contentHeight}px`
+container.style.position = 'fixed'
+container.style.top = '0'
+
+let currentY = 0
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t
+
+function animate() {
+  requestAnimationFrame(animate)
+
+  // JS is source of truth -- read scroll, lerp toward it
+  currentY = lerp(currentY, window.scrollY, 0.1)
+
+  // Apply to HTML content
+  container.style.transform = `translate3d(0, ${-currentY}px, 0)`
+
+  // Apply to WebGL camera (same value, same frame)
+  camera.position.y = -currentY * scrollFactor
+  renderer.render(scene, camera)
+}
+```
+
+Because both the DOM content and the canvas are updated from the same `scrollY` read in the same frame, there's **zero drift** between them. The lerp smooths the input so per-frame deltas stay small.
+
+### Why it works
+
+The scroll hijack detaches the compositor from scroll entirely. No compositor scroll means no compositor/JS race. The cost: you've replaced the compositor's zero-latency GPU scrolling with main-thread JS scrolling.
 
 ```mermaid
 sequenceDiagram
+    participant U as User Input
     participant C as Compositor
-    participant W as Window (canvas here)
-    participant P as Page (DOM here)
+    participant M as Main Thread
+    participant S as Screen
 
-    Note over C: User scrolls 40px
-    C->>P: Move page to scrollY=540<br/>(instant, GPU)
-    Note over W: Canvas stays put (it's fixed)
-    Note over W: rAF fires: reads scrollY=540<br/>(but compositor already at 548)
-    W->>W: Render WebGL at scroll=540
-    Note over C: Page is visually at 548
-    Note over W: Canvas content shows 540
-    Note over C,W: 8px drift between<br/>DOM and canvas content
+    Note over U: User scrolls
+    U->>C: Scroll event
+    Note over C: No native scroll to apply<br/>(content is position: fixed)
+    C->>M: Forward scroll delta
+    Note over M: rAF callback
+    M->>M: Read scrollY<br/>Lerp currentY<br/>Update DOM transform<br/>Render WebGL
+    M->>C: Commit layers
+    C->>S: Draw frame
+    Note over S: DOM and canvas<br/>perfectly in sync
 ```
 
-**The canvas doesn't move, but its content is wrong.** The WebGL scene is rendered with a scroll value that's already stale. DOM elements (on the page side) have moved further than what the canvas is showing.
+### The tradeoffs
 
-### The absolute approach
+The problem: you've killed native scroll. Every scroll frame now runs through the main thread.
 
-The canvas is `position: absolute` -- it lives in **page** space. It scrolls naturally with the DOM. To keep it covering the viewport, JS applies a `transform` to offset it back into view.
+- **Mobile lag**: On mobile, the main thread gets overloaded by touch handlers, GC pauses, and layout work. The smoothness users expect from native scroll is gone. It feels weirdly laggy.
+- **Lost browser features**: Find-in-page, anchor link navigation, scroll restoration, accessibility (screen readers) -- all break or degrade.
+- **`position: fixed` children**: Elements inside the translated container can't be `position: fixed` relative to the viewport. A CSS `transform` on an ancestor creates a new containing block, so fixed children become fixed to the container instead. This breaks sticky headers, modals, tooltips -- anything that needs to stay in the viewport.
+- **Scroll-linked APIs**: `IntersectionObserver`, `scroll-snap`, CSS `scroll()` timeline -- all behave differently or break entirely because the browser doesn't see "real" scrolling.
+
+### When to use it
+
+When the entire experience is WebGL-driven and DOM is minimal. Think full-page immersive experiences where you control the whole viewport. The drift-free sync is worth the tradeoffs when there's not much DOM to break.
+
+## Approach 2: Absolute
+
+The approach used by [Lusion's webgl-scroll-sync](https://github.com/matiasperz/webgl-scroll-sync). Native scroll stays intact. The canvas moves with the page.
+
+### How it works
+
+The canvas is `position: absolute` -- it lives in **page** space, inside the scrolling container. It moves with the DOM naturally on the compositor thread. Each frame, JS reads `scrollY` and applies a `transform` to slide the canvas back into the viewport.
 
 ```mermaid
 flowchart LR
@@ -271,257 +234,193 @@ flowchart LR
 
     subgraph page ["Page (P)"]
         direction TB
-        CANVAS["Canvas<br/>(absolute, in page)"]
+        CANVAS["Canvas<br/>(absolute, in page flow)"]
         DOM["DOM elements"]
     end
 
-    viewport ---|"D (delta)<br/>= scroll offset"| page
+    viewport ---|"D (delta)<br/>JS reads scrollY,<br/>applies transform<br/>to reposition canvas"| page
 
     style viewport fill:#bfdbfe,stroke:#2563eb,color:#000
     style page fill:#f0fdf4,stroke:#16a34a,color:#000
     style CANVAS fill:#e9d5ff,stroke:#7c3aed,color:#000
 ```
 
-The canvas sits on the **P** side. The compositor moves the page (and the canvas with it) instantly. But JS needs to know the window position to apply the correction transform, and that read is **one frame late**:
+The canvas sits on the **P** side. The compositor moves the page -- and the canvas with it -- instantly. DOM elements and the canvas move together on the GPU. JS only needs to correct the canvas position and re-render the WebGL scene.
+
+```ts showLineNumbers
+// The absolute approach
+const canvas = document.querySelector('#canvas')
+// canvas CSS: position: absolute; left: 0;
+
+const padding = 0.25 // 25% extra top and bottom
+const canvasHeight = window.innerHeight * (1 + padding * 2)
+
+function animate() {
+  requestAnimationFrame(animate)
+
+  const scrollY = window.scrollY
+  const scrollOffset = scrollY - window.innerHeight * padding
+
+  // Reposition canvas to cover viewport (+ padding)
+  canvas.style.transform = `translate(0, ${scrollOffset}px)`
+
+  // Update WebGL uniforms with scroll position
+  // Each mesh knows its absolute page position (from getBoundingClientRect + scrollY)
+  // The vertex shader subtracts scrollOffset to get canvas-local coordinates
+  updateUniforms(scrollOffset)
+  renderer.render(scene, camera)
+}
+```
+
+### What drifts (and why it's ok)
+
+The canvas and DOM move together on the compositor -- no content drift. The only stale thing is the `transform` correction that repositions the canvas over the viewport:
 
 ```mermaid
 sequenceDiagram
     participant C as Compositor
-    participant P as Page (canvas + DOM here)
-    participant W as Window
+    participant P as Page (canvas + DOM)
+    participant M as Main Thread
 
     Note over C: User scrolls 40px
     C->>P: Move page to scrollY=540<br/>(canvas moves WITH page, instant)
-    Note over P: Canvas and DOM move together<br/>(no drift between them)
-    Note over W: rAF fires: reads scrollY=540
-    W->>P: Apply transform: translate(0, 540 - padding)
+    Note over P: Canvas and DOM move together<br/>(zero drift between them)
+    Note over M: rAF fires
+    M->>M: Read scrollY = 540
+    M->>P: Apply transform to reposition canvas
     Note over C: Compositor already at 548
-    Note over P: Transform correction is 8px stale
-    Note over C,P: Canvas position slightly off,<br/>but content matches DOM
+    Note over P: Transform correction is 8px stale<br/>→ canvas edges slightly off viewport
+    Note over P: But content inside still matches DOM
 ```
 
-**The canvas moves with the DOM, but its position correction is late.** The content stays aligned with surrounding DOM elements (they're all on the page side, moving together on the compositor). The only thing that's stale is the `transform` that repositions the canvas to cover the viewport.
-
-### Why absolute wins
-
-The key insight: **what drifts is different**.
+With the fixed approach, the **content** drifts (images separate from placeholders). With absolute, the **edges** drift (canvas doesn't perfectly cover the viewport). Content stays locked to the DOM.
 
 ```mermaid
 flowchart TD
-    subgraph fixed ["Fixed approach"]
+    subgraph fixed ["Fixed approach drift"]
         direction TB
         F1["Canvas stays in window"] --> F2["Content rendered with stale scrollY"]
-        F2 --> F3["DOM elements drift away<br/>from canvas content"]
-        F3 --> F4["User sees: images separate<br/>from their DOM placeholders"]
+        F2 --> F3["WebGL images separate<br/>from DOM placeholders"]
     end
 
-    subgraph absolute ["Absolute approach"]
+    subgraph absolute ["Absolute approach drift"]
         direction TB
         A1["Canvas moves with page"] --> A2["Content stays aligned with DOM"]
-        A2 --> A3["Transform correction is stale"]
-        A3 --> A4["User sees: slight edge clipping<br/>but content stays in place"]
+        A2 --> A3["Canvas edges slightly miss<br/>viewport bounds"]
     end
 
     style fixed fill:#fecaca,stroke:#dc2626,color:#000
     style absolute fill:#bbf7d0,stroke:#16a34a,color:#000
 ```
 
-| | Fixed | Absolute |
+| | Fixed + hijack | Absolute |
 |---|---|---|
 | **Canvas lives in** | Window (W) | Page (P) |
-| **What's stale** | The scroll delta (D) used to render content | The window position (W) used for transform correction |
-| **What drifts** | Canvas content vs DOM elements | Canvas edges vs viewport bounds |
-| **Visible as** | Images visibly separating from placeholders | Slight clipping at canvas edges during fast scroll |
+| **What's stale** | Nothing (JS is source of truth) | The transform correction (W position) |
+| **What drifts** | Nothing -- but native scroll is dead | Canvas edges vs viewport bounds |
+| **Visible as** | Laggy scroll on mobile | Slight edge clipping during fast scroll |
 
-With the fixed approach, the **content** is wrong -- WebGL-rendered images drift away from their DOM counterparts. With the absolute approach, the **positioning** is slightly off -- the canvas edges might not perfectly cover the viewport, but the content inside stays locked to the DOM.
+### Solving the edge clipping with padding
 
-Edge clipping is solved by adding vertical padding. Render the canvas at 150% viewport height (25% extra top and bottom), and even with a few frames of stale transform, the visible area stays covered.
-
-### The scroll hijack alternative
-
-There's a third option: detach the compositor from scrolling entirely. Set `overflow: hidden`, make the body tall for a scrollbar, fix the content, and move it yourself via JS.
-
-This makes JS the **single source of truth** for scroll position. You read `scrollY` and apply it to both the HTML content and the canvas **in the same rAF callback**, before either one paints. No compositor race, no delta mismatch, zero drift.
-
-The problem: you've killed native scroll. The compositor is no longer helping you. Every scroll frame runs through the main thread. On mobile, where the main thread gets overloaded by touch handlers, GC pauses, and layout work, this means **perceptibly laggy scrolling**. The smoothness users expect from native scroll is gone.
-
-For a reference implementation of the absolute approach (with padding), see [webgl-scroll-sync](https://github.com/matiasperz/webgl-scroll-sync).
-
-## Why smooth scroll fixes this
-
-When you enable CSS `scroll-behavior: smooth` or use a JS-based smooth scroll (lerp/interpolation), you fundamentally change the scroll dynamics:
-
-### Without smooth scroll (native/instant)
+Edge clipping during fast scroll is solved by rendering the canvas larger than the viewport. Add 25% vertical padding top and bottom (canvas = 150% viewport height). Even with a few frames of stale transform, the extra rendered area covers the viewport:
 
 ```mermaid
 flowchart TD
-    A["User flicks scroll wheel"] --> B["Compositor jumps 40px instantly"]
-    B --> C["rAF reads scrollY<br/>(1 frame behind)"]
-    C --> D["Transform applies<br/>based on stale position"]
-    D --> E["40px of potential drift<br/>per wheel tick"]
-
-    style B fill:#fecaca,stroke:#dc2626,color:#000
-    style E fill:#fecaca,stroke:#dc2626,color:#000
-```
-
-With instant scroll, the compositor can jump large distances between frames. A single wheel tick might advance 40-100px. If your rAF is 1 frame behind, that's 40-100px of positional mismatch -- very visible jelly.
-
-### With smooth scroll (interpolated)
-
-```mermaid
-flowchart TD
-    A["User flicks scroll wheel"] --> B["Target becomes +40px"]
-    B --> C["Compositor advances ~4px/frame<br/>(eased over ~10 frames)"]
-    C --> D["rAF reads scrollY<br/>(1 frame behind)"]
-    D --> E["Transform applies based on<br/>stale-but-close position"]
-    E --> F["~4px of drift per frame<br/>(imperceptible)"]
-
-    style C fill:#bbf7d0,stroke:#16a34a,color:#000
-    style F fill:#bbf7d0,stroke:#16a34a,color:#000
-```
-
-Smooth scroll spreads the same 40px delta over many frames with an easing curve. The per-frame delta drops from 40px to ~4px. Even with 1 frame of lag, the mismatch is only a few pixels -- below the threshold of human perception.
-
-### The math
-
-| Scroll type | Delta per wheel tick | Frames to complete | Per-frame delta | Lag (1 frame) | Visible? |
-|---|---|---|---|---|---|
-| **Instant** | 40-100px | 1 | 40-100px | 40-100px | Yes |
-| **Smooth** | 40-100px | ~10 | 4-10px | 4-10px | No |
-
-Smooth scroll doesn't eliminate the compositor/JS timing gap. It makes the gap **too small to see**.
-
-## The lerp approach
-
-If you can't use CSS `scroll-behavior: smooth` (e.g., you need scroll hijacking for a WebGL experience), the same principle applies with JS-side interpolation:
-
-```ts showLineNumbers
-let currentY = 0
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-function animate() {
-  requestAnimationFrame(animate)
-
-  // Instead of jumping to scrollY, ease toward it
-  currentY = lerp(currentY, window.scrollY, 0.1)
-
-  // The transform is always close to (but smoothly trailing) the real position
-  container.style.transform = `translate3d(0, ${currentY - paddingOffset}px, 0)`
-}
-```
-
-This works for the same reason: you're artificially limiting the per-frame delta. The 1-frame compositor lag gets absorbed into the easing, making it invisible.
-
-```mermaid
-flowchart LR
-    subgraph without ["Without lerp"]
-        A1["scrollY: 500"] --> B1["transform: 500"]
-        A2["scrollY: 540"] --> B2["transform: 540"]
-        A3["scrollY: 580"] --> B3["transform: 580"]
+    subgraph canvas ["Canvas (150% viewport height)"]
+        direction TB
+        PAD_TOP["25% padding (top)<br/>Extra rendered area"]
+        VP["100% viewport area<br/>What the user actually sees"]
+        PAD_BOT["25% padding (bottom)<br/>Extra rendered area"]
     end
 
-    subgraph with ["With lerp (t=0.1)"]
-        C1["scrollY: 500"] --> D1["currentY: 500"]
-        C2["scrollY: 540"] --> D2["currentY: 504"]
-        C3["scrollY: 580"] --> D3["currentY: 511.6"]
-    end
+    SCROLL["During fast scroll,<br/>stale transform shifts canvas<br/>a few pixels"] --> VP
+    NOTE["Padding absorbs the shift<br/>→ no visible clipping"] --> VP
 
-    style without fill:#fecaca,stroke:#dc2626,color:#000
-    style with fill:#bbf7d0,stroke:#16a34a,color:#000
+    style PAD_TOP fill:#f0fdf4,stroke:#16a34a,color:#000
+    style VP fill:#bfdbfe,stroke:#2563eb,color:#000
+    style PAD_BOT fill:#f0fdf4,stroke:#16a34a,color:#000
+    style NOTE fill:#bbf7d0,stroke:#16a34a,color:#000
 ```
 
-Without lerp, every jump in `scrollY` translates 1:1 to a jump in transform position -- and the 1-frame compositor lag makes those jumps misaligned. With lerp, the transform trails behind smoothly. There's nothing for the compositor lag to "tear" against.
+### The `position: fixed` problem
 
-## Other approaches and their tradeoffs
+This is the main tradeoff of the absolute approach. Because the canvas has a CSS `transform` applied to it, any `position: fixed` descendants stop being fixed to the viewport. Per the CSS spec, a `transform` on an ancestor creates a new containing block for fixed-position descendants.
 
-### [position: fixed] + scroll hijack
+This means if your page design requires elements that are:
+- Inside or overlapping the canvas container
+- And `position: fixed` to the viewport (sticky nav, floating UI, modals)
 
-Many libraries (Locomotive Scroll, Lenis, GSAP ScrollSmoother) disable native scrolling entirely:
+...they will scroll with the canvas instead of staying put. You need to either:
+- Structure your DOM so fixed elements are **outside** the canvas container (siblings, not children)
+- Or use a separate layer/portal for fixed UI that doesn't live inside the transformed element
 
-```ts
-document.body.style.overflow = 'hidden'
-document.body.style.height = `${contentHeight}px`
-container.style.position = 'fixed'
-container.style.top = '0'
+### The vertex shader: page coords to canvas coords
 
-// Translate the container yourself
-function animate() {
-  requestAnimationFrame(animate)
-  currentY = lerp(currentY, window.scrollY, 0.1)
-  container.style.transform = `translate3d(0, ${-currentY}px, 0)`
+In this approach, each WebGL mesh knows its **absolute page position** (read from `getBoundingClientRect()` + `scrollY` on resize). The vertex shader converts that to canvas-local pixel coordinates by subtracting the scroll offset:
+
+```glsl
+uniform vec2 u_resolution;    // Canvas size in pixels
+uniform vec2 u_scrollOffset;  // scrollY - padding offset
+uniform vec2 u_domXY;         // Absolute page position of DOM element
+uniform vec2 u_domWH;         // Width/height in pixels
+
+void main() {
+    // Absolute page coords → canvas-local pixel coords
+    vec2 pixelXY = u_domXY - u_scrollOffset + u_domWH * 0.5;
+
+    // Flip Y (DOM Y goes down, GL Y goes up)
+    pixelXY.y = u_resolution.y - pixelXY.y;
+
+    // Scale unit quad to DOM element size
+    pixelXY += position.xy * u_domWH;
+
+    // Pixel coords → NDC (-1 to +1)
+    gl_Position = vec4(pixelXY / u_resolution * 2.0 - 1.0, 0.0, 1.0);
 }
 ```
 
-This sidesteps the compositor conflict entirely because `position: fixed` elements aren't scrolled by the compositor. The container stays put, and you move it yourself. But you lose:
-- Browser find-in-page
-- Anchor link navigation
-- Accessibility (screen readers)
-- Scroll restoration
-- `position: fixed` children (they position relative to the transformed parent, not the viewport)
+Because an identity `Camera()` is used (no projection/view matrix), the vertex shader output goes directly to clip space. This is a 2D orthographic projection done entirely in the shader.
 
-### CSS Scroll-Driven Animations
+### When to use it
 
-The modern, compositor-native solution:
-
-```css
-.webgl-container {
-  animation: sync-scroll linear;
-  animation-timeline: scroll();
-}
-
-@keyframes sync-scroll {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(0, -100%, 0); }
-}
-```
-
-Scroll-driven animations run **entirely on the compositor thread**. No JS, no rAF, no stale `scrollY`. The compositor applies the transform in the same pass that it applies the scroll offset, guaranteeing zero lag. This is the correct long-term solution but requires the effect to be expressible as a CSS animation, which doesn't work for WebGL camera sync.
-
-### [will-change: transform] on the container
-
-```css
-.webgl-container {
-  will-change: transform;
-}
-```
-
-This promotes the element to its own compositor layer, which can reduce jank from repaint but does **not** fix the timing mismatch. The transform value is still set by the main thread and committed asynchronously. It helps with paint performance, not with compositor sync.
+When you have a real webpage with DOM content -- text, navigation, interactive elements -- and the WebGL canvas is an enhancement layer (background effects, image treatments, transitions). Native scroll stays intact. Browser features work. Accessibility works. The only constraint is managing `position: fixed` elements around the transformed canvas.
 
 ## Summary
 
 ```mermaid
 flowchart TD
-    ROOT["Why does the canvas jelly<br/>during scroll?"]
-    ROOT --> A["Browser has 2 threads"]
-    A --> B["Compositor scrolls instantly<br/>(GPU-driven, zero latency)"]
-    A --> C["JS reads scrollY in rAF<br/>(1+ frame behind compositor)"]
-    B --> D["position: absolute container<br/>moved by compositor to Y"]
-    C --> E["transform applied based on<br/>stale Y-delta"]
-    D --> F["Mismatch between compositor<br/>position and transform offset"]
-    E --> F
-    F --> G["Visual jelly / wobble"]
+    ROOT["WebGL canvas needs to<br/>stay in sync with DOM during scroll"]
+    ROOT --> PROBLEM["Compositor scrolls instantly (GPU)<br/>JS reads scrollY 1+ frames late"]
+    PROBLEM --> Q{"Where does<br/>the canvas live?"}
 
-    G --> H{"Fix"}
-    H --> I["Smooth scroll<br/>(reduce per-frame delta)"]
-    H --> J["Lerp/interpolation<br/>(absorb lag into easing)"]
-    H --> K["Scroll-driven animations<br/>(compositor-native, zero lag)"]
-    H --> L["Scroll hijack<br/>(bypass compositor scroll)"]
+    Q --> FIXED["Window side (fixed)"]
+    Q --> ABS["Page side (absolute)"]
 
-    style B fill:#bbf7d0,stroke:#16a34a,color:#000
-    style C fill:#fecaca,stroke:#dc2626,color:#000
-    style F fill:#fef9c3,stroke:#ca8a04,color:#000
-    style G fill:#fecaca,stroke:#dc2626,color:#000
-    style I fill:#bbf7d0,stroke:#16a34a,color:#000
-    style J fill:#bbf7d0,stroke:#16a34a,color:#000
-    style K fill:#bfdbfe,stroke:#2563eb,color:#000
-    style L fill:#fef9c3,stroke:#ca8a04,color:#000
+    FIXED --> FIX_HOW["Hijack scroll:<br/>JS is source of truth<br/>Move everything yourself"]
+    FIX_HOW --> FIX_PRO["Zero drift between<br/>DOM and canvas"]
+    FIX_HOW --> FIX_CON["Kills native scroll<br/>Laggy on mobile<br/>Breaks browser features"]
+
+    ABS --> ABS_HOW["Keep native scroll:<br/>Canvas moves with page<br/>Transform corrects position"]
+    ABS_HOW --> ABS_PRO["Native scroll preserved<br/>Content stays aligned<br/>Accessibility works"]
+    ABS_HOW --> ABS_CON["Edge clipping (fix with padding)<br/>position: fixed children break"]
+
+    style PROBLEM fill:#fef9c3,stroke:#ca8a04,color:#000
+    style FIXED fill:#bfdbfe,stroke:#2563eb,color:#000
+    style ABS fill:#f0fdf4,stroke:#16a34a,color:#000
+    style FIX_PRO fill:#bbf7d0,stroke:#16a34a,color:#000
+    style FIX_CON fill:#fecaca,stroke:#dc2626,color:#000
+    style ABS_PRO fill:#bbf7d0,stroke:#16a34a,color:#000
+    style ABS_CON fill:#fecaca,stroke:#dc2626,color:#000
 ```
 
-| Approach | Compositor lag eliminated? | Downsides |
+| | Fixed + scroll hijack | Absolute + padding |
 |---|---|---|
-| **Smooth scroll** | No, but lag is imperceptible | Slight delay in reaching target position |
-| **Lerp/interpolation** | No, but lag is absorbed into easing | Adds perceived inertia; tuning `t` is subjective |
-| **CSS Scroll-Driven Animations** | Yes (runs on compositor) | Can't drive WebGL camera; limited to CSS properties |
-| **Scroll hijack** | Yes (bypasses compositor scroll) | Breaks accessibility, find-in-page, anchor links |
+| **Native scroll** | No | Yes |
+| **DOM/canvas drift** | None | None (content-level) |
+| **Edge clipping** | N/A | Solved with padding |
+| **`position: fixed`** | Works (no transform on ancestors) | Breaks inside canvas container |
+| **Mobile performance** | Laggy (main thread scrolling) | Smooth (compositor scrolling) |
+| **Browser features** | Broken (find, anchors, a11y) | Preserved |
+| **Best for** | Full-page immersive WebGL | WebGL as enhancement layer |
 
-For WebGL scroll sync, smooth scroll (or lerp) is the pragmatic fix. You can't eliminate the architectural gap between the compositor and JS. You can make it invisible.
+For a reference implementation of the absolute approach, see [webgl-scroll-sync](https://github.com/matiasperz/webgl-scroll-sync).
