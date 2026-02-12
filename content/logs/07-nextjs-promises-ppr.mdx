@@ -29,23 +29,16 @@ export default async function RootLayout({ children }) {
 
 **The problem**: you're `await`-ing at the root. Nothing renders until those fetches resolve. Your entire page is held hostage by the slowest provider.
 
-```txt
-Request arrives
-      │
-      ▼
-┌─────────────┐
-│  await cart  │ 200ms
-└─────┬───────┘
-      │
-      ▼
-┌─────────────┐
-│  await flags │ 150ms
-└─────┬───────┘
-      │
-      ▼
-┌─────────────┐
-│  Render HTML │  Everything waits 350ms+
-└─────────────┘
+```mermaid
+flowchart TD
+    A(["Request arrives"]) --> B["await getCart() — 200ms"]
+    B --> C["await getFlags() — 150ms"]
+    C --> D["Render HTML"]
+    D --> E["Send response — 350ms+ later"]
+
+    style B fill:#fecaca,stroke:#dc2626
+    style C fill:#fecaca,stroke:#dc2626
+    style E fill:#fecaca,stroke:#dc2626
 ```
 
 Users stare at a blank screen for 350ms minimum. On slow connections or cold starts, this gets worse.
@@ -76,22 +69,20 @@ export default function RootLayout({ children }) {
 
 The layout returns immediately. The promises are in-flight. Client components resolve them when they're ready, wrapped in `<Suspense>`.
 
-```txt
-Request arrives
-      │
-      ├──── getCart()  started ──────────┐
-      ├──── getFlags() started ──────────┤
-      │                                  │ (resolving in parallel)
-      ▼                                  │
-┌──────────────────────┐                 │
-│  Render HTML shell   │ immediate       │
-│  (with fallbacks)    │                 │
-└──────────┬───────────┘                 │
-           │                             │
-           ▼                             ▼
-┌──────────────────────────────────────────┐
-│  Stream resolved data as promises settle │
-└──────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A(["Request arrives"]) --> B["getCart() started"]
+    A --> C["getFlags() started"]
+    A --> D["Render HTML shell immediately\n(with Suspense fallbacks)"]
+
+    B --> E["Stream resolved data\nas promises settle"]
+    C --> E
+    D --> E
+
+    style B fill:#bbf7d0,stroke:#16a34a
+    style C fill:#bbf7d0,stroke:#16a34a
+    style D fill:#bfdbfe,stroke:#2563eb
+    style E fill:#bfdbfe,stroke:#2563eb
 ```
 
 The shell renders immediately. Fetches resolve in parallel. Content streams in as each promise settles.
@@ -351,54 +342,44 @@ With **Partial Prerendering** (PPR), enabled via `cacheComponents: true` in Next
 1. A **static shell** prerendered at build time (the HTML around your Suspense fallbacks)
 2. **Dynamic holes** that stream at request time (the actual content inside those boundaries)
 
-```txt
-┌──────────────────────────────────────────────────┐
-│                  Static Shell                     │
-│  ┌────────────────────────────────────────────┐  │
-│  │  <nav>                                     │  │
-│  │    Store              [$$$] [🛒 ●]         │  │
-│  │  </nav>                ▲      ▲            │  │
-│  │                        │      │            │  │
-│  │              fallback skeletons            │  │
-│  │              (part of static shell)        │  │
-│  └────────────────────────────────────────────┘  │
-│                                                   │
-│  ┌────────────────────────────────────────────┐  │
-│  │  <main>                                    │  │
-│  │    Featured Products                       │  │  ← static
-│  │    ┌──────┐ ┌──────┐ ┌──────┐             │  │
-│  │    │ Img  │ │ Img  │ │ Img  │             │  │  ← static
-│  │    └──────┘ └──────┘ └──────┘             │  │
-│  │                                            │  │
-│  │    [  Checkout with ??? Pay  ]             │  │  ← fallback
-│  │                                            │  │
-│  └────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────┘
+```mermaid
+block-beta
+    columns 1
+    block:shell["Static Shell — built at build time, served from CDN"]
+        columns 2
+        nav["&lt;nav&gt;\nStore\n&lt;/nav&gt;"]:2
+        skeleton1["💀 CartTotal skeleton"]:1
+        skeleton2["💀 CartCount skeleton"]:1
+        main["&lt;main&gt;\nFeatured Products\n🖼️ 🖼️ 🖼️"]:2
+        fallback["💀 Checkout button fallback"]:2
+    end
 
-       Built at build time. Served from CDN.
+    style nav fill:#bfdbfe,stroke:#2563eb
+    style main fill:#bfdbfe,stroke:#2563eb
+    style skeleton1 fill:#fef9c3,stroke:#ca8a04
+    style skeleton2 fill:#fef9c3,stroke:#ca8a04
+    style fallback fill:#fef9c3,stroke:#ca8a04
 ```
 
 When a request comes in, the static shell is **instantly** served. Then the dynamic parts stream in:
 
-```txt
-Static shell served instantly (0ms)
-      │
-      ├──── getFlags() resolves (80ms) ─────┐
-      │                                      ▼
-      │                        ┌──────────────────────────┐
-      │                        │ CheckoutButton renders    │
-      │                        │ "Checkout with Express Pay│
-      │                        └──────────────────────────┘
-      │
-      ├──── getCart() resolves (120ms) ──────┐
-      │                                      ▼
-      │                        ┌──────────────────────────┐
-      │                        │ CartCount: "3"           │
-      │                        │ CartTotal: "$149.97"     │
-      │                        └──────────────────────────┘
-      │
-      ▼
-   Page fully interactive (~120ms)
+```mermaid
+flowchart TD
+    A(["Static shell served — 0ms"]) --> B["getFlags resolves — 80ms"]
+    A --> C["getCart resolves — 120ms"]
+
+    B --> D["CheckoutButton renders\nCheckout with Express Pay"]
+    C --> E["CartCount: 3\nCartTotal: $149.97"]
+
+    D --> F(["Page fully interactive ~120ms"])
+    E --> F
+
+    style A fill:#bfdbfe,stroke:#2563eb
+    style B fill:#bbf7d0,stroke:#16a34a
+    style C fill:#bbf7d0,stroke:#16a34a
+    style D fill:#e9d5ff,stroke:#7c3aed
+    style E fill:#e9d5ff,stroke:#7c3aed
+    style F fill:#bbf7d0,stroke:#16a34a
 ```
 
 Compare this to the traditional approach where nothing renders for 350ms.
@@ -407,36 +388,38 @@ Compare this to the traditional approach where nothing renders for 350ms.
 
 ### Without promise forwarding (traditional)
 
-```txt
-Server                          Client
-──────                          ──────
+```mermaid
+sequenceDiagram
+    participant S as Server
+    participant C as Client
 
-1. await getCart()                 ... waiting
-2. await getFlags()               ... still waiting
-3. Render full HTML               ... still waiting
-4. Send response         ──→     5. Display everything at once
-                                  6. Hydrate
-
-Time: ████████████████████░░░░  (slow TTFB, fast render)
+    Note over C: Blank screen...
+    S->>S: await getCart() — 200ms
+    S->>S: await getFlags() — 150ms
+    S->>S: Render full HTML
+    S->>C: Send response (350ms+ later)
+    C->>C: Display everything at once
+    C->>C: Hydrate
+    Note over S,C: Slow TTFB, fast render
 ```
 
 ### With promise forwarding + PPR
 
-```txt
-Server                          Client
-──────                          ──────
+```mermaid
+sequenceDiagram
+    participant S as Server
+    participant C as Client
 
-1. Start getCart()
-2. Start getFlags()
-3. Render static shell   ──→     4. Display shell + fallbacks instantly
-   (with fallback UI)            5. Hydrate static parts
-
-   ...promises resolve...
-
-6. Stream cart data      ──→     7. CartCount + CartTotal pop in
-8. Stream flags data     ──→     9. CheckoutButton resolves
-
-Time: ██░░░░░░░░░░░░░░░░░░░░░  (fast TTFB, progressive render)
+    S->>S: Start getCart()
+    S->>S: Start getFlags()
+    S->>C: Static shell + fallbacks (instant)
+    C->>C: Display shell + hydrate static parts
+    Note over C: Users see content immediately
+    S-->>C: Stream flags data
+    C->>C: CheckoutButton resolves
+    S-->>C: Stream cart data
+    C->>C: CartCount + CartTotal pop in
+    Note over S,C: Fast TTFB, progressive render
 ```
 
 ## Combining both providers
@@ -473,63 +456,60 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 Here's what the rendering timeline looks like:
 
-```txt
- 0ms    50ms   100ms  150ms  200ms  250ms  300ms
-  │      │      │      │      │      │      │
-  ├──────────────────────────────────────────────
-  │ Static shell served (nav, main layout, footer)
-  ├──────────────────────────────────────────────
-  │
-  ├─── flags resolve ──┤
-  │                     └→ CheckoutButton, BetaBanner render
-  │
-  ├──────── cart resolves ─────┤
-  │                            └→ CartCount, CartTotal render
-  │
-  ▼
-  Everything visible and interactive by ~150ms
-  (vs 350ms+ with sequential awaits)
+```mermaid
+gantt
+    title Rendering Timeline — Promise Forwarding + PPR
+    dateFormat X
+    axisFormat %Lms
+
+    section Static
+    Shell served from CDN           :done, 0, 10
+
+    section Flags
+    getFlags resolves               :active, 0, 80
+    CheckoutButton + BetaBanner     :milestone, 80, 0
+
+    section Cart
+    getCart resolves                 :active, 0, 120
+    CartCount + CartTotal           :milestone, 120, 0
+
+    section Result
+    Fully interactive               :crit, 120, 150
 ```
 
 ## The full rendering flow
 
 Here's the complete picture of how a request flows through the system with promise forwarding and PPR:
 
-```txt
-┌─────────────────────────────────────────────────────────────┐
-│                        BUILD TIME                           │
-│                                                             │
-│  Next.js prerenders the route:                              │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ Static Shell                                          │  │
-│  │  • <html>, <body>, <nav>, <main>, <footer>            │  │
-│  │  • Suspense fallbacks (skeletons, "Loading...")        │  │
-│  │  • All non-dynamic content                            │  │
-│  └───────────────────────────────────────────────────────┘  │
-│  Stored on CDN / edge cache                                 │
-└─────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       REQUEST TIME                          │
-│                                                             │
-│  1. CDN serves static shell            ──→ Browser paints  │
-│                                             immediately     │
-│  2. Server executes layout:                                 │
-│     ┌─────────────────────────────┐                         │
-│     │ const cartPromise = getCart()│──→ fetch in flight      │
-│     │ const flagsPromise = getFlags()│→ fetch in flight     │
-│     └─────────────────────────────┘                         │
-│                                                             │
-│  3. Promises forwarded to client providers via RSC payload  │
-│                                                             │
-│  4. As each promise resolves, React streams the             │
-│     component tree update to replace the fallback           │
-│     ┌──────────────┐    ┌──────────────┐                    │
-│     │ flags ready   │    │ cart ready    │                   │
-│     │ → stream HTML │    │ → stream HTML │                   │
-│     └──────────────┘    └──────────────┘                    │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph build ["BUILD TIME"]
+        B1["Next.js prerenders the route"]
+        B2["Static Shell\nhtml, body, nav, main, footer\nSuspense fallbacks\nAll non-dynamic content"]
+        B3[("CDN / Edge Cache")]
+        B1 --> B2 --> B3
+    end
+
+    subgraph request ["REQUEST TIME"]
+        R1["CDN serves static shell"] --> R2["Browser paints immediately"]
+        R3["Server executes layout"]
+        R3 --> R4["getCart() — fetch in flight"]
+        R3 --> R5["getFlags() — fetch in flight"]
+        R4 --> R6["Promises forwarded via\nRSC payload"]
+        R5 --> R6
+        R6 --> R7["flags ready\nstream HTML"]
+        R6 --> R8["cart ready\nstream HTML"]
+    end
+
+    B3 --> R1
+    B3 --> R3
+
+    style build fill:#eff6ff,stroke:#2563eb
+    style request fill:#f0fdf4,stroke:#16a34a
+    style B3 fill:#bfdbfe,stroke:#2563eb
+    style R2 fill:#bbf7d0,stroke:#16a34a
+    style R7 fill:#e9d5ff,stroke:#7c3aed
+    style R8 fill:#e9d5ff,stroke:#7c3aed
 ```
 
 ## Rules of thumb
