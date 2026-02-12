@@ -73,9 +73,9 @@ The layout returns immediately. The promises are in-flight. Client components re
 flowchart TD
     A(["Request arrives"]) --> B["getCart() started"]
     A --> C["getFlags() started"]
-    A --> D["Render HTML shell immediately\n(with Suspense fallbacks)"]
+    A --> D["Render HTML shell immediately<br/>(with Suspense fallbacks)"]
 
-    B --> E["Stream resolved data\nas promises settle"]
+    B --> E["Stream resolved data<br/>as promises settle"]
     C --> E
     D --> E
 
@@ -347,10 +347,10 @@ block-beta
     columns 1
     block:shell["Static Shell — built at build time, served from CDN"]
         columns 2
-        nav["&lt;nav&gt;\nStore\n&lt;/nav&gt;"]:2
+        nav["&lt;nav&gt;<br/>Store<br/>&lt;/nav&gt;"]:2
         skeleton1["💀 CartTotal skeleton"]:1
         skeleton2["💀 CartCount skeleton"]:1
-        main["&lt;main&gt;\nFeatured Products\n🖼️ 🖼️ 🖼️"]:2
+        main["&lt;main&gt;<br/>Featured Products<br/>🖼️ 🖼️ 🖼️"]:2
         fallback["💀 Checkout button fallback"]:2
     end
 
@@ -368,8 +368,8 @@ flowchart TD
     A(["Static shell served — 0ms"]) --> B["getFlags resolves — 80ms"]
     A --> C["getCart resolves — 120ms"]
 
-    B --> D["CheckoutButton renders\nCheckout with Express Pay"]
-    C --> E["CartCount: 3\nCartTotal: $149.97"]
+    B --> D["CheckoutButton renders<br/>Checkout with Express Pay"]
+    C --> E["CartCount: 3<br/>CartTotal: $149.97"]
 
     D --> F(["Page fully interactive ~120ms"])
     E --> F
@@ -485,7 +485,7 @@ Here's the complete picture of how a request flows through the system with promi
 flowchart TD
     subgraph build ["BUILD TIME"]
         B1["Next.js prerenders the route"]
-        B2["Static Shell\nhtml, body, nav, main, footer\nSuspense fallbacks\nAll non-dynamic content"]
+        B2["Static Shell<br/>html, body, nav, main, footer<br/>Suspense fallbacks<br/>All non-dynamic content"]
         B3[("CDN / Edge Cache")]
         B1 --> B2 --> B3
     end
@@ -495,10 +495,10 @@ flowchart TD
         R3["Server executes layout"]
         R3 --> R4["getCart() — fetch in flight"]
         R3 --> R5["getFlags() — fetch in flight"]
-        R4 --> R6["Promises forwarded via\nRSC payload"]
+        R4 --> R6["Promises forwarded via<br/>RSC payload"]
         R5 --> R6
-        R6 --> R7["flags ready\nstream HTML"]
-        R6 --> R8["cart ready\nstream HTML"]
+        R6 --> R7["flags ready<br/>stream HTML"]
+        R6 --> R8["cart ready<br/>stream HTML"]
     end
 
     B3 --> R1
