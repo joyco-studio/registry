@@ -210,7 +210,6 @@ The problem: you've killed native scroll. Every scroll frame now runs through th
 
 - **Mobile lag**: On mobile, the main thread gets overloaded by touch handlers, GC pauses, and layout work. The smoothness users expect from native scroll is gone. It feels weirdly laggy.
 - **Lost browser features**: Find-in-page, anchor link navigation, scroll restoration, accessibility (screen readers) -- all break or degrade.
-- **`position: fixed` children**: Elements inside the translated container can't be `position: fixed` relative to the viewport. A CSS `transform` on an ancestor creates a new containing block, so fixed children become fixed to the container instead. This breaks sticky headers, modals, tooltips -- anything that needs to stay in the viewport.
 - **Scroll-linked APIs**: `IntersectionObserver`, `scroll-snap`, CSS `scroll()` timeline -- all behave differently or break entirely because the browser doesn't see "real" scrolling.
 
 ### When to use it
@@ -342,17 +341,31 @@ flowchart TD
     style NOTE fill:#bbf7d0,stroke:#16a34a,color:#000
 ```
 
-### The `position: fixed` problem
+### The fixed-element problem
 
-This is the main tradeoff of the absolute approach. Because the canvas has a CSS `transform` applied to it, any `position: fixed` descendants stop being fixed to the viewport. Per the CSS spec, a `transform` on an ancestor creates a new containing block for fixed-position descendants.
+This is the main tradeoff of the absolute approach. The canvas lives on the **P** side -- that's the whole point, it moves with the page on the compositor. But what if you need to render a WebGL element that stays **fixed on screen**? A floating logo, a HUD, a persistent UI element -- all rendered on the canvas, not in the DOM.
 
-This means if your page design requires elements that are:
-- Inside or overlapping the canvas container
-- And `position: fixed` to the viewport (sticky nav, floating UI, modals)
+To pin a WebGL element to the viewport, you'd need to counter-translate it by the scroll delta: subtract `scrollY` from its position so it stays put while everything else scrolls. But that `scrollY` is stale -- the compositor has already moved the canvas further than what JS knows. You're back to the exact same 1-frame lag that the fixed approach suffers from, just for this one element.
 
-...they will scroll with the canvas instead of staying put. You need to either:
-- Structure your DOM so fixed elements are **outside** the canvas container (siblings, not children)
-- Or use a separate layer/portal for fixed UI that doesn't live inside the transformed element
+```mermaid
+sequenceDiagram
+    participant C as Compositor
+    participant P as Page (canvas here)
+    participant M as Main Thread
+
+    Note over C: User scrolls 40px
+    C->>P: Move page to scrollY=540<br/>(canvas moves with page)
+    Note over P: All page-side WebGL elements<br/>move with DOM ✓
+    Note over M: rAF fires: reads scrollY=540
+    M->>M: For the "fixed" element:<br/>subtract scrollY to pin it
+    Note over C: Compositor already at 548
+    Note over P: Fixed element is pinned<br/>to scrollY=540, not 548
+    Note over P: 8px drift — same jelly<br/>as the fixed approach
+```
+
+You chose the P side to get free compositor sync for page-bound content. But viewport-fixed content needs the delta from the W side -- and that delta is always stale. You can't have both: the compositor gives you one side for free, the other is always a frame behind.
+
+This means the absolute approach works best when **all your WebGL content scrolls with the page**. The moment you need a viewport-pinned WebGL element, you're fighting the same battle the fixed approach fights for everything.
 
 ### The vertex shader: page coords to canvas coords
 
@@ -383,7 +396,7 @@ Because an identity `Camera()` is used (no projection/view matrix), the vertex s
 
 ### When to use it
 
-When you have a real webpage with DOM content -- text, navigation, interactive elements -- and the WebGL canvas is an enhancement layer (background effects, image treatments, transitions). Native scroll stays intact. Browser features work. Accessibility works. The only constraint is managing `position: fixed` elements around the transformed canvas.
+When all your WebGL content scrolls with the page -- background effects, image treatments, scroll-driven transitions. Native scroll stays intact. Browser features work. Accessibility works. The constraint: any WebGL element that needs to stay fixed on screen will drift, because you're back to reading a stale scroll delta from the other side.
 
 ## Summary
 
@@ -402,7 +415,7 @@ flowchart TD
 
     ABS --> ABS_HOW["Keep native scroll:<br/>Canvas moves with page<br/>Transform corrects position"]
     ABS_HOW --> ABS_PRO["Native scroll preserved<br/>Content stays aligned<br/>Accessibility works"]
-    ABS_HOW --> ABS_CON["Edge clipping (fix with padding)<br/>position: fixed children break"]
+    ABS_HOW --> ABS_CON["Edge clipping (fix with padding)<br/>Viewport-fixed WebGL elements drift"]
 
     style PROBLEM fill:#fef9c3,stroke:#ca8a04,color:#000
     style FIXED fill:#bfdbfe,stroke:#2563eb,color:#000
@@ -418,7 +431,7 @@ flowchart TD
 | **Native scroll** | No | Yes |
 | **DOM/canvas drift** | None | None (content-level) |
 | **Edge clipping** | N/A | Solved with padding |
-| **`position: fixed`** | Works (no transform on ancestors) | Breaks inside canvas container |
+| **Viewport-fixed WebGL** | Works (canvas is already in window) | Drifts (stale delta from W side) |
 | **Mobile performance** | Laggy (main thread scrolling) | Smooth (compositor scrolling) |
 | **Browser features** | Broken (find, anchors, a11y) | Preserved |
 | **Best for** | Full-page immersive WebGL | WebGL as enhancement layer |
