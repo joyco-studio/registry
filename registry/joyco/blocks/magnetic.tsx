@@ -43,10 +43,14 @@ interface RootProps extends React.ComponentPropsWithRef<'div'> {
   ease?: number
 }
 
-const Root = React.forwardRef<HTMLDivElement, RootProps>(function Root(
-  { asChild, strength = 0.35, ease = 350, children, ...props },
-  forwardedRef
-) {
+function Root({
+  asChild,
+  ref: forwardedRef,
+  strength = 0.35,
+  ease = 350,
+  children,
+  ...props
+}: RootProps) {
   const rootRef = React.useRef<HTMLElement | null>(null)
   const mousePos = React.useRef({ x: 0, y: 0 })
   const isHovered = React.useRef(false)
@@ -87,8 +91,7 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(function Root(
       </Comp>
     </MagneticContext.Provider>
   )
-})
-Root.displayName = 'Root'
+}
 
 /* -------------------------------------------------------------------------------------------------
  * Inner
@@ -98,16 +101,55 @@ interface InnerProps extends React.ComponentPropsWithRef<'div'> {
   asChild?: boolean
 }
 
-const Inner = React.forwardRef<HTMLDivElement, InnerProps>(function Inner(
-  { asChild, className, style, ...props },
-  forwardedRef
-) {
-  const { rootRef, mousePos, strength, ease, isHovered } = useMagneticContext()
+function Inner({
+  asChild,
+  ref: forwardedRef,
+  className,
+  style,
+  ...props
+}: InnerProps) {
+  const { rootRef, mousePos, strength, ease } = useMagneticContext()
   const innerRef = React.useRef<HTMLElement | null>(null)
   const composedRef = useComposedRefs(forwardedRef, innerRef)
   const rafId = React.useRef<number>(0)
   const current = React.useRef({ x: 0, y: 0 })
   const prefersReducedMotion = React.useRef(false)
+
+  const applyTick = React.useEffectEvent(() => {
+    if (prefersReducedMotion.current) return false
+
+    const el = innerRef.current
+    const rootEl = rootRef.current
+    if (!el || !rootEl) return false
+
+    const rect = rootEl.getBoundingClientRect()
+    const centerX = rect.left + window.scrollX + rect.width / 2
+    const centerY = rect.top + window.scrollY + rect.height / 2
+
+    const lerpFactor = 0.15
+    const targetX = (mousePos.current.x - centerX) * strength
+    const targetY = (mousePos.current.y - centerY) * strength
+
+    current.current.x += (targetX - current.current.x) * lerpFactor
+    current.current.y += (targetY - current.current.y) * lerpFactor
+
+    el.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0)`
+
+    return true
+  })
+
+  const applyLeave = React.useEffectEvent(() => {
+    cancelAnimationFrame(rafId.current)
+
+    if (prefersReducedMotion.current) return
+
+    const el = innerRef.current
+    if (!el) return
+
+    current.current = { x: 0, y: 0 }
+    el.style.transition = `transform ${ease}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+    el.style.transform = 'translate3d(0, 0, 0)'
+  })
 
   React.useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -134,28 +176,10 @@ const Inner = React.forwardRef<HTMLDivElement, InnerProps>(function Inner(
     const inner = innerRef.current
     if (!root || !inner) return
 
-    const lerpFactor = 0.15
-
     function tick() {
-      if (prefersReducedMotion.current) return
-
-      const el = innerRef.current
-      const rootEl = rootRef.current
-      if (!el || !rootEl) return
-
-      const rect = rootEl.getBoundingClientRect()
-      const centerX = rect.left + window.scrollX + rect.width / 2
-      const centerY = rect.top + window.scrollY + rect.height / 2
-
-      const targetX = (mousePos.current.x - centerX) * strength
-      const targetY = (mousePos.current.y - centerY) * strength
-
-      current.current.x += (targetX - current.current.x) * lerpFactor
-      current.current.y += (targetY - current.current.y) * lerpFactor
-
-      el.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0)`
-
-      rafId.current = requestAnimationFrame(tick)
+      if (applyTick()) {
+        rafId.current = requestAnimationFrame(tick)
+      }
     }
 
     function handleEnter() {
@@ -168,28 +192,15 @@ const Inner = React.forwardRef<HTMLDivElement, InnerProps>(function Inner(
       rafId.current = requestAnimationFrame(tick)
     }
 
-    function handleLeave() {
-      cancelAnimationFrame(rafId.current)
-
-      if (prefersReducedMotion.current) return
-
-      const el = innerRef.current
-      if (!el) return
-
-      current.current = { x: 0, y: 0 }
-      el.style.transition = `transform ${ease}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
-      el.style.transform = 'translate3d(0, 0, 0)'
-    }
-
     root.addEventListener('mouseenter', handleEnter)
-    root.addEventListener('mouseleave', handleLeave)
+    root.addEventListener('mouseleave', applyLeave)
 
     return () => {
       cancelAnimationFrame(rafId.current)
       root.removeEventListener('mouseenter', handleEnter)
-      root.removeEventListener('mouseleave', handleLeave)
+      root.removeEventListener('mouseleave', applyLeave)
     }
-  }, [rootRef, mousePos, strength, ease, isHovered])
+  }, [])
 
   const Comp = asChild ? Slot : 'div'
 
@@ -201,7 +212,6 @@ const Inner = React.forwardRef<HTMLDivElement, InnerProps>(function Inner(
       {...props}
     />
   )
-})
-Inner.displayName = 'Inner'
+}
 
 export { Root, Inner }
