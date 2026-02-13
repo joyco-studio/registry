@@ -1,22 +1,30 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { interpolate } from 'flubber'
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
+
+type FlubberInterpolator = (t: number) => string
 
 interface SvgMorphPathProps {
   paths: string[]
   duration?: number
   gap?: number
   fill?: string
+  step?: number
 }
 
-function SvgMorphPath({
+function AutoMorphPath({
   paths,
-  duration = 0.4,
-  gap = 0.5,
-  fill = 'currentColor',
-}: SvgMorphPathProps) {
+  duration,
+  gap,
+  fill,
+}: {
+  paths: string[]
+  duration: number
+  gap: number
+  fill: string
+}) {
   const [pathIndex, setPathIndex] = useState(0)
   const progress = useMotionValue(pathIndex)
 
@@ -47,6 +55,87 @@ function SvgMorphPath({
   return <motion.path fill={fill} d={d} />
 }
 
+function ControlledMorphPath({
+  paths,
+  duration,
+  fill,
+  step,
+}: {
+  paths: string[]
+  duration: number
+  fill: string
+  step: number
+}) {
+  const progress = useMotionValue(0)
+  const currentPathRef = useRef(paths[step])
+  const interpolatorRef = useRef<FlubberInterpolator | null>(null)
+
+  const d = useTransform(progress, (v: number) => {
+    if (!interpolatorRef.current) return currentPathRef.current
+    return interpolatorRef.current(v)
+  })
+
+  useEffect(() => {
+    const targetPath = paths[step]
+    if (targetPath === currentPathRef.current) return
+
+    // Capture mid-animation state if interrupted
+    const p = progress.get()
+    if (interpolatorRef.current && p > 0 && p < 1) {
+      currentPathRef.current = interpolatorRef.current(p)
+    }
+
+    // Direct interpolation: current visual state → target (skips intermediates)
+    interpolatorRef.current = interpolate(
+      currentPathRef.current,
+      targetPath,
+      { maxSegmentLength: 20 }
+    )
+    progress.set(0)
+
+    const animation = animate(progress, 1, {
+      duration,
+      ease: 'easeInOut',
+      onComplete: () => {
+        currentPathRef.current = targetPath
+        interpolatorRef.current = null
+      },
+    })
+
+    return () => animation.stop()
+  }, [step, duration, progress, paths])
+
+  return <motion.path fill={fill} d={d} />
+}
+
+function SvgMorphPath({
+  paths,
+  duration = 0.4,
+  gap = 0.5,
+  fill = 'currentColor',
+  step,
+}: SvgMorphPathProps) {
+  if (step !== undefined) {
+    return (
+      <ControlledMorphPath
+        paths={paths}
+        duration={duration}
+        fill={fill}
+        step={step}
+      />
+    )
+  }
+
+  return (
+    <AutoMorphPath
+      paths={paths}
+      duration={duration}
+      gap={gap}
+      fill={fill}
+    />
+  )
+}
+
 interface StaticPath {
   d: string
   fill?: string
@@ -62,6 +151,7 @@ interface SvgMorphProps {
   transform?: string
   duration?: number
   gap?: number
+  step?: number
   className?: string
   width?: number | string
   height?: number | string
@@ -74,6 +164,7 @@ export default function SvgMorph({
   transform,
   duration,
   gap,
+  step,
   className,
   width,
   height,
@@ -90,6 +181,7 @@ export default function SvgMorph({
           fill={svg.fill}
           duration={duration}
           gap={gap}
+          step={step}
         />
       ))}
     </>
