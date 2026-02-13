@@ -145,11 +145,12 @@ flowchart LR
     subgraph viewport ["Window (W)"]
         direction TB
         CANVAS["Canvas<br/>(fixed to window)"]
-        CONTENT["DOM content<br/>(scrolls natively via scrollTop)"]
+        VIEW["Viewport<br/>(what user sees)"]
     end
 
     subgraph page ["Page (P)"]
         direction TB
+        CONTENT["DOM content"]
         SCROLL["Real scrollbar<br/>(scrollTop animated by JS)"]
     end
 
