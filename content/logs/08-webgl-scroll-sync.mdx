@@ -91,33 +91,6 @@ flowchart LR
 
 The impl tree is a snapshot from the last commit. Between commits, the impl thread scrolls, animates, and draws frames without consulting the main thread. When your rAF fires and reads `window.scrollY`, it's reading the scroll offset from the *last time the impl thread synced* -- not the impl thread's current position.
 
-### Quantifying the lag
-
-Firefox's APZ (Async Pan/Zoom) documentation gives the most precise breakdown:
-
-```mermaid
-sequenceDiagram
-    participant APZ as Compositor (APZ)
-    participant MT as Main Thread
-    participant Frame as Composited Frame
-
-    Note over Frame: Composite C
-    APZ->>APZ: Sample animation<br/>for frame C+1
-    APZ->>MT: Notify scroll position
-    Note over MT: Next refresh tick<br/>(aligned with C+1)
-    MT->>MT: Run scroll handlers<br/>+ rAF callbacks
-    MT->>MT: Style, Layout, Paint
-    MT->>APZ: Commit updated layers
-
-    Note over Frame: Composite C+1
-    Note over APZ: Main thread paint<br/>won't land until...
-    Note over Frame: Composite C+2
-    Note over Frame: At minimum 1 frame behind.<br/>Under load, 2+ frames.
-
-```
-
-Under ideal conditions, JS-driven effects are **1 frame behind** compositor scroll. Under main-thread load (GC pauses, layout thrashing, heavy React renders), 2-3 frames. At 60fps, that's 16-48ms of positional drift.
-
 ### The core tension
 
 There are three things in play: the **window** (W, the viewport), the **page** (P, the document), and the **delta** (D, the scroll offset between them).
@@ -287,7 +260,8 @@ sequenceDiagram
     Note over M: rAF fires
     M->>M: Read scrollY = 540
     M->>P: Apply transform to reposition canvas
-    Note over C: Compositor already at 548
+    Note over C: User scrolls another 8px
+    C->>P: Move page to scrollY=548<br/>(instant, before transform lands)
     Note over P: Transform correction is 8px stale<br/>→ canvas edges slightly off viewport
     Note over P: But content inside still matches DOM
 ```
