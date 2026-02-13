@@ -415,4 +415,8 @@ flowchart TD
 | **Browser features** | Broken (find, anchors, a11y) | Preserved |
 | **Best for** | Full-page immersive WebGL | WebGL as enhancement layer |
 
+The two approaches are mirror images of each other. The fixed canvas lives on the **window** side, so viewport-pinned WebGL elements work natively -- but tracking DOM elements requires scroll hijacking to keep them in sync. The absolute canvas lives on the **page** side, so DOM-tracked WebGL elements move with the page for free -- but pinning anything to the viewport requires the same scroll hijacking to fight the stale delta.
+
+They sit on opposite sides of the same problem, and reach for the same escape hatch -- JS-driven scroll -- to cover their blind spot.
+
 For a reference implementation of the absolute approach, see [webgl-scroll-sync](https://github.com/matiasperz/webgl-scroll-sync).
