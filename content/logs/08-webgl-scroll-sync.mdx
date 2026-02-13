@@ -384,8 +384,6 @@ flowchart TD
 | **Edge clipping** | N/A | Solved with padding |
 | **Viewport-fixed WebGL** | Works (canvas is already in window) | Drifts (stale delta from W side) |
 | **Mobile performance** | Can drop frames under load | Smooth (compositor scrolling) |
-| **Browser features** | Preserved (real scroll events) | Preserved |
-| **Best for** | Drift-free sync, smooth lerp designs | WebGL as enhancement layer |
 
 The two approaches are mirror images of each other. The fixed canvas lives on the **window** side, so viewport-pinned WebGL elements work natively -- but tracking DOM elements requires JS-driven scroll to keep them in sync. The absolute canvas lives on the **page** side, so DOM-tracked WebGL elements move with the page for free -- but pinning anything to the viewport requires the same JS-driven scroll to fight the stale delta.
 
