@@ -151,7 +151,6 @@ flowchart LR
     subgraph page ["Page (P)"]
         direction TB
         CONTENT["DOM content"]
-        SCROLL["Real scrollbar<br/>(scrollTop animated by JS)"]
     end
 
     viewport ---|"D (delta)<br/>JS animates scrollTop,<br/>reads it back for canvas"| page
