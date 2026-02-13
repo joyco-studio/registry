@@ -132,28 +132,28 @@ function animate() {
 
 **This is the root of the drift.** Every frame, your meshes are positioned with a `scrollOffset` that's already outdated. The question becomes: how do you architect around that staleness?
 
-## Approach 1: Fixed + scroll hijack
+## Approach 1: JS-driven scroll (Lenis)
 
-The classic approach used by Locomotive Scroll, Lenis, GSAP ScrollSmoother, and most WebGL-heavy sites.
+The approach used by [Lenis](https://lenis.darkroom.engineering/) and most WebGL-heavy sites. Unlike older libraries that used `position: fixed` with fake scrollbars, Lenis animates `scrollTop` directly -- there's real native scroll, but the main thread drives it.
 
 ### How it works
 
-The canvas is `position: fixed` -- it lives in **window** space. It doesn't participate in native scroll at all. You disable native scrolling on the content, keep the body tall for a scrollbar, and move everything yourself via JS.
+The canvas is `position: fixed` -- it lives in **window** space. Lenis takes over scroll by animating `scrollTop` on each frame via `requestAnimationFrame`. The browser sees real scroll events, so browser features (find-in-page, anchors, accessibility) still work. But because JS is setting `scrollTop`, the main thread controls the pace.
 
 ```mermaid
 flowchart LR
     subgraph viewport ["Window (W)"]
         direction TB
         CANVAS["Canvas<br/>(fixed to window)"]
-        CONTENT["Content container<br/>(fixed, translated by JS)"]
+        CONTENT["DOM content<br/>(scrolls natively via scrollTop)"]
     end
 
     subgraph page ["Page (P)"]
         direction TB
-        SCROLL["Scrollbar only<br/>(body is tall,<br/>overflow hidden on content)"]
+        SCROLL["Real scrollbar<br/>(scrollTop animated by JS)"]
     end
 
-    viewport ---|"D (delta)<br/>JS reads scrollY,<br/>applies to both"| page
+    viewport ---|"D (delta)<br/>JS animates scrollTop,<br/>reads it back for canvas"| page
 
     style viewport fill:#bfdbfe,stroke:#2563eb,color:#000
     style page fill:#f0fdf4,stroke:#16a34a,color:#000
@@ -161,52 +161,42 @@ flowchart LR
     style CONTENT fill:#dbeafe,stroke:#3b82f6,color:#000
 ```
 
-JS is the **single source of truth**. You read `scrollY` and apply it to both the HTML content and the canvas in the same `rAF` callback, before either one paints. The compositor never moves your content -- you do it all yourself.
+JS is the **single source of truth**. On each frame, Lenis lerps toward the target scroll position, sets `scrollTop`, and your rAF callback reads it back for the canvas. Because both the DOM scroll and the WebGL render happen from the same value in the same frame, there's **zero drift** between them.
 
 ```ts showLineNumbers
-// The scroll hijack pattern
-document.body.style.overflow = 'hidden'
-document.body.style.height = `${contentHeight}px`
-container.style.position = 'fixed'
-container.style.top = '0'
+// Lenis-style: JS animates scrollTop, canvas reads it back
+const lenis = new Lenis()
 
-let currentY = 0
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-function animate() {
+function animate(time: number) {
   requestAnimationFrame(animate)
 
-  // JS is source of truth -- read scroll, lerp toward it
-  currentY = lerp(currentY, window.scrollY, 0.1)
+  lenis.raf(time)
 
-  // Apply to HTML content
-  container.style.transform = `translate3d(0, ${-currentY}px, 0)`
+  // Lenis has already set scrollTop for this frame
+  // Read it back for the canvas
+  const scrollY = lenis.scroll
 
-  // Apply to WebGL camera (same value, same frame)
-  camera.position.y = -currentY * scrollFactor
+  // Update WebGL meshes with the same scroll value
+  camera.position.y = -scrollY * scrollFactor
   renderer.render(scene, camera)
 }
 ```
 
-Because both the DOM content and the canvas are updated from the same `scrollY` read in the same frame, there's **zero drift** between them. The lerp smooths the input so per-frame deltas stay small.
-
 ### Why it works
 
-The scroll hijack detaches the compositor from scroll entirely. No compositor scroll means no compositor/JS race. The cost: you've replaced the compositor's zero-latency GPU scrolling with main-thread JS scrolling.
+JS drives `scrollTop` each frame, so the compositor and JS are always in agreement -- there's no race. The DOM scrolls to exactly where JS told it to, and the canvas renders with the same value.
 
 ```mermaid
 sequenceDiagram
     participant U as User Input
+    participant M as Main Thread (Lenis)
     participant C as Compositor
-    participant M as Main Thread
     participant S as Screen
 
     Note over U: User scrolls
-    U->>C: Scroll event
-    Note over C: No native scroll to apply<br/>(content is position: fixed)
-    C->>M: Forward scroll delta
+    U->>M: Scroll input
     Note over M: rAF callback
-    M->>M: Read scrollY<br/>Lerp currentY<br/>Update DOM transform<br/>Render WebGL
+    M->>M: Lerp toward target<br/>Set scrollTop<br/>Render WebGL with same value
     M->>C: Commit layers
     C->>S: Draw frame
     Note over S: DOM and canvas<br/>perfectly in sync
@@ -214,15 +204,14 @@ sequenceDiagram
 
 ### The tradeoffs
 
-The problem: you've killed native scroll. Every scroll frame now runs through the main thread.
+Every scroll frame runs through the main thread. The compositor isn't driving scroll independently -- JS is.
 
-- **Mobile lag**: On mobile, the main thread gets overloaded by touch handlers, GC pauses, and layout work. The smoothness users expect from native scroll is gone. It feels weirdly laggy.
-- **Lost browser features**: Find-in-page, anchor link navigation, scroll restoration, accessibility (screen readers) -- all break or degrade.
-- **Scroll-linked APIs**: `IntersectionObserver`, `scroll-snap`, CSS `scroll()` timeline -- all behave differently or break entirely because the browser doesn't see "real" scrolling.
+- **Mobile performance**: On mobile, the main thread competes with touch handlers, GC pauses, and layout work. Under heavy load, scroll frames can drop and feel sluggish compared to compositor-driven native scroll.
+- **Scroll-linked APIs**: `scroll-snap`, CSS `scroll()` timeline, and other compositor-coupled features may behave differently since scroll timing is JS-controlled.
 
 ### When to use it
 
-When the entire experience is WebGL-driven and DOM is minimal. Think full-page immersive experiences where you control the whole viewport. The drift-free sync is worth the tradeoffs when there's not much DOM to break.
+When you need drift-free DOM/canvas sync and your page can tolerate main-thread scrolling. Works well for portfolio sites, landing pages, and experiences where the smooth lerp is part of the design language.
 
 ## Approach 2: Absolute
 
@@ -388,9 +377,9 @@ flowchart TD
     Q --> FIXED["Window side (fixed)"]
     Q --> ABS["Page side (absolute)"]
 
-    FIXED --> FIX_HOW["Hijack scroll:<br/>JS is source of truth<br/>Move everything yourself"]
+    FIXED --> FIX_HOW["JS-driven scroll (Lenis):<br/>JS animates scrollTop<br/>Canvas reads it back"]
     FIX_HOW --> FIX_PRO["Zero drift between<br/>DOM and canvas"]
-    FIX_HOW --> FIX_CON["Kills native scroll<br/>Laggy on mobile<br/>Breaks browser features"]
+    FIX_HOW --> FIX_CON["Main-thread scrolling<br/>Can drop frames on mobile"]
 
     ABS --> ABS_HOW["Keep native scroll:<br/>Canvas moves with page<br/>Transform corrects position"]
     ABS_HOW --> ABS_PRO["Native scroll preserved<br/>Content stays aligned<br/>Accessibility works"]
@@ -405,18 +394,18 @@ flowchart TD
     style ABS_CON fill:#fecaca,stroke:#dc2626,color:#000
 ```
 
-| | Fixed + scroll hijack | Absolute + padding |
+| | JS-driven scroll (Lenis) | Absolute + padding |
 |---|---|---|
-| **Native scroll** | No | Yes |
+| **Scroll driven by** | Main thread (JS animates scrollTop) | Compositor (native) |
 | **DOM/canvas drift** | None | None (content-level) |
 | **Edge clipping** | N/A | Solved with padding |
 | **Viewport-fixed WebGL** | Works (canvas is already in window) | Drifts (stale delta from W side) |
-| **Mobile performance** | Laggy (main thread scrolling) | Smooth (compositor scrolling) |
-| **Browser features** | Broken (find, anchors, a11y) | Preserved |
-| **Best for** | Full-page immersive WebGL | WebGL as enhancement layer |
+| **Mobile performance** | Can drop frames under load | Smooth (compositor scrolling) |
+| **Browser features** | Preserved (real scroll events) | Preserved |
+| **Best for** | Drift-free sync, smooth lerp designs | WebGL as enhancement layer |
 
-The two approaches are mirror images of each other. The fixed canvas lives on the **window** side, so viewport-pinned WebGL elements work natively -- but tracking DOM elements requires scroll hijacking to keep them in sync. The absolute canvas lives on the **page** side, so DOM-tracked WebGL elements move with the page for free -- but pinning anything to the viewport requires the same scroll hijacking to fight the stale delta.
+The two approaches are mirror images of each other. The fixed canvas lives on the **window** side, so viewport-pinned WebGL elements work natively -- but tracking DOM elements requires JS-driven scroll to keep them in sync. The absolute canvas lives on the **page** side, so DOM-tracked WebGL elements move with the page for free -- but pinning anything to the viewport requires the same JS-driven scroll to fight the stale delta.
 
-They sit on opposite sides of the same problem, and reach for the same escape hatch -- JS-driven scroll -- to cover their blind spot.
+They sit on opposite sides of the same problem, and reach for the same escape hatch to cover their blind spot.
 
 For a reference implementation of the absolute approach, see [webgl-scroll-sync](https://github.com/matiasperz/webgl-scroll-sync).
