@@ -8,3 +8,32 @@
   ) {
   @apply my-6 first:mt-0 last:mb-0;
 }
+
+/* Server-rendered Mermaid diagrams: dual-theme toggling */
+.mermaid-diagram {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mermaid-diagram [data-mermaid-theme='light'] {
+  display: block;
+}
+
+.mermaid-diagram [data-mermaid-theme='dark'] {
+  display: none;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+:where(.dark, .terminal) .mermaid-diagram [data-mermaid-theme='light'] {
+  display: none;
+}
+
+:where(.dark, .terminal) .mermaid-diagram [data-mermaid-theme='dark'] {
+  display: block;
+}

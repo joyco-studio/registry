@@ -8,9 +8,8 @@ import {
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config'
-import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins'
-
 import { transformers } from './lib/shiki'
+import rehypeMermaidDualTheme from './lib/rehype-mermaid'
 import { cn } from './lib/utils'
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
@@ -53,9 +52,9 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkMdxMermaid],
     rehypePlugins: (plugins) => {
       plugins.shift()
+      plugins.push(rehypeMermaidDualTheme)
       plugins.push([
         rehypePrettyCode,
         {
